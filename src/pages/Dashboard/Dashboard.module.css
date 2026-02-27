@@ -1,0 +1,146 @@
+.container {
+  @apply space-y-6;
+}
+
+.statsGrid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.statCard {
+  @apply card p-5 space-y-3;
+}
+
+.statHeader {
+  @apply flex items-start justify-between;
+}
+
+.statIconBox {
+  @apply w-9 h-9 rounded flex items-center justify-center;
+}
+
+.statTrending {
+  color: var(--ink-3);
+}
+
+.statValue {
+  @apply text-2xl font-bold;
+  color: var(--ink-1);
+  letter-spacing: -0.03em;
+}
+
+.statLabel {
+  @apply text-xs mt-0.5;
+  color: var(--ink-3);
+}
+
+.statDelta {
+  @apply text-xs font-medium;
+  color: var(--ink-2);
+}
+
+.contentGrid {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-4;
+}
+
+.feedCard {
+  @apply card lg:col-span-2;
+}
+
+.cardHeader {
+  @apply px-5 py-4 border-b flex items-center justify-between;
+  border-color: var(--border);
+}
+
+.cardHeaderLeft {
+  @apply flex items-center gap-2;
+}
+
+.cardTitle {
+  @apply text-sm font-semibold;
+  color: var(--ink-1);
+}
+
+.viewAllBtn {
+  @apply text-xs;
+  color: var(--ink-3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.feedDesc {
+  @apply text-sm;
+  color: var(--ink-1);
+}
+
+.feedUser {
+  @apply text-sm;
+  color: var(--ink-2);
+}
+
+.feedAmount {
+  @apply font-mono text-sm font-medium;
+  color: var(--ink-1);
+}
+
+.feedTime {
+  @apply text-xs;
+  color: var(--ink-3);
+}
+
+.alertCard {
+  @apply card;
+}
+
+.alertHeader {
+  @apply px-5 py-4 border-b flex items-center gap-2;
+  border-color: var(--border);
+}
+
+.alertIcon {
+  color: var(--warning);
+}
+
+.alertList {
+  @apply divide-y;
+  border-color: var(--border);
+}
+
+.alertItem {
+  @apply px-5 py-3.5 space-y-2;
+}
+
+.alertItemHeader {
+  @apply flex items-center justify-between;
+}
+
+.alertSku {
+  @apply text-xs font-mono;
+  color: var(--ink-3);
+}
+
+.alertName {
+  @apply text-sm font-medium;
+  color: var(--ink-1);
+}
+
+.alertBarBg {
+  @apply h-1.5 rounded-full;
+  background: var(--control-bg);
+}
+
+.alertBarFill {
+  @apply h-full rounded-full;
+  background: var(--destructive);
+}
+
+.alertMin {
+  @apply text-xs;
+  color: var(--ink-3);
+}

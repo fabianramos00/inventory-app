@@ -1,0 +1,93 @@
+.container {
+  @apply space-y-4;
+}
+
+.header {
+  @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
+}
+
+.title {
+  @apply text-lg font-bold;
+  color: var(--ink-1);
+}
+
+.headerActions {
+  @apply btn-accent flex items-center gap-1.5 text-xs py-2 px-3;
+}
+
+.searchCard {
+  @apply card p-4;
+}
+
+.searchWrapper {
+  @apply relative max-w-sm;
+}
+
+.searchIcon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2;
+  color: var(--ink-3);
+}
+
+.searchInput {
+  @apply form-input pl-9 py-2;
+}
+
+.gridContainer {
+  @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4;
+}
+
+.providerCard {
+  @apply card p-5 space-y-4;
+}
+
+.cardHeader {
+  @apply flex items-start justify-between;
+}
+
+.providerName {
+  @apply font-semibold text-sm;
+  color: var(--ink-1);
+}
+
+.providerContact {
+  @apply text-xs mt-0.5;
+  color: var(--ink-3);
+}
+
+.detailsList {
+  @apply space-y-2;
+}
+
+.detailItem {
+  @apply flex items-center gap-2 text-xs;
+  color: var(--ink-2);
+}
+
+.detailIcon {
+  color: var(--ink-3);
+}
+
+.cardFooter {
+  @apply flex items-center justify-between pt-2 border-t;
+  border-color: var(--border);
+}
+
+.productCount {
+  @apply text-xs;
+  color: var(--ink-3);
+}
+
+.productNumber {
+  @apply font-semibold font-mono;
+  color: var(--ink-1);
+}
+
+.actionButtons {
+  @apply flex gap-2;
+}
+
+.actionBtn {
+  @apply text-xs px-2.5 py-1 rounded;
+  background: var(--control-bg);
+  color: var(--ink-2);
+}

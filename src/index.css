@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #ffffff;
+    --surface: #F9F8F7;
+    --surface-2: #F2F0EE;
+    --border: rgba(0, 0, 0, 0.09);
+    --border-strong: rgba(0, 0, 0, 0.16);
+    --ink-1: #111111;
+    --ink-2: #555550;
+    --ink-3: #9B9B8E;
+    --accent: #FACC15;
+    --accent-hover: #EAB308;
+    --accent-fg: #111111;
+    --destructive: #DC2626;
+    --destructive-fg: #ffffff;
+    --success: #16A34A;
+    --warning: #D97706;
+    --control-bg: #F3F2F0;
+    --control-border: rgba(0, 0, 0, 0.13);
+    --focus-ring: #FACC15;
+    --sidebar-w: 232px;
+  }
+
+  * {
+    border-color: var(--border);
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    background: var(--bg);
+    color: var(--ink-1);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer components {
+  /* Bin label badge — the project signature */
+  .bin-label {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs font-mono font-medium tracking-widest uppercase;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    border: 1px solid var(--border);
+  }
+
+  .bin-label--accent {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-color: transparent;
+  }
+
+  /* Surface cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+  .badge--success { background: #DCFCE7; color: #15803D; }
+  .badge--warning { background: #FEF3C7; color: #B45309; }
+  .badge--destructive { background: #FEE2E2; color: #B91C1C; }
+  .badge--neutral { background: var(--surface-2); color: var(--ink-2); }
+
+  /* Form controls */
+  .form-input {
+    @apply w-full px-3 py-2.5 rounded text-sm transition-shadow duration-150;
+    background: var(--control-bg);
+    border: 1px solid var(--control-border);
+    color: var(--ink-1);
+    outline: none;
+    font-family: inherit;
+  }
+  .form-input::placeholder { color: var(--ink-3); }
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.25);
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded text-sm font-semibold transition-all duration-150 cursor-pointer;
+    background: var(--ink-1);
+    color: #ffffff;
+  }
+  .btn-primary:hover { background: #222; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded text-sm font-semibold transition-all duration-150 cursor-pointer;
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+  .btn-accent:hover { background: var(--accent-hover); }
+  .btn-accent:active { transform: scale(0.98); }
+
+  /* Ghost / outline button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded text-sm font-medium transition-all duration-150 cursor-pointer;
+    background: transparent;
+    color: var(--ink-2);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-ghost:hover { background: var(--surface); }
+
+  /* Table styles */
+  .data-table th {
+    @apply text-left text-xs font-semibold uppercase tracking-wider py-3 px-4;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .data-table td {
+    @apply py-3 px-4 text-sm;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table tr:hover td {
+    background: var(--surface);
+  }
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }

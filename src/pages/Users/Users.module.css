@@ -1,0 +1,89 @@
+.container {
+  @apply space-y-4;
+}
+
+.header {
+  @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
+}
+
+.title {
+  @apply text-lg font-bold;
+  color: var(--ink-1);
+}
+
+.headerActions {
+  @apply btn-accent flex items-center gap-1.5 text-xs py-2 px-3;
+}
+
+.searchCard {
+  @apply card p-4;
+}
+
+.searchWrapper {
+  @apply relative max-w-sm;
+}
+
+.searchIcon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2;
+  color: var(--ink-3);
+}
+
+.searchInput {
+  @apply form-input pl-9 py-2;
+}
+
+.tableCard {
+  @apply card overflow-hidden;
+}
+
+.userCell {
+  @apply flex items-center gap-2.5;
+}
+
+.avatar {
+  @apply w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0;
+  color: #111;
+}
+
+.userName {
+  @apply font-medium text-sm;
+  color: var(--ink-1);
+}
+
+.emailCell {
+  @apply text-sm;
+  color: var(--ink-2);
+}
+
+.roleCell {
+  @apply flex items-center gap-1.5;
+}
+
+.adminIcon {
+  color: var(--warning);
+}
+
+.userIcon {
+  color: var(--ink-3);
+}
+
+.lastActivityCell {
+  @apply text-xs;
+  color: var(--ink-3);
+}
+
+.actionsContainer {
+  @apply flex gap-1.5;
+}
+
+.editBtn {
+  @apply text-xs px-2 py-1 rounded;
+  color: var(--ink-2);
+  background: var(--control-bg);
+}
+
+.toggleStatusBtn {
+  @apply text-xs px-2 py-1 rounded;
+  color: var(--destructive);
+  background: #FEE2E2;
+}

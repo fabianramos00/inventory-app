@@ -1,0 +1,96 @@
+.container {
+  @apply space-y-4;
+}
+
+.header {
+  @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
+}
+
+.title {
+  @apply text-lg font-bold;
+  color: var(--ink-1);
+}
+
+.headerActions {
+  @apply btn-accent flex items-center gap-1.5 text-xs py-2 px-3;
+}
+
+.summaryGrid {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-4;
+}
+
+.summaryCard {
+  @apply card p-4 text-center;
+}
+
+.summaryValue {
+  @apply text-xl font-bold font-mono;
+  color: var(--ink-1);
+}
+
+.summaryValueDestructive {
+  @apply text-xl font-bold font-mono;
+  color: var(--destructive);
+}
+
+.summaryLabel {
+  @apply text-xs mt-0.5;
+  color: var(--ink-3);
+}
+
+.searchCard {
+  @apply card p-4;
+}
+
+.searchWrapper {
+  @apply relative max-w-sm;
+}
+
+.searchIcon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2;
+  color: var(--ink-3);
+}
+
+.searchInput {
+  @apply form-input pl-9 py-2;
+}
+
+.tableCard {
+  @apply card overflow-hidden;
+}
+
+.codeCell {
+  @apply font-mono text-xs;
+  color: var(--ink-3);
+}
+
+.customerCell {
+  @apply font-medium text-sm;
+  color: var(--ink-1);
+}
+
+.itemsCell {
+  @apply text-sm;
+  color: var(--ink-2);
+}
+
+.totalCell {
+  @apply font-mono font-semibold text-sm;
+  color: var(--ink-1);
+}
+
+.userCell {
+  @apply text-sm;
+  color: var(--ink-2);
+}
+
+.dateCell {
+  @apply text-xs;
+  color: var(--ink-3);
+}
+
+.actionBtn {
+  @apply text-xs px-2 py-1 rounded;
+  color: var(--ink-2);
+  background: var(--control-bg);
+}

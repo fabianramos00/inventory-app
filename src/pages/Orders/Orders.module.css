@@ -1,0 +1,79 @@
+.container {
+  @apply space-y-4;
+}
+
+.header {
+  @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
+}
+
+.title {
+  @apply text-lg font-bold;
+  color: var(--ink-1);
+}
+
+.headerActions {
+  @apply btn-accent flex items-center gap-1.5 text-xs py-2 px-3;
+}
+
+.filterTabs {
+  @apply flex gap-2;
+}
+
+.filterTab {
+  @apply px-3 py-1.5 rounded text-xs font-medium transition-colors;
+}
+
+.filterTabActive {
+  background: var(--ink-1);
+  color: #fff;
+}
+
+.filterTabInactive {
+  background: var(--control-bg);
+  color: var(--ink-2);
+}
+
+.tableCard {
+  @apply card overflow-hidden;
+}
+
+.codeCell {
+  @apply font-mono text-xs;
+  color: var(--ink-3);
+}
+
+.providerCell {
+  @apply font-medium text-sm;
+  color: var(--ink-1);
+}
+
+.itemsCell {
+  @apply text-sm;
+  color: var(--ink-2);
+}
+
+.totalCell {
+  @apply font-mono font-semibold text-sm;
+  color: var(--ink-1);
+}
+
+.dateCell {
+  @apply text-xs;
+  color: var(--ink-3);
+}
+
+.actionsContainer {
+  @apply flex gap-1.5;
+}
+
+.viewBtn {
+  @apply text-xs px-2 py-1 rounded;
+  color: var(--ink-2);
+  background: var(--control-bg);
+}
+
+.receiveBtn {
+  @apply text-xs px-2 py-1 rounded;
+  color: #fff;
+  background: var(--success, #22C55E); /* Fallback to standard success green if variable missing */
+}

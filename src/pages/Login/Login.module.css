@@ -1,0 +1,354 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: url('../../assets/login.jpg') center/cover no-repeat fixed;
+  position: relative;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 25, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 0;
+}
+
+.card {
+  width: 100%;
+  max-width: 1300px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background-color: #ffffff;
+  min-height: 600px;
+  padding: 0.5rem;
+  box-shadow: 0 40px 80px -10px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 640px) {
+  .card {
+    flex-direction: row;
+  }
+}
+
+.leftPanel {
+  position: relative;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3rem 2.5rem;
+  width: 55%;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.85) 100%), url('../../assets/login.jpg') center/cover no-repeat fixed;
+  border-radius: 20px;
+}
+
+@media (min-width: 640px) {
+  .leftPanel {
+    display: flex;
+  }
+}
+
+.flexBottom {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  gap: 2.5rem;
+}
+
+.headlineContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.headlineTitle {
+  font-size: 2.25rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.highlight {
+  color: #FDE804;
+}
+
+.headlineDescription {
+  font-size: 1.3rem;
+  color: #FDE804;
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+.rightPanel {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 2rem;
+  background-color: #ffffff;
+}
+
+@media (min-width: 640px) {
+  .rightPanel {
+    padding: 3rem;
+  }
+}
+
+.formContainer {
+  max-width: 24rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.formTitle {
+  font-size: 1.875rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #111111;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.formSubtitle {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 400;
+}
+
+.formBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: 0.02em;
+}
+
+.inputField {
+  background-color: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+  color: #111111;
+  transition: all 0.2s;
+  width: 100%;
+  outline: none;
+}
+
+.inputField::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.inputField:focus {
+  border-color: #FACC15;
+  box-shadow: 0 0 0 1px #FACC15;
+}
+
+.passwordInputWrapper {
+  position: relative;
+}
+
+.passwordToggleButton {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9CA3AF;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passwordToggleButton:hover {
+  color: #4B5563;
+}
+
+.errorMessage {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #DC2626;
+  margin-top: -0.25rem;
+}
+
+.formOptions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -0.25rem;
+}
+
+.rememberMeLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox {
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 4px;
+  border: 1px solid #D1D5DB;
+  appearance: none;
+  background-color: transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+  margin: 0;
+}
+
+.checkbox:checked {
+  background-color: #111111;
+  border-color: #111111;
+}
+
+.checkboxIcon {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  pointer-events: none;
+  opacity: 0;
+  color: #ffffff;
+  transition: opacity 0.2s;
+}
+
+.checkbox:checked+.checkboxIcon {
+  opacity: 1;
+}
+
+.rememberMeText {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #6B7280;
+}
+
+.forgotPasswordBtn {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #111111;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.forgotPasswordBtn:hover {
+  text-decoration: underline;
+}
+
+.apiErrorBox {
+  font-size: 0.8125rem;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 6px;
+  background-color: #FEE2E2;
+  color: #991b1b;
+  border: 1px solid #FECACA;
+  font-weight: 500;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.875rem;
+  margin-top: 0.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.025em;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: #FDE804;
+  color: #111111;
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .container {
+    padding: 0;
+  }
+
+  .card {
+    border-radius: 0;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .rightPanel {
+    padding: 2rem 1.5rem;
+  }
+}
