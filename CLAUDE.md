@@ -47,7 +47,8 @@ src/
 ├── types/index.ts            # All TypeScript interfaces (User, Product, Order, etc.)
 ├── context/
 │   ├── AuthContext.tsx       # Auth token + user state (localStorage-backed)
-│   └── UIContext.tsx         # Global UI state (e.g. mobile sidebar toggle)
+│   ├── UIContext.tsx         # Global UI state (e.g. mobile sidebar toggle)
+│   └── ModalContext.tsx      # Modal visibility state for backdrop blur (provides isModalOpen, openModal(), closeModal())
 ├── components/
 │   ├── PrivateRoute.tsx      # Route guard — redirects to /login if no token
 │   └── layout/
@@ -67,11 +68,12 @@ src/
 └── pages/
     ├── Login/                # /login — split-panel layout + Login.module.css
     ├── Dashboard/            # / — KPI cards + Dashboard.module.css
-    ├── Inventory/            # /inventario + Inventory.module.css
-    ├── Providers/            # /proveedores + Providers.module.css
-    ├── Sells/                # /ventas + Sells.module.css
-    ├── Orders/               # /pedidos + Orders.module.css
-    └── Users/                # /usuarios + Users.module.css
+    ├── Inventory/            # /inventory — product list + Inventory.module.css
+    ├── CreateProduct/        # /inventory/create — product creation form + CreateProduct.module.css
+    ├── Providers/            # /providers + Providers.module.css
+    ├── Sells/                # /sells + Sells.module.css
+    ├── Orders/               # /orders + Orders.module.css
+    └── Users/                # /users + Users.module.css
 ```
 
 ## Routes
@@ -81,6 +83,7 @@ src/
 | `/login` | `Login` | Public |
 | `/` | `Dashboard` | Protected |
 | `/inventory` | `Inventory` | Protected |
+| `/inventory/create` | `CreateProduct` | Protected |
 | `/providers` | `Providers` | Protected |
 | `/sells` | `Sells` | Protected |
 | `/orders` | `Orders` | Protected |
@@ -95,10 +98,11 @@ Full spec at `.interface-design/system.md`. Summary:
 ### CSS Variables (defined in `src/index.css`)
 
 ```css
---bg: #ffffff                /* page canvas */
---surface: #F9F8F7           /* cards, sidebar (warm off-white) */
---surface-2: #F2F0EE         /* hovers, secondary surfaces */
---border: rgba(0,0,0,0.09)
+--bg: #ffffff                /* white — sidebar, cards, UI elements */
+--bg-page: #F3F4F6           /* light gray — main page background for contrast */
+--surface: #ffffff           /* white — card backgrounds (KPI, filters, table) */
+--surface-2: #F8FAFC         /* cool blue-gray (slate-50) — header backgrounds, hovers */
+--border: #E5E7EB            /* slate-200 — cool blue-gray borders */
 --border-strong: rgba(0,0,0,0.16)
 --ink-1: #111111             /* primary text */
 --ink-2: #555550             /* secondary text */
@@ -109,7 +113,7 @@ Full spec at `.interface-design/system.md`. Summary:
 --destructive: #DC2626       /* red — only for delete/error actions */
 --success: #16A34A
 --warning: #D97706
---control-bg: #F3F2F0        /* input backgrounds (inset feel) */
+--control-bg: #F8FAFC        /* cool blue-gray (slate-50) — input backgrounds (inset feel) */
 --sidebar-w: 232px
 ```
 
@@ -135,13 +139,21 @@ Full spec at `.interface-design/system.md`. Summary:
 ### Design Rules
 
 1. **One accent color only** — yellow `#FACC15`. Everything else uses ink hierarchy.
-2. **Depth strategy: subtle shadows** — `0 1px 3px rgba(0,0,0,0.07)` on cards. No dramatic lifts.
-3. **Sidebar same hue as canvas** — `border-right` is the only separator. Never use a different background color.
-4. **Inputs are inset** — `--control-bg` is darker than surrounding surface.
-5. **Bin-label on every section header** — this is the project's signature visual element.
-6. **Yellow left-bar on active sidebar link** — 4px wide, `--accent`, centered vertically.
-7. **Use only Bricolage Grotesque for UI** — this is the project's distinctive typography choice.
-8. **Border radius:** `8px` buttons/inputs · `10px` cards · `14px` modals.
+2. **Color contrast structure:**
+   - **Page background:** Light gray `#F3F4F6` (--bg-page) for main content area
+   - **Cards & UI:** White `#ffffff` (--surface) for KPI cards, filter controls, tables, sidebar
+   - **Secondary surfaces:** Warm off-white `#F9F8F7` (--surface-2) for table headers, hover states
+3. **Depth strategy: subtle shadows** — `0 1px 2px rgba(0,0,0,0.07)` on cards. No dramatic lifts.
+4. **Sidebar white background** — maintains visual separation from gray page background via `border-right`.
+5. **KPI cards:**
+   - White background with 1px border
+   - 4px left border with color-matched icon: Yellow (accent), Orange (warning), Red (destructive), Green (success)
+   - Icon positioned absolutely top-right in 44px square with tinted background
+   - Column layout with label above value
+6. **Breadcrumb:** Simple text with icon colors, no background — adapts to page background.
+7. **Yellow left-bar on active sidebar link** — 4px wide, `--accent`, centered vertically.
+8. **Use only Bricolage Grotesque for UI** — this is the project's distinctive typography choice.
+9. **Border radius:** `8px` buttons/inputs · `10px` cards · `14px` modals.
 
 ## Sidebar Behavior
 
@@ -154,43 +166,90 @@ Full spec at `.interface-design/system.md`. Summary:
 - **Mobile:** Collapse state independent of mobile menu toggle
 - **Footer Adaptation:** Shows user avatar + logout icon button when collapsed (centered layout)
 
+## Modal Context & Backdrop Blur
+
+**Global Modal State Management** (`src/context/ModalContext.tsx`):
+- **Purpose:** Track when any modal is open to apply blur effect to entire page (sidebar + content)
+- **API:**
+  - `useModalContext()` — returns `{ isModalOpen: boolean, openModal(): void, closeModal(): void }`
+  - `ModalProvider` — wraps `AppLayout` in `App.tsx` (already integrated)
+- **AppLayout Integration:**
+  - AppLayout wraps root div with blur class when `isModalOpen` is true
+  - Blur styling in `src/components/layout/AppLayout.module.css`: `filter: blur(4px); pointer-events: none;`
+  - Applies to entire page (sidebar + main content) for clear visual focus on modals
+  - Smooth 0.3s transition using `transition-all duration-300`
+- **Page Integration (CreateProduct Example):**
+  - Import `useModalContext` hook
+  - Call `contextOpenModal()` when modal opens (usually when `openModal` state is set to non-null)
+  - Call `contextCloseModal()` when modal closes (usually when `openModal` state is set to null)
+  - Typically done via `useEffect` watching the local `openModal` state:
+    ```typescript
+    useEffect(() => {
+      if (openModal) {
+        contextOpenModal()
+      } else {
+        contextCloseModal()
+      }
+    }, [openModal, contextOpenModal, contextCloseModal])
+    ```
+  - Keep page-level modal state (which modal type is open, form data, errors) in component
+  - Only use context for the global blur toggle (is ANY modal open)
+
 ## Inventory Page Layout
 
-- **Page Header:** Title "Control de Inventario" + description + "Nuevo Producto" button
-- **KPI Cards:** 4-column grid on desktop (responsive: 2-column on tablet, 1-column on mobile) showing:
-  - Total Variantes (Grid icon, yellow accent) — from API `total_variants` (distinct product count)
-  - Total Stock (Package icon, yellow accent) — from API `total_stock` (total quantity across all products)
-  - Stock Bajo (AlertCircle icon, red destructive) — from API `low_stock_count` (products below threshold)
-  - Valor Total (DollarSign icon, green success) — from API `total_inventory_value` (total value)
-- **Controls Bar:** Horizontal layout with:
+- **Page Header:**
+  - Breadcrumb: Simple text "INV / Productos" (12px font, no background) with secondary color
+  - Title "Control de Inventario" + description + "Nuevo Producto" button
+- **KPI Cards:** 4-column grid on desktop (responsive: 2-column on tablet, 1-column on mobile) with refined styling:
+  - Layout: Column flex with icon positioned absolutely top-right corner
+  - Card styling: White background (`var(--surface)`) with 1px border, subtle shadow (0 1px 2px rgba(0,0,0,0.07))
+  - Left border: 4px colored border matching icon/text color:
+    - Total Variantes: Yellow (`--accent`) with Grid icon
+    - Total Stock: Orange (`--warning`) with Package icon
+    - Stock Bajo: Red (`--destructive`) with AlertCircle icon
+    - Valor Total: Green (`--success`) with DollarSign icon
+  - Icon: 44px square positioned `top: 16px; right: 16px;` with tinted background (e.g., rgba(250, 204, 21, 0.1)), colored text
+  - Content: Uppercase label (12px) above large bold value (24px) — no icon in content area
+  - Hover: Subtle shadow enhancement
+- **Filters Card Container:**
+  - Wraps all filter controls in dedicated card element
+  - Background: `var(--surface)` with 1px border and 10px border-radius
+  - Padding: 16px with subtle shadow (0 1px 2px rgba(0,0,0,0.04))
+- **Controls Bar (inside Filters Card):** Horizontal flex layout (responsive stacks on mobile) with:
   - **Name/ID Search:** Text input with icon (placeholder: "Nombre o ID...")
   - **Categoría Dropdown:** Dynamic options from `inventoryApi.getCategories()`
   - **Material Dropdown:** Dynamic options from `inventoryApi.getMaterials()`
-  - **Disponibilidad Select:** Standard select (Todos, En Stock, Stock Bajo)
+  - **Marca Dropdown:** Dynamic options from `inventoryApi.getBrands()`
+  - **Disponibilidad Select:** Standard select (Todos, En Stock, Stock Bajo, Sin Stock)
 - **Dynamic Dropdowns (API-Driven with Search):**
   - Load options from API when dropdown opens
-  - API calls with pagination params: `skip: 0, limit: 100, search: userInput`
+  - API calls with pagination params: `skip: 0, limit: 10, search: userInput`
   - Search/filter triggers API request (debounced 300ms to avoid spam)
   - Response structure: `{ items: [{ id, name }], has_next, skip, limit }`
   - Click outside to close
   - Selected option shows option name in button label (stores ID internally)
-  - Active selection highlighted in yellow
+  - Active selection highlighted in yellow (`rgba(250, 204, 21, 0.12)`)
   - Loading spinner shows while fetching options
 - **Stats Loading:** KPI cards load on component mount via `inventoryApi.getStats()` (calls `/inventory/stats/overview` endpoint once, independent of filters)
   - Response structure: `{ total_variants, total_stock, low_stock_count, total_inventory_value }`
   - Maps to state: `{ totalVariants, totalStock, lowStockCount, totalValue }`
+- **Data Table:** Product list with enhanced styling:
+  - Header: Light gray background (`var(--surface-2)`) with 1px bottom border, uppercase labels
+  - Columns 5 & 6 (Stock, Mín.): Center-aligned numeric values
+  - Rows: Subtle border-bottom (1px), smooth hover effect to `var(--surface-2)`
+  - Cells: Consistent 12px padding, proper typography hierarchy
 - **API Parameters:** All filters sent to backend via `inventoryApi.getProducts(params)`:
   - `skip`: pagination offset `(page - 1) * limit`
   - `limit`: items per page (default: 10)
   - `search`: text search from name/ID input
-  - `categoria`: selected category filter
-  - `material`: selected material filter
-  - `status`: disponibilidad filter (bajo/ok)
-- **Data Table:** Product list with status badges, edit buttons, pagination
+  - `category_id`: selected category filter (numeric ID)
+  - `material_id`: selected material filter (numeric ID)
+  - `brand_id`: selected brand filter (numeric ID)
+  - `stock_status`: disponibilidad filter (in_stock, low_stock, out_of_stock)
 - **Pagination:** Previous/Next buttons, shows current page and total pages
 - **Loading State:** Spinner while fetching products
 - **Error Handling:** Fallback to mock data if API fails for categories/materials
-- **Spacing:** 24px section gaps, 16px card padding, consistent grid layouts
+- **Spacing:** 32px section gaps, 16px card padding inside containers, consistent grid layouts
 
 ## Tailwind Config
 
@@ -231,7 +290,26 @@ Extended in `tailwind.config.js`:
 
 ## TypeScript Types (`src/types/index.ts`)
 
-Key interfaces: `User`, `Product`, `Category`, `Provider`, `Order`, `OrderItem`, `Sale`, `SaleItem`, `PaginatedResponse<T>`, `LoginPayload`, `AuthResponse`.
+Key interfaces: `User`, `Product`, `Category`, `Provider`, `Order`, `OrderItem`, `Sale`, `SaleItem`, `PaginatedResponse<T>`, `LoginPayload`, `AuthResponse`, `FilterOption`, `CreateProductInput`.
+
+## Inventory API Endpoints (`src/lib/api/inventory.ts`)
+
+**Product Management:**
+- `getProducts(params?)` — `GET /inventory/variants` with pagination, search, filters
+- `getProduct(id)` — `GET /inventory/variants/{id}`
+- `createProduct(data: CreateProductInput)` — `POST /inventory/variants`
+- `updateProduct(id, data)` — `PUT /inventory/variants/{id}`
+- `deleteProduct(id)` — `DELETE /inventory/variants/{id}`
+
+**Filter/Dropdown Data:**
+- `getCategories(params?)` — `GET /inventory/categories` → returns `PaginatedResponse<FilterOption>`
+- `getMaterials(params?)` — `GET /inventory/materials` → returns `PaginatedResponse<FilterOption>`
+- `getBrands(params?)` — `GET /inventory/brands` → returns `PaginatedResponse<FilterOption>`
+- `getSalesUnits(params?)` — `GET /inventory/sales-units` → returns `PaginatedResponse<FilterOption>`
+- `getSizeUnits(params?)` — `GET /inventory/size-units` → returns `PaginatedResponse<FilterOption>`
+
+**Statistics:**
+- `getStats()` — `GET /inventory/variants/stats/overview` → returns stats (total variants, stock, low stock count, total value)
 
 ## Path Alias
 

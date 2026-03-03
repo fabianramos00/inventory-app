@@ -43,16 +43,7 @@ export default function Login() {
     setLoading(true)
     try {
       const res = await authApi.login({ email: data.email, password: data.password })
-      const token = res.data.access_token
-      const mockUser: User = {
-        id: 1,
-        name: 'Admin',
-        email: data.email,
-        role: 'admin',
-        is_active: true,
-        created_at: new Date().toISOString(),
-      }
-      login(token, mockUser)
+      login(res.data.access_token, res.data.user)
       navigate('/', { replace: true })
     } catch {
       setApiError('Correo o contraseña incorrectos.')

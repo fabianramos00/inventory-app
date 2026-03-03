@@ -78,29 +78,45 @@
 }
 
 .kpiCard {
+  position: relative;
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
   padding: 20px;
   background: var(--surface);
-  border: none;
+  border: 1px solid var(--border);
   border-left: 4px solid var(--accent);
   border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
   transition: all 200ms ease-out;
+  overflow: hidden;
+}
+
+.kpiCard:nth-child(2) {
+  border-left-color: var(--warning);
+}
+
+.kpiCard:nth-child(3) {
+  border-left-color: var(--destructive);
+}
+
+.kpiCard:nth-child(4) {
+  border-left-color: var(--success);
 }
 
 .kpiCard:hover {
-  background: var(--surface-2);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .kpiIcon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   flex-shrink: 0;
 }
@@ -108,6 +124,8 @@
 .kpiContent {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .kpiLabel {
@@ -126,13 +144,22 @@
   letter-spacing: -0.01em;
 }
 
+/* Filter Card Container */
+.filtersCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  margin-bottom: 8px;
+}
+
 /* Controls Bar */
 .controlsBar {
   display: flex;
   flex-direction: column;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
 }
 
 @media (min-width: 768px) {
@@ -151,7 +178,7 @@
 @media (min-width: 768px) {
   .searchWrapper {
     flex: 0 1 auto;
-    width: 240px;
+    width: 480px;
   }
 }
 
@@ -273,6 +300,7 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -329,7 +357,8 @@
   background: var(--surface);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  border: 1px solid var(--border);
 }
 
 .skuCell {
@@ -436,6 +465,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -449,19 +479,27 @@
 
 :global(.data-table thead) {
   background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
 }
 
 :global(.data-table thead th) {
   padding: 12px;
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--ink-1);
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   border: none;
 }
 
+:global(.data-table thead th:nth-child(5)),
+:global(.data-table thead th:nth-child(6)) {
+  text-align: center;
+}
+
 :global(.data-table tbody tr) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--border);
   transition: all 200ms ease-out;
 }
 
@@ -474,6 +512,12 @@
   font-size: 14px;
   color: var(--ink-1);
   border: none;
+  vertical-align: middle;
+}
+
+:global(.data-table tbody td:nth-child(5)),
+:global(.data-table tbody td:nth-child(6)) {
+  text-align: center;
 }
 
 :global(.badge) {

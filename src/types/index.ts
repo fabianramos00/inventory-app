@@ -11,11 +11,10 @@ export interface AuthResponse {
 // ─── User ────────────────────────────────────────────────────────────────────
 export interface User {
   id: number
-  name: string
+  full_name: string
   email: string
-  role: 'admin' | 'manager' | 'employee'
+  is_superuser: boolean
   is_active: boolean
-  created_at: string
 }
 
 // ─── Category / Material ─────────────────────────────────────────────────────
@@ -96,4 +95,25 @@ export interface PaginatedResponse<T> {
   page: number
   size: number
   pages: number
+}
+
+// ─── Dropdown / Filter Options ────────────────────────────────────────────────
+export interface FilterOption {
+  id: number
+  name: string
+  abbreviation?: string
+}
+
+// ─── Product Creation Form ────────────────────────────────────────────────────
+export interface CreateProductInput {
+  name: string
+  brand_id: number
+  category_id: number
+  material_id: number
+  size_value?: string | null
+  measurement_unit_id?: number | null
+  sale_price: number
+  cost: number
+  initial_quantity: number
+  min_stock_quantity: number
 }

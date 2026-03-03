@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, Plus, AlertCircle, DollarSign, Package, Grid, ChevronDown, Loader } from 'lucide-react'
 import styles from './Inventory.module.css'
 import { inventoryApi } from '@/lib/api/inventory'
@@ -23,6 +24,7 @@ const statusLabel: Record<string, string> = {
 }
 
 export default function Inventory() {
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('')
   const [selectedMaterial, setSelectedMaterial] = useState<number | ''>()
@@ -56,9 +58,10 @@ export default function Inventory() {
   const categoryRef = useRef<HTMLDivElement>(null)
   const materialRef = useRef<HTMLDivElement>(null)
   const brandRef = useRef<HTMLDivElement>(null)
-  const categoryTimeoutRef = useRef<NodeJS.Timeout>()
-  const materialTimeoutRef = useRef<NodeJS.Timeout>()
-  const brandTimeoutRef = useRef<NodeJS.Timeout>()
+  const estadoRef = useRef<HTMLDivElement>(null)
+  const categoryTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const materialTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const brandTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     if (categoryTimeoutRef.current) clearTimeout(categoryTimeoutRef.current)
@@ -178,8 +181,9 @@ export default function Inventory() {
       const isOutsideCategory = !categoryRef.current?.contains(target)
       const isOutsideMaterial = !materialRef.current?.contains(target)
       const isOutsideBrand = !brandRef.current?.contains(target)
+      const isOutsideAvailability = !estadoRef.current?.contains(target)
 
-      if (isOutsideCategory && isOutsideMaterial && isOutsideBrand) {
+      if (isOutsideCategory && isOutsideMaterial && isOutsideBrand && isOutsideAvailability) {
         setOpenDropdown(null)
       }
     }
@@ -216,6 +220,7 @@ export default function Inventory() {
   const selectedCategorieName = categoryOptions.find(c => c.id === selectedCategory)?.name || 'Categoría'
   const selectedMaterialName = materialOptions.find(m => m.id === selectedMaterial)?.name || 'Material'
   const selectedBrandName = brandOptions.find(b => b.id === selectedBrand)?.name || 'Marca'
+  const selectedAvailabilityName = selectedAvailability === 'all' ? 'Disponibilidad' : statusLabel[selectedAvailability]
 
   const getProductStatus = (stock: number, threshold: number) => {
     if (stock === 0) return 'out_of_stock'
@@ -226,11 +231,18 @@ export default function Inventory() {
     <div className={styles.container}>
       <div className={styles.pageHeader}>
         <div>
-          <span className="bin-label mb-2 inline-block">INV / Productos</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '12px', fontWeight: '600', color: 'var(--ink-3)' }}>
+            <span>INV</span>
+            <span>/</span>
+            <span style={{ fontWeight: '500', color: 'var(--ink-2)' }}>Productos</span>
+          </div>
           <h1 className={styles.pageTitle}>Control de Inventario</h1>
           <p className={styles.pageDescription}>Gestión centralizada de stock, hardware y componentes.</p>
         </div>
-        <button className={styles.newProductBtn}>
+        <button
+          className={styles.newProductBtn}
+          onClick={() => navigate('/inventory/create')}
+        >
           <Plus size={16} /> Nuevo Producto
         </button>
       </div>
@@ -279,214 +291,264 @@ export default function Inventory() {
         </div>
       </div>
 
-      <div className={styles.controlsBar}>
-        <div className={styles.searchWrapper}>
-          <Search size={14} className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Nombre o ID..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-        </div>
+      <div className={styles.filtersCard}>
+        <div className={styles.controlsBar}>
+          <div className={styles.searchWrapper}>
+            <Search size={14} className={styles.searchIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Nombre o ID..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
 
-        <div className={styles.dynamicDropdown} ref={categoryRef}>
-          <button
-            className={`${styles.dropdownTrigger} ${selectedCategory ? styles.filterActive : ''}`}
-            onClick={() => {
-              if (openDropdown === 'category') {
-                setOpenDropdown(null)
-              } else {
-                setOpenDropdown('category')
-                setCategorySearch('')
-              }
-            }}
-          >
-            {selectedCategorieName}
-            <ChevronDown size={14} />
-          </button>
-          {openDropdown === 'category' && (
-            <div className={styles.dropdownContent}>
-              <input
-                type="text"
-                className={styles.dropdownSearch}
-                placeholder="Buscar categoría..."
-                value={categorySearch}
-                onChange={e => setCategorySearch(e.target.value)}
-                autoFocus
-              />
-              <div className={styles.dropdownOptions}>
-                <div
-                  className={styles.dropdownOption}
-                  onClick={() => {
-                    setSelectedCategory('')
-                    setOpenDropdown(null)
-                    setPage(1)
-                  }}
-                >
-                  Todas las Categorías
-                </div>
-                {categoryLoading ? (
-                  <div className={styles.dropdownOption} style={{ justifyContent: 'center' }}>
-                    <Loader size={14} className={styles.loadingSpinner} />
+          <div className={styles.dynamicDropdown} ref={categoryRef}>
+            <button
+              className={`${styles.dropdownTrigger} ${selectedCategory ? styles.filterActive : ''}`}
+              onClick={() => {
+                if (openDropdown === 'category') {
+                  setOpenDropdown(null)
+                } else {
+                  setOpenDropdown('category')
+                  setCategorySearch('')
+                }
+              }}
+            >
+              {selectedCategorieName}
+              <ChevronDown size={14} />
+            </button>
+            {openDropdown === 'category' && (
+              <div className={styles.dropdownContent}>
+                <input
+                  type="text"
+                  className={styles.dropdownSearch}
+                  placeholder="Buscar categoría..."
+                  value={categorySearch}
+                  onChange={e => setCategorySearch(e.target.value)}
+                  autoFocus
+                />
+                <div className={styles.dropdownOptions}>
+                  <div
+                    className={styles.dropdownOption}
+                    onClick={() => {
+                      setSelectedCategory('')
+                      setOpenDropdown(null)
+                      setPage(1)
+                    }}
+                  >
+                    Todas las Categorías
                   </div>
-                ) : (
-                  categoryOptions.map(cat => (
-                    <div
-                      key={cat.id}
-                      className={`${styles.dropdownOption} ${selectedCategory === cat.id ? styles.active : ''}`}
-                      onClick={() => {
-                        setSelectedCategory(cat.id)
-                        setCategorySearch('')
-                        setOpenDropdown(null)
-                        setPage(1)
-                      }}
-                    >
-                      {cat.name}
+                  {categoryLoading ? (
+                    <div className={styles.dropdownOption} style={{ justifyContent: 'center' }}>
+                      <Loader size={14} className={styles.loadingSpinner} />
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className={styles.dynamicDropdown} ref={materialRef}>
-          <button
-            className={`${styles.dropdownTrigger} ${selectedMaterial ? styles.filterActive : ''}`}
-            onClick={() => {
-              if (openDropdown === 'material') {
-                setOpenDropdown(null)
-              } else {
-                setOpenDropdown('material')
-                setMaterialSearch('')
-              }
-            }}
-          >
-            {selectedMaterialName}
-            <ChevronDown size={14} />
-          </button>
-          {openDropdown === 'material' && (
-            <div className={styles.dropdownContent}>
-              <input
-                type="text"
-                className={styles.dropdownSearch}
-                placeholder="Buscar material..."
-                value={materialSearch}
-                onChange={e => setMaterialSearch(e.target.value)}
-                autoFocus
-              />
-              <div className={styles.dropdownOptions}>
-                <div
-                  className={styles.dropdownOption}
-                  onClick={() => {
-                    setSelectedMaterial('')
-                    setOpenDropdown(null)
-                    setPage(1)
-                  }}
-                >
-                  Todos los Materiales
+                  ) : (
+                    categoryOptions.map(cat => (
+                      <div
+                        key={cat.id}
+                        className={`${styles.dropdownOption} ${selectedCategory === cat.id ? styles.active : ''}`}
+                        onClick={() => {
+                          setSelectedCategory(cat.id)
+                          setCategorySearch('')
+                          setOpenDropdown(null)
+                          setPage(1)
+                        }}
+                      >
+                        {cat.name}
+                      </div>
+                    ))
+                  )}
                 </div>
-                {materialLoading ? (
-                  <div className={styles.dropdownOption} style={{ justifyContent: 'center' }}>
-                    <Loader size={14} className={styles.loadingSpinner} />
-                  </div>
-                ) : (
-                  materialOptions.map(mat => (
-                    <div
-                      key={mat.id}
-                      className={`${styles.dropdownOption} ${selectedMaterial === mat.id ? styles.active : ''}`}
-                      onClick={() => {
-                        setSelectedMaterial(mat.id)
-                        setMaterialSearch('')
-                        setOpenDropdown(null)
-                        setPage(1)
-                      }}
-                    >
-                      {mat.name}
-                    </div>
-                  ))
-                )}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        <div className={styles.dynamicDropdown} ref={brandRef}>
-          <button
-            className={`${styles.dropdownTrigger} ${selectedBrand ? styles.filterActive : ''}`}
-            onClick={() => {
-              if (openDropdown === 'marca') {
-                setOpenDropdown(null)
-              } else {
-                setOpenDropdown('marca')
-                setBrandSearch('')
-              }
-            }}
-          >
-            {selectedBrandName}
-            <ChevronDown size={14} />
-          </button>
-          {openDropdown === 'marca' && (
-            <div className={styles.dropdownContent}>
-              <input
-                type="text"
-                className={styles.dropdownSearch}
-                placeholder="Buscar marca..."
-                value={brandSearch}
-                onChange={e => setBrandSearch(e.target.value)}
-                autoFocus
-              />
-              <div className={styles.dropdownOptions}>
-                <div
-                  className={styles.dropdownOption}
-                  onClick={() => {
-                    setSelectedBrand('')
-                    setOpenDropdown(null)
-                    setPage(1)
-                  }}
-                >
-                  Todas las Marcas
+          <div className={styles.dynamicDropdown} ref={materialRef}>
+            <button
+              className={`${styles.dropdownTrigger} ${selectedMaterial ? styles.filterActive : ''}`}
+              onClick={() => {
+                if (openDropdown === 'material') {
+                  setOpenDropdown(null)
+                } else {
+                  setOpenDropdown('material')
+                  setMaterialSearch('')
+                }
+              }}
+            >
+              {selectedMaterialName}
+              <ChevronDown size={14} />
+            </button>
+            {openDropdown === 'material' && (
+              <div className={styles.dropdownContent}>
+                <input
+                  type="text"
+                  className={styles.dropdownSearch}
+                  placeholder="Buscar material..."
+                  value={materialSearch}
+                  onChange={e => setMaterialSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className={styles.dropdownOptions}>
+                  <div
+                    className={styles.dropdownOption}
+                    onClick={() => {
+                      setSelectedMaterial('')
+                      setOpenDropdown(null)
+                      setPage(1)
+                    }}
+                  >
+                    Todos los Materiales
+                  </div>
+                  {materialLoading ? (
+                    <div className={styles.dropdownOption} style={{ justifyContent: 'center' }}>
+                      <Loader size={14} className={styles.loadingSpinner} />
+                    </div>
+                  ) : (
+                    materialOptions.map(mat => (
+                      <div
+                        key={mat.id}
+                        className={`${styles.dropdownOption} ${selectedMaterial === mat.id ? styles.active : ''}`}
+                        onClick={() => {
+                          setSelectedMaterial(mat.id)
+                          setMaterialSearch('')
+                          setOpenDropdown(null)
+                          setPage(1)
+                        }}
+                      >
+                        {mat.name}
+                      </div>
+                    ))
+                  )}
                 </div>
-                {brandLoading ? (
-                  <div className={styles.dropdownOption} style={{ justifyContent: 'center' }}>
-                    <Loader size={14} className={styles.loadingSpinner} />
-                  </div>
-                ) : (
-                  brandOptions.map(brand => (
-                    <div
-                      key={brand.id}
-                      className={`${styles.dropdownOption} ${selectedBrand === brand.id ? styles.active : ''}`}
-                      onClick={() => {
-                        setSelectedBrand(brand.id)
-                        setBrandSearch('')
-                        setOpenDropdown(null)
-                        setPage(1)
-                      }}
-                    >
-                      {brand.name}
-                    </div>
-                  ))
-                )}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        <select
-          className={`${styles.filterSelect} ${selectedAvailability !== 'all' ? styles.filterActive : ''}`}
-          value={selectedAvailability}
-          onChange={e => {
-            setSelectedAvailability(e.target.value)
-            setPage(1)
-          }}
-        >
-          <option value="all">Estado</option>
-          <option value="in_stock">En Stock</option>
-          <option value="low_stock">Stock Bajo</option>
-          <option value="out_of_stock">Sin Stock</option>
-        </select>
+          <div className={styles.dynamicDropdown} ref={brandRef}>
+            <button
+              className={`${styles.dropdownTrigger} ${selectedBrand ? styles.filterActive : ''}`}
+              onClick={() => {
+                if (openDropdown === 'marca') {
+                  setOpenDropdown(null)
+                } else {
+                  setOpenDropdown('marca')
+                  setBrandSearch('')
+                }
+              }}
+            >
+              {selectedBrandName}
+              <ChevronDown size={14} />
+            </button>
+            {openDropdown === 'marca' && (
+              <div className={styles.dropdownContent}>
+                <input
+                  type="text"
+                  className={styles.dropdownSearch}
+                  placeholder="Buscar marca..."
+                  value={brandSearch}
+                  onChange={e => setBrandSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className={styles.dropdownOptions}>
+                  <div
+                    className={styles.dropdownOption}
+                    onClick={() => {
+                      setSelectedBrand('')
+                      setOpenDropdown(null)
+                      setPage(1)
+                    }}
+                  >
+                    Todas las Marcas
+                  </div>
+                  {brandLoading ? (
+                    <div className={styles.dropdownOption} style={{ justifyContent: 'center' }}>
+                      <Loader size={14} className={styles.loadingSpinner} />
+                    </div>
+                  ) : (
+                    brandOptions.map(brand => (
+                      <div
+                        key={brand.id}
+                        className={`${styles.dropdownOption} ${selectedBrand === brand.id ? styles.active : ''}`}
+                        onClick={() => {
+                          setSelectedBrand(brand.id)
+                          setBrandSearch('')
+                          setOpenDropdown(null)
+                          setPage(1)
+                        }}
+                      >
+                        {brand.name}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.dynamicDropdown} ref={estadoRef}>
+            <button
+              className={`${styles.dropdownTrigger} ${selectedAvailability !== 'all' ? styles.filterActive : ''}`}
+              onClick={() => {
+                if (openDropdown === 'estado') {
+                  setOpenDropdown(null)
+                } else {
+                  setOpenDropdown('estado')
+                }
+              }}
+            >
+              {selectedAvailabilityName}
+              <ChevronDown size={14} />
+            </button>
+            {openDropdown === 'estado' && (
+              <div className={styles.dropdownContent}>
+                <div className={styles.dropdownOptions}>
+                  <div
+                    className={styles.dropdownOption}
+                    onClick={() => {
+                      setSelectedAvailability('all')
+                      setOpenDropdown(null)
+                      setPage(1)
+                    }}
+                  >
+                    Todos
+                  </div>
+                  <div
+                    className={`${styles.dropdownOption} ${selectedAvailability === 'in_stock' ? styles.active : ''}`}
+                    onClick={() => {
+                      setSelectedAvailability('in_stock')
+                      setOpenDropdown(null)
+                      setPage(1)
+                    }}
+                  >
+                    En Stock
+                  </div>
+                  <div
+                    className={`${styles.dropdownOption} ${selectedAvailability === 'low_stock' ? styles.active : ''}`}
+                    onClick={() => {
+                      setSelectedAvailability('low_stock')
+                      setOpenDropdown(null)
+                      setPage(1)
+                    }}
+                  >
+                    Stock Bajo
+                  </div>
+                  <div
+                    className={`${styles.dropdownOption} ${selectedAvailability === 'out_of_stock' ? styles.active : ''}`}
+                    onClick={() => {
+                      setSelectedAvailability('out_of_stock')
+                      setOpenDropdown(null)
+                      setPage(1)
+                    }}
+                  >
+                    Sin Stock
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className={styles.tableCard}>
@@ -510,7 +572,7 @@ export default function Inventory() {
                     <th>Material</th>
                     <th>Marca</th>
                     <th>Precio Unit.</th>
-                    <th>Estado</th>
+                    <th>Disponibilidad</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -521,7 +583,7 @@ export default function Inventory() {
                       <tr key={p.id}>
                         <td><span className={styles.skuCell}>{p.sku}</span></td>
                         <td><span className={styles.nameCell}>{p.product?.name || '-'}</span></td>
-                        <td><span className={styles.unitCell}>{p.size_value} {p.size_unit.abbreviation}</span></td>
+                        <td><span className={styles.unitCell}>{p.size_value} {p.measurement_unit.abbreviation}</span></td>
                         <td><span className={styles.categoryCell}>{p.product?.category?.name || '-'}</span></td>
                         <td>
                           <span className={`${styles.stockCell} ${status === 'bajo' ? styles.stockCellLow : styles.stockCellOk}`}>

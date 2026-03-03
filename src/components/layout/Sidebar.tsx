@@ -178,9 +178,9 @@ export default function Sidebar({ isMobileMenuOpen, closeMobileMenu }: SidebarPr
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold"
               style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
-              title={user?.name ?? 'Usuario'}
+              title={user?.full_name ?? 'Usuario'}
             >
-              {user?.name?.charAt(0).toUpperCase() ?? 'U'}
+              {user?.full_name?.charAt(0).toUpperCase() ?? 'U'}
             </div>
             <button
               onClick={handleLogout}
@@ -200,14 +200,14 @@ export default function Sidebar({ isMobileMenuOpen, closeMobileMenu }: SidebarPr
                 className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                 style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
               >
-                {user?.name?.charAt(0).toUpperCase() ?? 'U'}
+                {user?.full_name?.charAt(0).toUpperCase() ?? 'U'}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold truncate" style={{ color: 'var(--ink-1)' }}>
-                  {user?.name ?? 'Usuario'}
+                  {user?.full_name ?? 'Usuario'}
                 </div>
                 <div className="text-xs truncate" style={{ color: 'var(--ink-3)' }}>
-                  Admin
+                  {user?.is_superuser ? 'Admin' : 'Usuario'}
                 </div>
               </div>
             </div>

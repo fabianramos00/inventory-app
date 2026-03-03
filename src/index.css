@@ -7,9 +7,10 @@
 @layer base {
   :root {
     --bg: #ffffff;
-    --surface: #F9F8F7;
-    --surface-2: #F2F0EE;
-    --border: rgba(0, 0, 0, 0.09);
+    --bg-page: #F3F4F6;
+    --surface: #ffffff;
+    --surface-2: #F8FAFC;
+    --border: #E5E7EB;
     --border-strong: rgba(0, 0, 0, 0.16);
     --ink-1: #111111;
     --ink-2: #555550;
@@ -21,7 +22,7 @@
     --destructive-fg: #ffffff;
     --success: #16A34A;
     --warning: #D97706;
-    --control-bg: #F3F2F0;
+    --control-bg: #F8FAFC;
     --control-border: rgba(0, 0, 0, 0.13);
     --focus-ring: #FACC15;
     --sidebar-w: 232px;
