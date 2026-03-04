@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Plus, AlertCircle, DollarSign, Package, Grid, ChevronDown, Loader } from 'lucide-react'
+import { Search, Plus, AlertCircle, DollarSign, Package, Grid, ChevronDown, Loader, Eye, Trash2 } from 'lucide-react'
 import styles from './Inventory.module.css'
 import { inventoryApi } from '@/lib/api/inventory'
+import { useModalContext } from '@/context/ModalContext'
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
 import Pagination from '@/components/Pagination'
 import type { Product } from '@/types'
 
@@ -25,6 +27,7 @@ const statusLabel: Record<string, string> = {
 
 export default function Inventory() {
   const navigate = useNavigate()
+  const { openModal: contextOpenModal, closeModal: contextCloseModal } = useModalContext()
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('')
   const [selectedMaterial, setSelectedMaterial] = useState<number | ''>()
@@ -37,6 +40,8 @@ export default function Inventory() {
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [productToDelete, setProductToDelete] = useState<{ id: number; name: string } | null>(null)
   const [stats, setStats] = useState({
     totalVariants: 0,
     totalStock: 0,
@@ -173,7 +178,7 @@ export default function Inventory() {
     }
 
     loadProducts()
-  }, [search, selectedCategory, selectedMaterial, selectedBrand, selectedAvailability, page, limit])
+  }, [search, selectedCategory, selectedMaterial, selectedBrand, selectedAvailability, page, limit, refreshKey])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -216,11 +221,21 @@ export default function Inventory() {
     loadStats()
   }, [])
 
+  useEffect(() => {
+    if (productToDelete) { contextOpenModal() } else { contextCloseModal() }
+  }, [productToDelete, contextOpenModal, contextCloseModal])
+
   const totalPages = Math.ceil(total / limit)
   const selectedCategorieName = categoryOptions.find(c => c.id === selectedCategory)?.name || 'Categoría'
   const selectedMaterialName = materialOptions.find(m => m.id === selectedMaterial)?.name || 'Material'
   const selectedBrandName = brandOptions.find(b => b.id === selectedBrand)?.name || 'Marca'
   const selectedAvailabilityName = selectedAvailability === 'all' ? 'Disponibilidad' : statusLabel[selectedAvailability]
+
+  async function handleDeleteConfirm() {
+    await inventoryApi.deleteProduct(productToDelete!.id)
+    setProductToDelete(null)
+    setRefreshKey(k => k + 1)
+  }
 
   const getProductStatus = (stock: number, threshold: number) => {
     if (stock === 0) return 'out_of_stock'
@@ -581,22 +596,45 @@ export default function Inventory() {
                     const status = getProductStatus(p.stock_quantity || 0, p.low_stock_threshold || 0)
                     return (
                       <tr key={p.id}>
-                        <td><span className={styles.skuCell}>{p.sku}</span></td>
-                        <td><span className={styles.nameCell}>{p.product?.name || '-'}</span></td>
-                        <td><span className={styles.unitCell}>{p.size_value} {p.measurement_unit.abbreviation}</span></td>
-                        <td><span className={styles.categoryCell}>{p.product?.category?.name || '-'}</span></td>
                         <td>
-                          <span className={`${styles.stockCell} ${status === 'bajo' ? styles.stockCellLow : styles.stockCellOk}`}>
+                          <button
+                            className={styles.skuLink}
+                            onClick={() => navigate(`/inventory/product/${p.id}`)}
+                            title="Ver producto"
+                          >
+                            {p.sku}
+                          </button>
+                        </td>
+                        <td><span className={styles.nameCell}>{p.name || '-'}</span></td>
+                        <td><span className={styles.unitCell}>{p.size_value} {p.measurement_unit?.abbreviation}</span></td>
+                        <td><span className={styles.categoryCell}>{p.category?.name || '-'}</span></td>
+                        <td>
+                          <span className={`${styles.stockCell} ${status === 'low_stock' || status === 'out_of_stock' ? styles.stockCellLow : styles.stockCellOk}`}>
                             {p.stock_quantity} <span className={styles.stockUnit}>{p.unit}</span>
                           </span>
                         </td>
                         <td><span className={styles.minCell}>{p.low_stock_threshold}</span></td>
-                        <td><span className={styles.materialCell}>{p.product?.material?.name || '-'}</span></td>
+                        <td><span className={styles.materialCell}>{p.material?.name || '-'}</span></td>
                         <td><span className={styles.brandCell}>{p.brand?.name || '-'}</span></td>
                         <td><span className={styles.priceCell}>$ {(p.price || 0).toFixed(2)}</span></td>
                         <td><span className={`badge ${statusMap[status]}`}>{statusLabel[status]}</span></td>
                         <td>
-                          <button className={styles.editBtn}>Editar</button>
+                          <div className={styles.actionButtons}>
+                            <button
+                              className={styles.iconBtn}
+                              title="Ver producto"
+                              onClick={() => navigate(`/inventory/product/${p.id}`)}
+                            >
+                              <Eye size={15} />
+                            </button>
+                            <button
+                              className={styles.iconBtnDestructive}
+                              title="Eliminar"
+                              onClick={() => setProductToDelete({ id: p.id, name: p.name + ' ' + p.size_value + ' ' + p.measurement_unit?.abbreviation })}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     )
@@ -620,6 +658,14 @@ export default function Inventory() {
           </>
         )}
       </div>
+
+      {productToDelete && (
+        <ConfirmDeleteModal
+          productName={productToDelete.name}
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setProductToDelete(null)}
+        />
+      )}
     </div>
   )
 }

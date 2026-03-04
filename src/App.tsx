@@ -6,7 +6,7 @@ import AppLayout from '@/components/layout/AppLayout'
 import Login from '@/pages/Login/Login'
 import Dashboard from '@/pages/Dashboard/Dashboard'
 import Inventory from '@/pages/Inventory/Inventory'
-import CreateProduct from '@/pages/CreateProduct/CreateProduct'
+import ProductForm from '@/pages/ProductForm/ProductForm'
 import Providers from '@/pages/Providers/Providers'
 import Sells from './pages/Sells/Sells'
 import Orders from './pages/Orders/Orders'
@@ -26,7 +26,8 @@ export default function App() {
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/inventory" element={<Inventory />} />
-                <Route path="/inventory/create" element={<CreateProduct />} />
+                <Route path="/inventory/create" element={<ProductForm />} />
+                <Route path="/inventory/product/:id" element={<ProductForm />} />
                 <Route path="/providers" element={<Providers />} />
                 <Route path="/sells" element={<Sells />} />
                 <Route path="/orders" element={<Orders />} />

@@ -1,0 +1,609 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ChevronLeft, Pencil, Loader, Check, X, Trash2 } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { inventoryApi } from '@/lib/api/inventory'
+import { useModalContext } from '@/context/ModalContext'
+import ProductDropdown from '@/components/ProductDropdown/ProductDropdown'
+import CreateEntityModal, { type EntityType } from '@/components/CreateEntityModal/CreateEntityModal'
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
+import type { Product, FilterOption, CreateProductInput } from '@/types'
+import styles from './ProductForm.module.css'
+
+const productSchema = z.object({
+  name: z.string().min(1, 'Nombre es requerido').max(255),
+  sku: z.string().max(100).optional(),
+  brand_id: z.number().int().min(1, 'Marca es requerida'),
+  category_id: z.number().int().min(1, 'Categoría es requerida'),
+  material_id: z.number().int().min(1, 'Material es requerido'),
+  size_value: z.string().nullable().optional(),
+  measurement_unit_id: z.number().nullable().optional(),
+  price: z.number().min(0, 'Precio debe ser mayor a 0'),
+  cost: z.number().min(0, 'Costo debe ser mayor a 0'),
+  stock_quantity: z.number().int().min(0, 'Cantidad debe ser mayor a 0'),
+  min_stock_quantity: z.number().int().min(0, 'Cantidad mínima debe ser mayor a 0'),
+})
+
+type ProductFormInputs = z.infer<typeof productSchema>
+
+const statusMap: Record<string, string> = {
+  low_stock: 'badge--destructive',
+  in_stock: 'badge--success',
+  out_of_stock: 'badge--neutral',
+}
+
+const statusLabel: Record<string, string> = {
+  low_stock: 'Stock Bajo',
+  in_stock: 'En Stock',
+  out_of_stock: 'Sin Stock',
+}
+
+function getProductStatus(stock: number, threshold: number) {
+  if (stock === 0) return 'out_of_stock'
+  return stock <= threshold ? 'low_stock' : 'in_stock'
+}
+
+export default function ProductForm() {
+  const { id } = useParams<{ id?: string }>()
+  const isCreateMode = !id
+  const navigate = useNavigate()
+  const { openModal: contextOpenModal, closeModal: contextCloseModal } = useModalContext()
+
+  const [product, setProduct] = useState<Product | null>(null)
+  const [pageLoading, setPageLoading] = useState(!isCreateMode)
+  const [isEditing, setIsEditing] = useState(isCreateMode)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const [activeModal, setActiveModal] = useState<EntityType | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  const [categoryInitialOptions, setCategoryInitialOptions] = useState<FilterOption[]>([])
+  const [brandInitialOptions, setBrandInitialOptions] = useState<FilterOption[]>([])
+  const [materialInitialOptions, setMaterialInitialOptions] = useState<FilterOption[]>([])
+  const [measurementUnitInitialOptions, setMeasurementUnitInitialOptions] = useState<FilterOption[]>([])
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    setValue,
+  } = useForm<ProductFormInputs>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: '',
+      sku: '',
+      brand_id: 0,
+      category_id: 0,
+      material_id: 0,
+      size_value: undefined,
+      measurement_unit_id: undefined,
+      price: 0,
+      cost: 0,
+      stock_quantity: 0,
+      min_stock_quantity: 0,
+    },
+  })
+
+  function populateForm(p: Product) {
+    setValue('name', p.name)
+    setValue('sku', p.sku)
+    if (p.category) {
+      setCategoryInitialOptions([{ id: p.category.id, name: p.category.name }])
+      setValue('category_id', p.category.id)
+    }
+    if (p.brand) {
+      setBrandInitialOptions([{ id: p.brand.id, name: p.brand.name }])
+      setValue('brand_id', p.brand.id)
+    }
+    if (p.material) {
+      setMaterialInitialOptions([{ id: p.material.id, name: p.material.name }])
+      setValue('material_id', p.material.id)
+    }
+    setValue('size_value', p.size_value ?? undefined)
+    if (p.measurement_unit) {
+      setMeasurementUnitInitialOptions([{
+        id: p.measurement_unit.id,
+        name: p.measurement_unit.name,
+        abbreviation: p.measurement_unit.abbreviation,
+      }])
+      setValue('measurement_unit_id', p.measurement_unit.id)
+    }
+    setValue('price', p.price ?? 0)
+    setValue('cost', p.cost ?? 0)
+    setValue('stock_quantity', p.stock_quantity ?? p.stock ?? 0)
+    setValue('min_stock_quantity', p.low_stock_threshold ?? p.min_stock ?? 0)
+  }
+
+  useEffect(() => {
+    if (isCreateMode) return
+    const loadProduct = async () => {
+      try {
+        const response = await inventoryApi.getProduct(Number(id))
+        setProduct(response.data)
+        populateForm(response.data)
+      } catch {
+        navigate('/inventory')
+      } finally {
+        setPageLoading(false)
+      }
+    }
+    loadProduct()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  useEffect(() => {
+    if (activeModal || showDeleteModal) { contextOpenModal() } else { contextCloseModal() }
+  }, [activeModal, showDeleteModal, contextOpenModal, contextCloseModal])
+
+  function handleEntityCreated(type: EntityType, entity: FilterOption) {
+    switch (type) {
+      case 'category':
+        setCategoryInitialOptions(prev => [...prev, entity])
+        setValue('category_id', entity.id, { shouldValidate: true })
+        break
+      case 'brand':
+        setBrandInitialOptions(prev => [...prev, entity])
+        setValue('brand_id', entity.id, { shouldValidate: true })
+        break
+      case 'material':
+        setMaterialInitialOptions(prev => [...prev, entity])
+        setValue('material_id', entity.id, { shouldValidate: true })
+        break
+      case 'measurementUnit':
+        setMeasurementUnitInitialOptions(prev => [...prev, entity])
+        setValue('measurement_unit_id', entity.id, { shouldValidate: true })
+        break
+    }
+    setActiveModal(null)
+  }
+
+  function handleCancel() {
+    if (product) populateForm(product)
+    setIsEditing(false)
+    setOpenDropdownId(null)
+    setActiveModal(null)
+    setApiError(null)
+  }
+
+  async function handleDelete() {
+    await inventoryApi.deleteProduct(Number(id))
+    navigate('/inventory', { state: { successMessage: 'Producto eliminado exitosamente' } })
+  }
+
+  async function onSubmit(data: ProductFormInputs) {
+    setApiError(null)
+    try {
+      const { price, sku, ...rest } = data
+      const payload = {
+        ...rest,
+        price: price,
+        size_value: !rest.size_value || rest.size_value.trim() === '' ? null : rest.size_value,
+        measurement_unit_id: rest.measurement_unit_id ?? null,
+      }
+      if (isCreateMode) {
+        await inventoryApi.createProduct(payload as CreateProductInput)
+        navigate('/inventory', { state: { successMessage: 'Producto creado exitosamente' } })
+      } else {
+        const response = await inventoryApi.updateProduct(Number(id), { ...payload, sku })
+        setProduct(response.data)
+        populateForm(response.data)
+        setIsEditing(false)
+        setOpenDropdownId(null)
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message :
+        isCreateMode ? 'Error al crear producto' : 'Error al actualizar producto'
+      setApiError(msg)
+    }
+  }
+
+  if (pageLoading) {
+    return (
+      <div className={styles.pageContainer}>
+        <div className={styles.loadingState}>
+          <Loader size={24} className={styles.spinner} />
+          <p>Cargando producto...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const stock = product ? (product.stock_quantity ?? product.stock ?? 0) : 0
+  const threshold = product ? (product.low_stock_threshold ?? product.min_stock ?? 0) : 0
+  const status = getProductStatus(stock, threshold)
+  const isFormActive = isEditing || isCreateMode
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className={styles.pageContainer}>
+      {/* Page header */}
+      <div className={styles.pageHeader}>
+        <button
+          type="button"
+          onClick={() => navigate('/inventory')}
+          className={styles.backButton}
+          title="Volver al inventario"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <div className={styles.headerContent}>
+          <p className={styles.breadcrumb}>
+            {isCreateMode ? 'INV / REGISTRO' : 'INV / PRODUCTO'}
+          </p>
+          {isCreateMode ? (
+            <>
+              <h1 className={styles.pageTitle}>Registro de Producto</h1>
+              <p className={styles.pageDescription}>
+                Complete la información detallada para registrar el producto en el catálogo
+              </p>
+            </>
+          ) : (
+            <>
+              <div className={styles.titleRow}>
+                <h1 className={styles.pageTitle}>{product?.name || '-'}</h1>
+                <span className={styles.skuBadge}>{product?.sku}</span>
+              </div>
+              <div className={styles.statusRow}>
+                <span className={`badge ${statusMap[status]}`}>{statusLabel[status]}</span>
+              </div>
+            </>
+          )}
+        </div>
+        <div className={styles.headerActions}>
+          {isCreateMode ? (
+            <button type="submit" disabled={isSubmitting} className={styles.saveButton}>
+              {isSubmitting ? (
+                <><Loader size={15} className={styles.spinner} /> Guardando...</>
+              ) : (
+                'Guardar Producto'
+              )}
+            </button>
+          ) : isEditing ? (
+            <>
+              <button
+                key="btn-cancel"
+                type="button"
+                onClick={handleCancel}
+                className={styles.cancelButton}
+              >
+                <X size={15} />
+                Cancelar
+              </button>
+              <button
+                key="btn-save"
+                type="submit"
+                disabled={isSubmitting}
+                className={styles.saveButton}
+              >
+                {isSubmitting ? <Loader size={15} className={styles.spinner} /> : <Check size={15} />}
+                {isSubmitting ? 'Guardando...' : 'Guardar'}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                key="btn-delete"
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className={styles.deleteButton}
+              >
+                <Trash2 size={15} />
+                Eliminar
+              </button>
+              <button
+                key="btn-edit"
+                type="button"
+                onClick={() => setIsEditing(true)}
+                className={styles.editButton}
+              >
+                <Pencil size={15} />
+                Editar
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {apiError && <div className={styles.errorBox}>{apiError}</div>}
+
+      <div className={styles.sectionsGrid}>
+        {/* Left: Información General */}
+        <section className={styles.card}>
+          <h2 className={styles.cardTitle}>Información General</h2>
+          <dl className={styles.fieldList}>
+
+            {/* Nombre */}
+            <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+              <dt className={styles.fieldLabel}>Nombre</dt>
+              {isFormActive ? (
+                <dd className={styles.fieldValueFull}>
+                  <input
+                    type="text"
+                    className={styles.inputField}
+                    placeholder="Nombre del producto"
+                    {...register('name')}
+                  />
+                  {errors.name && <p className={styles.errorMessage}>{errors.name.message}</p>}
+                </dd>
+              ) : (
+                <dd className={styles.fieldValue}>{product?.name || '-'}</dd>
+              )}
+            </div>
+
+            {/* SKU — only shown in view/edit mode */}
+            {!isCreateMode && (
+              <div className={isEditing ? styles.fieldRowEditing : styles.fieldRow}>
+                <dt className={styles.fieldLabel}>SKU</dt>
+                {isEditing ? (
+                  <dd className={styles.fieldValueFull}>
+                    <input
+                      type="text"
+                      className={`${styles.inputField} ${styles.mono}`}
+                      {...register('sku')}
+                    />
+                    {errors.sku && <p className={styles.errorMessage}>{errors.sku.message}</p>}
+                  </dd>
+                ) : (
+                  <dd className={`${styles.fieldValue} ${styles.mono}`}>{product?.sku}</dd>
+                )}
+              </div>
+            )}
+
+            {/* Categoría */}
+            <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+              <dt className={styles.fieldLabel}>Categoría</dt>
+              {isFormActive ? (
+                <dd className={styles.fieldValueFull}>
+                  <ProductDropdown
+                    id="category"
+                    label="categoría"
+                    value={watch('category_id') || null}
+                    openDropdownId={openDropdownId}
+                    onOpenChange={setOpenDropdownId}
+                    fetchOptions={(search) =>
+                      inventoryApi.getCategories({ search: search || undefined, skip: 0, limit: 10 })
+                        .then(r => r.data.items || [])
+                    }
+                    onSelect={(opt) => setValue('category_id', opt.id, { shouldValidate: true })}
+                    onAddNew={() => setActiveModal('category')}
+                    initialOptions={categoryInitialOptions}
+                    error={errors.category_id?.message}
+                  />
+                </dd>
+              ) : (
+                <dd className={styles.fieldValue}>{product?.category?.name || '-'}</dd>
+              )}
+            </div>
+
+            {/* Marca */}
+            <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+              <dt className={styles.fieldLabel}>Marca</dt>
+              {isFormActive ? (
+                <dd className={styles.fieldValueFull}>
+                  <ProductDropdown
+                    id="brand"
+                    label="marca"
+                    value={watch('brand_id') || null}
+                    openDropdownId={openDropdownId}
+                    onOpenChange={setOpenDropdownId}
+                    fetchOptions={(search) =>
+                      inventoryApi.getBrands({ search: search || undefined, skip: 0, limit: 10 })
+                        .then(r => r.data.items || [])
+                    }
+                    onSelect={(opt) => setValue('brand_id', opt.id, { shouldValidate: true })}
+                    onAddNew={() => setActiveModal('brand')}
+                    initialOptions={brandInitialOptions}
+                    error={errors.brand_id?.message}
+                  />
+                </dd>
+              ) : (
+                <dd className={styles.fieldValue}>{product?.brand?.name || '-'}</dd>
+              )}
+            </div>
+
+            {/* Material */}
+            <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+              <dt className={styles.fieldLabel}>Material</dt>
+              {isFormActive ? (
+                <dd className={styles.fieldValueFull}>
+                  <ProductDropdown
+                    id="material"
+                    label="material"
+                    value={watch('material_id') || null}
+                    openDropdownId={openDropdownId}
+                    onOpenChange={setOpenDropdownId}
+                    fetchOptions={(search) =>
+                      inventoryApi.getMaterials({ search: search || undefined, skip: 0, limit: 10 })
+                        .then(r => r.data.items || [])
+                    }
+                    onSelect={(opt) => setValue('material_id', opt.id, { shouldValidate: true })}
+                    onAddNew={() => setActiveModal('material')}
+                    initialOptions={materialInitialOptions}
+                    error={errors.material_id?.message}
+                  />
+                </dd>
+              ) : (
+                <dd className={styles.fieldValue}>{product?.material?.name || '-'}</dd>
+              )}
+            </div>
+
+            <hr className={styles.fieldDivider} />
+
+            {/* Tamaño */}
+            <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+              <dt className={styles.fieldLabel}>Tamaño</dt>
+              {isFormActive ? (
+                <dd className={styles.fieldValueFull}>
+                  <input
+                    type="text"
+                    className={styles.inputField}
+                    placeholder="ej: 10, 5.5, 12 x 5"
+                    {...register('size_value')}
+                  />
+                </dd>
+              ) : (
+                <dd className={`${styles.fieldValue} ${styles.mono}`}>{product?.size_value || '-'}</dd>
+              )}
+            </div>
+
+            {/* Unidad de Medida */}
+            <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+              <dt className={styles.fieldLabel}>Unidad de Medida</dt>
+              {isFormActive ? (
+                <dd className={styles.fieldValueFull}>
+                  <ProductDropdown
+                    id="measurementUnit"
+                    label="unidad de medida"
+                    value={watch('measurement_unit_id') || null}
+                    openDropdownId={openDropdownId}
+                    onOpenChange={setOpenDropdownId}
+                    fetchOptions={(search) =>
+                      inventoryApi.getMeasurementUnits({ search: search || undefined, skip: 0, limit: 10 })
+                        .then(r => r.data.items || [])
+                    }
+                    onSelect={(opt) => setValue('measurement_unit_id', opt.id, { shouldValidate: true })}
+                    onAddNew={() => setActiveModal('measurementUnit')}
+                    formatLabel={(opt) => opt.abbreviation ? `${opt.abbreviation} — ${opt.name}` : opt.name}
+                    initialOptions={measurementUnitInitialOptions}
+                    error={errors.measurement_unit_id?.message}
+                  />
+                </dd>
+              ) : (
+                <dd className={styles.fieldValue}>
+                  {product?.measurement_unit
+                    ? `${product.measurement_unit.abbreviation} — ${product.measurement_unit.name}`
+                    : '-'}
+                </dd>
+              )}
+            </div>
+
+          </dl>
+        </section>
+
+        {/* Right column */}
+        <div className={styles.rightColumn}>
+          {/* Valores Económicos */}
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Valores Económicos</h2>
+            <dl className={styles.fieldList}>
+              <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+                <dt className={styles.fieldLabel}>Precio de Venta</dt>
+                {isFormActive ? (
+                  <dd className={styles.fieldValueFull}>
+                    <input
+                      type="number"
+                      className={styles.inputField}
+                      placeholder="0.00"
+                      step="0.01"
+                      {...register('price', { valueAsNumber: true })}
+                    />
+                    {errors.price && <p className={styles.errorMessage}>{errors.price.message}</p>}
+                  </dd>
+                ) : (
+                  <dd className={`${styles.fieldValue} ${styles.mono}`}>
+                    $ {(product?.price ?? 0).toFixed(2)}
+                  </dd>
+                )}
+              </div>
+
+              <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+                <dt className={styles.fieldLabel}>Costo</dt>
+                {isFormActive ? (
+                  <dd className={styles.fieldValueFull}>
+                    <input
+                      type="number"
+                      className={styles.inputField}
+                      placeholder="0.00"
+                      step="0.01"
+                      {...register('cost', { valueAsNumber: true })}
+                    />
+                    {errors.cost && <p className={styles.errorMessage}>{errors.cost.message}</p>}
+                  </dd>
+                ) : (
+                  <dd className={`${styles.fieldValue} ${styles.mono}`}>
+                    $ {(product?.cost ?? 0).toFixed(2)}
+                  </dd>
+                )}
+              </div>
+            </dl>
+          </section>
+
+          {/* Control de Stock */}
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Control de Stock</h2>
+            <dl className={styles.fieldList}>
+              <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+                <dt className={styles.fieldLabel}>
+                  {isCreateMode ? 'Cantidad Inicial' : 'Stock Actual'}
+                </dt>
+                {isFormActive ? (
+                  <dd className={styles.fieldValueFull}>
+                    <input
+                      type="number"
+                      className={styles.inputField}
+                      placeholder="0"
+                      {...register('stock_quantity', { valueAsNumber: true })}
+                    />
+                    {errors.stock_quantity && (
+                      <p className={styles.errorMessage}>{errors.stock_quantity.message}</p>
+                    )}
+                  </dd>
+                ) : (
+                  <dd className={`${styles.fieldValue} ${styles.mono} ${status === 'low_stock' || status === 'out_of_stock' ? styles.valueDanger : ''}`}>
+                    {stock}
+                  </dd>
+                )}
+              </div>
+
+              <div className={isFormActive ? styles.fieldRowEditing : styles.fieldRow}>
+                <dt className={styles.fieldLabel}>Cantidad Mínima</dt>
+                {isFormActive ? (
+                  <dd className={styles.fieldValueFull}>
+                    <input
+                      type="number"
+                      className={styles.inputField}
+                      placeholder="0"
+                      {...register('min_stock_quantity', { valueAsNumber: true })}
+                    />
+                    {errors.min_stock_quantity && (
+                      <p className={styles.errorMessage}>{errors.min_stock_quantity.message}</p>
+                    )}
+                  </dd>
+                ) : (
+                  <dd className={`${styles.fieldValue} ${styles.mono}`}>{threshold}</dd>
+                )}
+              </div>
+
+              {!isCreateMode && (
+                <div className={styles.fieldRow}>
+                  <dt className={styles.fieldLabel}>Disponibilidad</dt>
+                  <dd className={styles.fieldValue}>
+                    <span className={`badge ${statusMap[status]}`}>{statusLabel[status]}</span>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </section>
+        </div>
+      </div>
+
+      {activeModal && (
+        <CreateEntityModal
+          type={activeModal}
+          onClose={() => setActiveModal(null)}
+          onCreated={(entity) => handleEntityCreated(activeModal, entity)}
+        />
+      )}
+
+      {showDeleteModal && product && (
+        <ConfirmDeleteModal
+          productName={product.name}
+          onConfirm={handleDelete}
+          onClose={() => setShowDeleteModal(false)}
+        />
+      )}
+    </form>
+  )
+}

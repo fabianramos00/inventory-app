@@ -51,6 +51,15 @@ src/
 │   └── ModalContext.tsx      # Modal visibility state for backdrop blur (provides isModalOpen, openModal(), closeModal())
 ├── components/
 │   ├── PrivateRoute.tsx      # Route guard — redirects to /login if no token
+│   ├── ProductDropdown/      # Reusable debounced API dropdown for product form fields
+│   │   ├── ProductDropdown.tsx         # Component: openDropdownId, fetchOptions, onSelect, onAddNew props
+│   │   └── ProductDropdown.module.css  # Dropdown/spinner styles
+│   ├── CreateEntityModal/    # Generic portal modal for creating filter entities (category/brand/material/measurementUnit)
+│   │   ├── CreateEntityModal.tsx       # Component: type, onClose, onCreated props; calls API internally
+│   │   └── CreateEntityModal.module.css # Modal styles
+│   ├── ConfirmDeleteModal/   # Portal modal for confirming product deletion
+│   │   ├── ConfirmDeleteModal.tsx      # Component: productName, onConfirm (async), onClose props; handles isDeleting state + error display
+│   │   └── ConfirmDeleteModal.module.css # Modal styles with destructive button
 │   └── layout/
 │       ├── AppLayout.tsx     # Shell: Sidebar + mobile menu backdrop
 │       ├── Sidebar.tsx       # Responsive collapsible sidebar (232px expanded, 80px collapsed icon-only mode)
@@ -69,7 +78,9 @@ src/
     ├── Login/                # /login — split-panel layout + Login.module.css
     ├── Dashboard/            # / — KPI cards + Dashboard.module.css
     ├── Inventory/            # /inventory — product list + Inventory.module.css
-    ├── CreateProduct/        # /inventory/create — product creation form + CreateProduct.module.css
+    ├── ProductForm/          # /inventory/create + /inventory/product/:id — unified create/view/edit page
+    │   ├── ProductForm.tsx             # Mode detection: isCreateMode = !useParams().id
+    │   └── ProductForm.module.css      # Layout-only CSS (header, sectionsGrid, cards, field rows)
     ├── Providers/            # /providers + Providers.module.css
     ├── Sells/                # /sells + Sells.module.css
     ├── Orders/               # /orders + Orders.module.css
@@ -83,7 +94,8 @@ src/
 | `/login` | `Login` | Public |
 | `/` | `Dashboard` | Protected |
 | `/inventory` | `Inventory` | Protected |
-| `/inventory/create` | `CreateProduct` | Protected |
+| `/inventory/create` | `ProductForm` (create mode) | Protected |
+| `/inventory/product/:id` | `ProductForm` (view/edit mode) | Protected |
 | `/providers` | `Providers` | Protected |
 | `/sells` | `Sells` | Protected |
 | `/orders` | `Orders` | Protected |
@@ -295,21 +307,21 @@ Key interfaces: `User`, `Product`, `Category`, `Provider`, `Order`, `OrderItem`,
 ## Inventory API Endpoints (`src/lib/api/inventory.ts`)
 
 **Product Management:**
-- `getProducts(params?)` — `GET /inventory/variants` with pagination, search, filters
-- `getProduct(id)` — `GET /inventory/variants/{id}`
-- `createProduct(data: CreateProductInput)` — `POST /inventory/variants`
-- `updateProduct(id, data)` — `PUT /inventory/variants/{id}`
-- `deleteProduct(id)` — `DELETE /inventory/variants/{id}`
+- `getProducts(params?)` — `GET /inventory/products` with pagination, search, filters
+- `getProduct(id)` — `GET /inventory/products/{id}`
+- `createProduct(data: CreateProductInput)` — `POST /inventory/products`
+- `updateProduct(id, data)` — `PUT /inventory/products/{id}`
+- `deleteProduct(id)` — `DELETE /inventory/products/{id}`
 
 **Filter/Dropdown Data:**
 - `getCategories(params?)` — `GET /inventory/categories` → returns `PaginatedResponse<FilterOption>`
 - `getMaterials(params?)` — `GET /inventory/materials` → returns `PaginatedResponse<FilterOption>`
 - `getBrands(params?)` — `GET /inventory/brands` → returns `PaginatedResponse<FilterOption>`
-- `getSalesUnits(params?)` — `GET /inventory/sales-units` → returns `PaginatedResponse<FilterOption>`
-- `getSizeUnits(params?)` — `GET /inventory/size-units` → returns `PaginatedResponse<FilterOption>`
+- `getMeasurementUnits(params?)` — `GET /inventory/measurement-units` → returns `PaginatedResponse<FilterOption>`
+- `createMaterial/createCategory/createBrand/createMeasurementUnit` — POST endpoints for entity creation
 
 **Statistics:**
-- `getStats()` — `GET /inventory/variants/stats/overview` → returns stats (total variants, stock, low stock count, total value)
+- `getStats()` — `GET /inventory/products/stats/overview` → returns stats (total variants, stock, low stock count, total value)
 
 ## Path Alias
 

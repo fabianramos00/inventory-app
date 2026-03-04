@@ -11,7 +11,7 @@ export const inventoryApi = {
   createProduct: (data: CreateProductInput) =>
     api.post<Product>('/inventory/products', data),
 
-  updateProduct: (id: number, data: Partial<Product>) =>
+  updateProduct: (id: number, data: Partial<CreateProductInput>) =>
     api.put<Product>(`/inventory/products/${id}`, data),
 
   deleteProduct: (id: number) =>

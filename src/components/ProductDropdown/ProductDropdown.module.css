@@ -1,0 +1,158 @@
+.container {
+  position: relative;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dropdownButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  padding: 10px 12px;
+  background-color: var(--control-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--ink-1);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.dropdownButton:hover {
+  border-color: var(--border-strong);
+}
+
+.dropdownButton:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.1);
+}
+
+.dropdownButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--accent-fg);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  min-width: 44px;
+}
+
+.addButton:hover {
+  background: var(--accent-hover);
+}
+
+.addButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.dropdownSearch {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--control-bg);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  font-size: 13px;
+  color: var(--ink-1);
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.dropdownSearch::placeholder {
+  color: var(--ink-3);
+}
+
+.dropdownSearch:focus {
+  border-bottom-color: var(--accent);
+}
+
+.dropdownLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--accent);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.dropdownEmpty {
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.dropdownOption {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  color: var(--ink-1);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  font-family: inherit;
+}
+
+.dropdownOption:hover {
+  background-color: var(--surface-2);
+}
+
+.dropdownOptionActive {
+  background-color: rgba(250, 204, 21, 0.12);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: var(--destructive);
+  margin: 4px 0 0;
+}

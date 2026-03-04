@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '@/context/AuthContext'
 import { authApi } from '@/lib/api/auth'
-import type { User } from '@/types'
 import styles from './Login.module.css'
 
 const loginSchema = z.object({
@@ -43,7 +42,7 @@ export default function Login() {
     setLoading(true)
     try {
       const res = await authApi.login({ email: data.email, password: data.password })
-      login(res.data.access_token, res.data.user)
+      login(res.data.access_token, null)
       navigate('/', { replace: true })
     } catch {
       setApiError('Correo o contraseña incorrectos.')

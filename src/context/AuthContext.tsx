@@ -4,7 +4,7 @@ import type { User } from '@/types'
 interface AuthContextValue {
   token: string | null
   user: User | null
-  login: (token: string, user: User) => void
+  login: (token: string, user: User | null) => void
   logout: () => void
   isAuthenticated: boolean
 }
@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return raw ? (JSON.parse(raw) as User) : null
   })
 
-  const login = useCallback((newToken: string, newUser: User) => {
+  const login = useCallback((newToken: string, newUser: User | null) => {
     localStorage.setItem('token', newToken)
     localStorage.setItem('user', JSON.stringify(newUser))
     setToken(newToken)

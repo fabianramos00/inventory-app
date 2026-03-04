@@ -35,6 +35,15 @@ export interface Product {
   unit: string
   price: number
   is_active: boolean
+  // Extended fields returned by the API
+  stock_quantity?: number
+  low_stock_threshold?: number
+  size_value?: string | null
+  measurement_unit?: { id: number; name: string; abbreviation: string } | null
+  material?: { id: number; name: string } | null
+  brand?: { id: number; name: string } | null
+  cost?: number
+  sale_price?: number
 }
 
 // ─── Provider / Supplier ─────────────────────────────────────────────────────
@@ -85,7 +94,7 @@ export interface Sale {
   items: SaleItem[]
   total: number
   created_at: string
-  created_by: Pick<User, 'id' | 'name'>
+  created_by: Pick<User, 'id' | 'full_name'>
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
@@ -107,6 +116,7 @@ export interface FilterOption {
 // ─── Product Creation Form ────────────────────────────────────────────────────
 export interface CreateProductInput {
   name: string
+  sku?: string
   brand_id: number
   category_id: number
   material_id: number
