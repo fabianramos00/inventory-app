@@ -58,24 +58,35 @@ export interface Provider {
 }
 
 // ─── Order ───────────────────────────────────────────────────────────────────
-export type OrderStatus = 'PENDIENTE' | 'RECIBIDO' | 'CANCELADO'
+export type OrderStatus = 'pending' | 'sent' | 'received' | 'cancelled'
+export type OrderPaymentStatus = 'pending' | 'paid'
 
 export interface OrderItem {
   id: number
-  product: Product
+  order_id: number
+  product_id: number
   quantity: number
   unit_cost: number
   subtotal: number
+  supplier_sku: string | null
+  product_name: string
+  product_sku: string
 }
 
 export interface Order {
   id: number
-  code: string
-  provider: Provider
+  provider_id: number
   status: OrderStatus
-  items: OrderItem[]
+  payment_status: OrderPaymentStatus
+  order_date: string
   total_amount: number
-  created_at: string
+  provider: {
+    id: number
+    name: string
+    contact_info: string | null
+    email: string | null
+    phone: string | null
+  }
 }
 
 // ─── Sale ────────────────────────────────────────────────────────────────────
@@ -148,6 +159,19 @@ export interface CreateSaleInput {
     quantity: number
     delivered_quantity: number
     unit_price: number | null
+  }[]
+}
+
+// ─── Order Creation Form ──────────────────────────────────────────────────────
+export interface CreateOrderInput {
+  provider_id: number
+  status: OrderStatus
+  payment_status: OrderPaymentStatus
+  items: {
+    product_id: number
+    quantity: number
+    unit_cost: number
+    supplier_sku?: string
   }[]
 }
 

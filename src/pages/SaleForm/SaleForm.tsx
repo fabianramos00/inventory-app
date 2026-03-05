@@ -59,7 +59,8 @@ export default function SaleForm() {
   const [pageLoading, setPageLoading] = useState(!isCreateMode)
 
   // View mode edit/delete
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditingItems, setIsEditingItems] = useState(false)
+  const [isEditingDetails, setIsEditingDetails] = useState(false)
   const [editingItems, setEditingItems] = useState<{ id: number; quantity: string; delivered_quantity: string; unit_price: string }[]>([])
   const [pendingItems, setPendingItems] = useState<{
     product_id: number; product_name: string; product_sku: string
@@ -67,6 +68,8 @@ export default function SaleForm() {
     quantity: string; delivered_quantity: string; unit_price: string
   }[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [savingItemId, setSavingItemId] = useState<number | null>(null)
+  const [deletingItemId, setDeletingItemId] = useState<number | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [editPaymentMethod, setEditPaymentMethod] = useState<string>('')
   const [editAmountPaid, setEditAmountPaid] = useState('0')
@@ -132,32 +135,41 @@ export default function SaleForm() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  function handleStartEdit() {
+  function handleStartEditItems() {
     if (!sale) return
-    setEditPaymentMethod(sale.payment_method ?? '')
-    setEditAmountPaid(String(sale.amount_paid))
-    setEditClientId(sale.client?.id ?? '')
-    if (sale.client) setEditClientOptions([sale.client])
     setEditingItems(saleItems.map(item => ({
       id: item.id,
       quantity: String(item.quantity),
       delivered_quantity: String(item.delivered_quantity),
       unit_price: String(item.unit_price),
     })))
-    setIsEditing(true)
+    setIsEditingItems(true)
   }
 
-  function handleCancelEdit() {
-    setIsEditing(false)
-    setEditOpenDropdown(null)
-    setEditClientOpen(false)
+  function handleCancelEditItems() {
+    setIsEditingItems(false)
     setEditingItems([])
     setPendingItems([])
     setProductSearch('')
     setProductSearchOpen(false)
   }
 
-  async function handleSaveEdit() {
+  function handleStartEditDetails() {
+    if (!sale) return
+    setEditPaymentMethod(sale.payment_method ?? '')
+    setEditAmountPaid(String(sale.amount_paid))
+    setEditClientId(sale.client?.id ?? '')
+    if (sale.client) setEditClientOptions([sale.client])
+    setIsEditingDetails(true)
+  }
+
+  function handleCancelEditDetails() {
+    setIsEditingDetails(false)
+    setEditOpenDropdown(null)
+    setEditClientOpen(false)
+  }
+
+  async function handleSaveDetails() {
     if (!sale) return
     setIsSaving(true)
     try {
@@ -167,7 +179,7 @@ export default function SaleForm() {
         client_id: editClientId || null,
       })
       setSale(res.data)
-      setIsEditing(false)
+      setIsEditingDetails(false)
     } catch {
       // keep editing so user can retry
     } finally {
@@ -189,26 +201,42 @@ export default function SaleForm() {
     if (!sale) return
     const editItem = editingItems.find(e => e.id === itemId)
     if (!editItem) return
+    setSavingItemId(itemId)
     try {
       const res = await salesApi.updateSaleItem(sale.id, itemId, {
         quantity: parseFloat(editItem.quantity) || 1,
         delivered_quantity: parseFloat(editItem.delivered_quantity) || 0,
         unit_price: editItem.unit_price !== '' ? parseFloat(editItem.unit_price) || null : null,
       })
-      setSaleItems(prev => prev.map(item => item.id === itemId ? { ...item, ...res.data } : item))
+      setSale(res.data)
+      const qty = parseFloat(editItem.quantity) || 1
+      const price = editItem.unit_price !== '' ? parseFloat(editItem.unit_price) || 0 : 0
+      setSaleItems(prev => prev.map(item => item.id === itemId ? {
+        ...item,
+        quantity: qty,
+        delivered_quantity: parseFloat(editItem.delivered_quantity) || 0,
+        unit_price: price,
+        subtotal: qty * price,
+      } : item))
     } catch {
       // keep editing
+    } finally {
+      setSavingItemId(null)
     }
   }
 
   async function handleDeleteItem(itemId: number) {
     if (!sale) return
+    setDeletingItemId(itemId)
     try {
-      await salesApi.deleteSaleItem(sale.id, itemId)
+      const res = await salesApi.deleteSaleItem(sale.id, itemId)
+      setSale(res.data)
       setSaleItems(prev => prev.filter(item => item.id !== itemId))
       setEditingItems(prev => prev.filter(e => e.id !== itemId))
     } catch {
       // keep item
+    } finally {
+      setDeletingItemId(null)
     }
   }
 
@@ -250,18 +278,24 @@ export default function SaleForm() {
         delivered_quantity: parseFloat(pending.delivered_quantity) || 0,
         unit_price: pending.unit_price !== '' ? parseFloat(pending.unit_price) || null : null,
       })
-      setSaleItems(prev => [...prev, {
-        ...res.data,
-        product_category: pending.product_category,
-        product_brand: pending.product_brand,
-        product_material: pending.product_material,
-      }])
-      setEditingItems(prev => [...prev, {
-        id: res.data.id,
-        quantity: pending.quantity,
-        delivered_quantity: pending.delivered_quantity,
-        unit_price: pending.unit_price,
-      }])
+      setSale(res.data)
+      const itemsRes = await salesApi.getSaleItems(sale.id, { skip: 0, limit: 100 })
+      const freshItems = itemsRes.data.items.map(item => ({
+        ...item,
+        product_category: item.category_name ?? '',
+        product_brand: item.brand_name ?? '',
+        product_material: item.material_name ?? '',
+      }))
+      setSaleItems(freshItems)
+      const newItem = freshItems.find(i => i.product_id === productId)
+      if (newItem) {
+        setEditingItems(prev => [...prev, {
+          id: newItem.id,
+          quantity: pending.quantity,
+          delivered_quantity: pending.delivered_quantity,
+          unit_price: pending.unit_price,
+        }])
+      }
       setPendingItems(prev => prev.filter(p => p.product_id !== productId))
     } catch {
       // keep pending so user can retry
@@ -466,7 +500,7 @@ export default function SaleForm() {
     return Number.isFinite(n) ? n : fallback
   }
 
-  const displayTotal = isEditing
+  const displayTotal = isEditingItems
     ? saleItems.reduce((sum, item) => {
         const ei = editingItems.find(e => e.id === item.id)
         const price = ei ? parseNum(ei.unit_price, item.unit_price) : item.unit_price
@@ -478,9 +512,7 @@ export default function SaleForm() {
       }, 0)
     : sale?.total_amount ?? 0
 
-  const displayDebt = isEditing
-    ? displayTotal - parseNum(editAmountPaid, 0)
-    : sale?.debt_amount ?? 0
+  const displayDebt = displayTotal - (isEditingDetails ? parseNum(editAmountPaid, 0) : sale?.amount_paid ?? 0)
 
   if (!isCreateMode) {
     if (pageLoading || !sale) {
@@ -511,41 +543,33 @@ export default function SaleForm() {
             </h1>
           </div>
           <div className={styles.headerActions}>
-            {isEditing ? (
-              <>
-                <button type="button" onClick={handleCancelEdit} className={styles.cancelButton}>
-                  <X size={15} />
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveEdit}
-                  disabled={isSaving || parseNum(editAmountPaid, 0) > displayTotal || editingItems.some(ei => parseNum(ei.delivered_quantity, 0) > parseNum(ei.quantity, Infinity))}
-                  className={styles.saveButton}
-                >
-                  {isSaving ? <><Loader size={15} className={styles.spinner} /> Guardando...</> : <><Check size={15} /> Guardar</>}
-                </button>
-              </>
-            ) : (
-              <>
-                <button type="button" onClick={() => setShowDeleteModal(true)} className={styles.deleteButton}>
-                  <Trash2 size={15} />
-                  Eliminar
-                </button>
-                <button type="button" onClick={handleStartEdit} className={styles.editButton}>
-                  <Pencil size={15} />
-                  Editar
-                </button>
-              </>
-            )}
+            <button type="button" onClick={() => setShowDeleteModal(true)} className={styles.deleteButton}>
+              <Trash2 size={15} />
+              Eliminar
+            </button>
           </div>
         </div>
 
         <div className={styles.sectionsGrid}>
           <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Productos</h2>
+            <div className={styles.cardHeader}>
+              <h2 className={styles.cardTitle}>Productos</h2>
+              <div className={styles.cardActions}>
+                {isEditingItems ? (
+                  <button type="button" onClick={handleCancelEditItems} className={styles.cancelButton}>
+                    <X size={15} />
+                    Cancelar
+                  </button>
+                ) : (
+                  <button type="button" onClick={handleStartEditItems} className={styles.editButton}>
+                    <Pencil size={15} />
+                    Editar
+                  </button>
+                )}
+              </div>
+            </div>
 
-            {isEditing && (
+            {isEditingItems && (
               <div className={styles.productSearchWrapper} ref={productSearchRef}>
                 <div className={styles.productSearchField}>
                   <Search size={14} className={styles.searchIcon} />
@@ -604,7 +628,7 @@ export default function SaleForm() {
             ) : (
               <div className={styles.itemsList}>
                 {saleItems.map(item => {
-                  if (isEditing) {
+                  if (isEditingItems) {
                     const editItem = editingItems.find(e => e.id === item.id)
                     if (!editItem) return null
                     return (
@@ -622,11 +646,27 @@ export default function SaleForm() {
                             </div>
                           </div>
                           <div className={styles.itemEditActions}>
-                            <button type="button" className={styles.itemSaveBtn} onClick={() => handleSaveItemField(item.id)} title="Guardar cambios">
-                              <Check size={13} />
+                            <button
+                              type="button"
+                              className={styles.itemSaveBtn}
+                              onClick={() => handleSaveItemField(item.id)}
+                              disabled={savingItemId === item.id || deletingItemId === item.id}
+                              title="Guardar cambios"
+                            >
+                              {savingItemId === item.id
+                                ? <Loader size={13} className={styles.spinner} />
+                                : <Check size={13} />}
                             </button>
-                            <button type="button" className={styles.removeBtn} onClick={() => handleDeleteItem(item.id)} title="Eliminar ítem">
-                              <X size={14} />
+                            <button
+                              type="button"
+                              className={styles.removeBtn}
+                              onClick={() => handleDeleteItem(item.id)}
+                              disabled={deletingItemId === item.id || savingItemId === item.id}
+                              title="Eliminar ítem"
+                            >
+                              {deletingItemId === item.id
+                                ? <Loader size={13} className={styles.spinner} />
+                                : <X size={14} />}
                             </button>
                           </div>
                         </div>
@@ -639,7 +679,6 @@ export default function SaleForm() {
                               min={1}
                               value={editItem.quantity}
                               onChange={e => updateEditingItem(item.id, 'quantity', e.target.value)}
-                              onBlur={() => handleSaveItemField(item.id)}
                             />
                           </div>
                           <div className={styles.itemField}>
@@ -650,7 +689,6 @@ export default function SaleForm() {
                               min={0}
                               value={editItem.delivered_quantity}
                               onChange={e => updateEditingItem(item.id, 'delivered_quantity', e.target.value)}
-                              onBlur={() => handleSaveItemField(item.id)}
                             />
                             {parseNum(editItem.delivered_quantity, 0) > parseNum(editItem.quantity, Infinity) && (
                               <span className={styles.fieldError}>máx. {editItem.quantity}</span>
@@ -665,7 +703,6 @@ export default function SaleForm() {
                               step="0.01"
                               value={editItem.unit_price}
                               onChange={e => updateEditingItem(item.id, 'unit_price', e.target.value)}
-                              onBlur={() => handleSaveItemField(item.id)}
                             />
                           </div>
                         </div>
@@ -708,7 +745,7 @@ export default function SaleForm() {
                     </div>
                   )
                 })}
-                {isEditing && pendingItems.map(pending => (
+                {isEditingItems && pendingItems.map(pending => (
                   <div key={pending.product_id} className={`${styles.itemCard} ${styles.itemCardPending}`}>
                     <div className={styles.itemHeader}>
                       <div className={styles.itemIdentity}>
@@ -793,13 +830,38 @@ export default function SaleForm() {
             </section>
 
             <section className={styles.card}>
-              <h2 className={styles.cardTitle}>Detalles de Venta</h2>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Detalles de Venta</h2>
+                <div className={styles.cardActions}>
+                  {isEditingDetails ? (
+                    <>
+                      <button type="button" onClick={handleCancelEditDetails} className={styles.cancelButton}>
+                        <X size={15} />
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveDetails}
+                        disabled={isSaving || parseNum(editAmountPaid, 0) > displayTotal}
+                        className={styles.saveButton}
+                      >
+                        {isSaving ? <><Loader size={15} className={styles.spinner} /> Guardando...</> : <><Check size={15} /> Guardar</>}
+                      </button>
+                    </>
+                  ) : (
+                    <button type="button" onClick={handleStartEditDetails} className={styles.editButton}>
+                      <Pencil size={15} />
+                      Editar
+                    </button>
+                  )}
+                </div>
+              </div>
               <dl className={styles.fieldList}>
 
                 {/* Cliente */}
-                <div className={isEditing ? styles.fieldRowEditing : styles.fieldRow}>
+                <div className={isEditingDetails ? styles.fieldRowEditing : styles.fieldRow}>
                   <dt className={styles.fieldLabel}>Cliente</dt>
-                  {isEditing ? (
+                  {isEditingDetails ? (
                     <dd className={styles.fieldValueFull}>
                       <div className={styles.selectDropdown} ref={editClientRef}>
                         <button
@@ -851,9 +913,9 @@ export default function SaleForm() {
                 </div>
 
                 {/* Método pago */}
-                <div className={isEditing ? styles.fieldRowEditing : styles.fieldRow}>
+                <div className={isEditingDetails ? styles.fieldRowEditing : styles.fieldRow}>
                   <dt className={styles.fieldLabel}>Método pago</dt>
-                  {isEditing ? (
+                  {isEditingDetails ? (
                     <dd className={styles.fieldValueFull}>
                       <div className={styles.selectDropdown} ref={editPaymentMethodRef}>
                         <button
@@ -883,9 +945,9 @@ export default function SaleForm() {
                 </div>
 
                 {/* Monto pagado */}
-                <div className={isEditing ? styles.fieldRowEditing : styles.fieldRow}>
+                <div className={isEditingDetails ? styles.fieldRowEditing : styles.fieldRow}>
                   <dt className={styles.fieldLabel}>Monto pagado</dt>
-                  {isEditing ? (
+                  {isEditingDetails ? (
                     <dd className={styles.fieldValueFull}>
                       <input
                         type="number"

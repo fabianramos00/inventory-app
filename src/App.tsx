@@ -11,6 +11,7 @@ import Providers from '@/pages/Providers/Providers'
 import Sales from './pages/Sales/Sales'
 import SaleForm from './pages/SaleForm/SaleForm'
 import Orders from './pages/Orders/Orders'
+import OrderForm from './pages/OrderForm/OrderForm'
 import Users from './pages/Users/Users'
 
 export default function App() {
@@ -34,6 +35,8 @@ export default function App() {
                 <Route path="/sales/create" element={<SaleForm />} />
                 <Route path="/sales/:id" element={<SaleForm />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/orders/create" element={<OrderForm />} />
+                <Route path="/orders/:id" element={<OrderForm />} />
                 <Route path="/users" element={<Users />} />
               </Route>
             </Route>

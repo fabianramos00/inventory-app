@@ -801,3 +801,8 @@
   color: var(--accent);
   font-weight: 500;
 }
+
+.emptyFieldValue {
+  color: var(--ink-3);
+  font-style: italic;
+}

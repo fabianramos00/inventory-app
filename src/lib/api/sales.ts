@@ -40,14 +40,14 @@ export const salesApi = {
     api.delete(`/sales/${id}`),
 
   updateSale: (id: number, data: { payment_method?: PaymentMethod; amount_paid?: number; client_id?: number | null }) =>
-    api.patch<Sale>(`/sales/${id}`, data),
+    api.put<Sale>(`/sales/${id}`, data),
 
   addSaleItem: (saleId: number, data: { product_id: number; quantity: number; delivered_quantity: number; unit_price?: number | null }) =>
-    api.post<SaleItem>(`/sales/${saleId}/items`, data),
+    api.post<Sale>(`/sales/${saleId}/items`, data),
 
   updateSaleItem: (saleId: number, itemId: number, data: { quantity?: number; delivered_quantity?: number; unit_price?: number | null }) =>
-    api.put<SaleItem>(`/sales/${saleId}/items/${itemId}`, data),
+    api.put<Sale>(`/sales/${saleId}/items/${itemId}`, data),
 
   deleteSaleItem: (saleId: number, itemId: number) =>
-    api.delete(`/sales/${saleId}/items/${itemId}`),
+    api.delete<Sale>(`/sales/${saleId}/items/${itemId}`),
 }

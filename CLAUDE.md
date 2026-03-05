@@ -87,6 +87,9 @@ src/
     ├── Sales/                # /sales + Sales.module.css
     ├── SaleForm/             # /sales/create + /sales/:id — unified create/view/edit page + SaleForm.module.css
     ├── Orders/               # /orders + Orders.module.css
+    ├── OrderForm/            # /orders/create + /orders/:id — unified create/view/edit page + OrderForm.module.css
+    │   ├── OrderForm.tsx             # Mode detection: isCreateMode = !useParams().id
+    │   └── OrderForm.module.css      # Copy of SaleForm.module.css + .emptyFieldValue class
     └── Users/                # /users + Users.module.css
 ```
 
@@ -104,6 +107,8 @@ src/
 | `/sales/create` | `SaleForm` (create mode) | Protected |
 | `/sales/:id` | `SaleForm` (view/edit mode) | Protected |
 | `/orders` | `Orders` | Protected |
+| `/orders/create` | `OrderForm` (create mode) | Protected |
+| `/orders/:id` | `OrderForm` (view/edit mode) | Protected |
 | `/users` | `Users` | Protected |
 
 All protected routes live inside `<PrivateRoute>` → `<AppLayout>`.
@@ -313,11 +318,24 @@ Extended in `tailwind.config.js`:
 
 ## TypeScript Types (`src/types/index.ts`)
 
-Key interfaces: `User`, `Product`, `Category`, `Provider`, `Order`, `OrderItem`, `Sale`, `SaleItem`, `CreateSaleInput`, `PaginatedResponse<T>`, `CursorPaginatedResponse<T>`, `LoginPayload`, `AuthResponse`, `FilterOption`, `CreateProductInput`.
+Key interfaces: `User`, `Product`, `Category`, `Provider`, `Order`, `OrderItem`, `Sale`, `SaleItem`, `CreateSaleInput`, `CreateOrderInput`, `PaginatedResponse<T>`, `CursorPaginatedResponse<T>`, `LoginPayload`, `AuthResponse`, `FilterOption`, `CreateProductInput`.
 
 **Pagination types:**
-- `PaginatedResponse<T>` — `{ items, total, page, size, pages }` — used by inventory/users endpoints
-- `CursorPaginatedResponse<T>` — `{ items, has_next, skip, limit }` — used by sales endpoints
+- `PaginatedResponse<T>` — `{ items, total, page, size, pages }` — used by inventory/users/providers endpoints
+- `CursorPaginatedResponse<T>` — `{ items, has_next, skip, limit }` — used by sales and orders endpoints
+
+**Order type** matches actual API shape:
+- `id`, `provider_id`, `status: OrderStatus`, `payment_status: OrderPaymentStatus`, `order_date`, `total_amount`
+- `provider: { id, name, contact_info, email, phone }`
+- `OrderStatus` — `'pending' | 'sent' | 'received' | 'cancelled'`
+- `OrderPaymentStatus` — `'pending' | 'paid'`
+
+**OrderItem type** matches actual API shape:
+- `id`, `order_id`, `product_id`, `quantity`, `unit_cost`, `subtotal`
+- `supplier_sku: string | null`, `product_name: string`, `product_sku: string`
+
+**CreateOrderInput:**
+- `provider_id`, `status`, `payment_status`, `items: [{ product_id, quantity, unit_cost, supplier_sku? }]`
 
 **Sale type** matches actual API shape:
 - `id`, `total_amount`, `debt_amount`, `amount_paid`, `client_id`
@@ -338,9 +356,9 @@ Key interfaces: `User`, `Product`, `Category`, `Provider`, `Order`, `OrderItem`,
 - `createSale(data)` — `POST /sales`
 - `updateSale(id, data)` — `PATCH /sales/{id}` — fields: `payment_method?`, `amount_paid?`, `client_id?`
 - `deleteSale(id)` — `DELETE /sales/{id}`
-- `addSaleItem(saleId, data)` — `POST /sales/{id}/items` — fields: `product_id`, `quantity`, `delivered_quantity`, `unit_price?`
-- `updateSaleItem(saleId, itemId, data)` — `PUT /sales/{id}/items/{itemId}` — fields: `quantity?`, `delivered_quantity?`, `unit_price?`
-- `deleteSaleItem(saleId, itemId)` — `DELETE /sales/{id}/items/{itemId}`
+- `addSaleItem(saleId, data)` — `POST /sales/{id}/items` — returns `Sale`; fields: `product_id`, `quantity`, `delivered_quantity`, `unit_price?`
+- `updateSaleItem(saleId, itemId, data)` — `PUT /sales/{id}/items/{itemId}` — returns `Sale`; fields: `quantity?`, `delivered_quantity?`, `unit_price?`
+- `deleteSaleItem(saleId, itemId)` — `DELETE /sales/{id}/items/{itemId}` — returns `Sale`
 
 ## SaleForm Page (`/sales/create` & `/sales/:id`)
 
@@ -359,15 +377,18 @@ Mode detection: `const isCreateMode = !useParams().id`
 
 ### View/Edit mode (`/sales/:id`)
 - Loads sale via `salesApi.getSale(id)` + items via `salesApi.getSaleItems(id)` in parallel on mount
-- **View mode header:** Eliminar (ghost destructive, opens `ConfirmDeleteModal`) + Editar (dark filled) buttons
-- **Edit mode header:** Cancelar + Guardar buttons; Guardar disabled while live validation errors exist
-- **Editable fields (edit mode):** Cliente, Método pago, Monto pagado — same dropdown pattern as create
-- **Items in edit mode:**
-  - Product search at top of Productos card (same debounced search) → selecting adds a **draft card** (dashed grey left border, no API call yet)
-  - Draft cards have pre-filled inputs + green checkmark (POST to save) + X (discard)
-  - Saved item cards show editable inputs with green checkmark (PUT on click) + X (DELETE)
-  - Live validation: `delivered_quantity ≤ quantity` per item; `amount_paid ≤ total`
-- **Resumen card (edit mode):** Total and Deuda computed locally from current `editingItems` + `pendingItems` state — updates live as inputs change
+- **Page header:** Only "Eliminar" button (opens `ConfirmDeleteModal`). No global edit mode.
+- **Productos card (scoped edit):** "Editar/Cancelar" button in card header activates item editing independently
+  - Edit mode: product search at top; each saved item shows editable inputs + ✓ (PUT) + ✗ (DELETE) with individual loading spinners (`savingItemId`, `deletingItemId`)
+  - New items: selecting from search adds a draft card (POST on ✓, discard on ✗); after POST, items list is re-fetched to get server-assigned id
+  - Live validation: `delivered_quantity ≤ quantity` per item
+- **Detalles de Venta card (scoped edit):** "Editar/Guardar/Cancelar" in card header, independent of items
+  - Editable: Cliente, Método pago, Monto pagado
+  - Live validation: `amount_paid ≤ total`
+  - Saves via `PATCH /sales/{id}`
+- **Two independent edit states:** `isEditingItems: boolean` and `isEditingDetails: boolean` (both can be active simultaneously)
+- **Resumen card:** Total updates live when `isEditingItems`; Debt = `displayTotal − (isEditingDetails ? editAmountPaid : sale.amount_paid)`
+- **CSS pattern:** `.cardHeader` (flex row + border-bottom) + `.cardActions` (flex row for buttons) in `SaleForm.module.css` — used whenever a card needs an inline action button next to its title
 - **Form dropdowns pattern** (`selectDropdown` in SaleForm.module.css): `border: 1px solid var(--border-strong)`, `border-radius: 4px`, height `40px`. Active: `box-shadow: inset 0 -2px 0 var(--accent)`.
 
 ### Sales table (Sales.tsx)
@@ -388,6 +409,59 @@ Mode detection: `const isCreateMode = !useParams().id`
 - **Table columns:** Código, Cliente, Total, Pagado, Deuda, Pago (badge), Entrega (badge), Usuario, Fecha, Ver
 - **Badges:** Defined as local CSS module classes (`.badge--success`, `.badge--warning`, `.badge--destructive`) referenced via `styles[key]`
 - **Pagination:** `has_next`-based prev/next buttons (no total count)
+
+## Orders API Endpoints (`src/lib/api/orders.ts`)
+
+- `getOrders(params?)` — `GET /supply-chain/purchase-orders` → `CursorPaginatedResponse<Order>`
+  - Params: `skip`, `limit`, `provider_id`, `payment_status`, `status`, `min_date`, `max_date`
+- `getOrder(id)` — `GET /supply-chain/purchase-orders/{id}`
+- `getOrderItems(id, params?)` — `GET /supply-chain/purchase-orders/{id}/items` → `CursorPaginatedResponse<OrderItem>`
+- `createOrder(data: CreateOrderInput)` — `POST /supply-chain/purchase-orders`
+- `updateOrder(id, data)` — `PATCH /supply-chain/purchase-orders/{id}` — fields: `provider_id?`, `status?`, `payment_status?`
+- `addOrderItem(orderId, data)` — `POST /supply-chain/purchase-orders/{id}/items` — returns `Order`; fields: `product_id`, `quantity`, `unit_cost`, `supplier_sku?`
+- `updateOrderItem(orderId, itemId, data)` — `PUT /supply-chain/purchase-orders/{id}/items/{itemId}` — returns `Order`; fields: `quantity?`, `unit_cost?`, `supplier_sku?`
+- `deleteOrderItem(orderId, itemId)` — `DELETE /supply-chain/purchase-orders/{id}/items/{itemId}` — returns `Order`
+- `deleteOrder(id)` — `DELETE /supply-chain/purchase-orders/{id}`
+
+## OrderForm Page (`/orders/create` & `/orders/:id`)
+
+Mode detection: `const isCreateMode = !useParams().id`
+
+### Create mode (`/orders/create`)
+- **Breadcrumb:** `PED / Nuevo Pedido`
+- **Layout:** 2-column grid (`3fr 2fr`) — items on left, summary + details on right
+- **Product search:** Debounced (300ms) → `inventoryApi.getProducts()`. Pre-fills `unit_cost` from `product.cost`.
+- **Item cards:** Yellow left-border accent. Shows product name, SKU badge, category/brand/material tags. Three inputs: Cantidad, Costo unit., SKU prov. (optional text field).
+- **Right panel:**
+  - Resumen card: item count + estimated total cost
+  - Detalles card: Proveedor (required, debounced API dropdown from `providersApi.getProviders()`), Estado, Estado pago — all using `selectDropdown`/`selectTrigger`/`selectContent` pattern
+- **Validation:** Provider required, at least one item, quantity > 0
+- **Payload:** `POST /supply-chain/purchase-orders` via `ordersApi.createOrder(CreateOrderInput)`. On success → navigates to `/orders`.
+
+### View/Edit mode (`/orders/:id`)
+- Loads order via `ordersApi.getOrder(id)` + items via `ordersApi.getOrderItems(id)` in parallel on mount
+- **Page header:** Only "Eliminar" button (opens `ConfirmDeleteModal`). No global edit mode.
+- **Productos card (scoped edit):** Same pattern as SaleForm — Editar/Cancelar activates product search + per-item controls
+  - Edit mode: each item shows Cantidad, Costo unit., SKU prov. inputs + ✓ (PUT) + ✗ (DELETE)
+  - New items: draft card (POST on ✓, discard on ✗); after POST, items re-fetched
+- **Detalles del Pedido card (scoped edit):** Editar/Guardar/Cancelar, independent of items
+  - Editable: Proveedor, Estado, Estado pago via `PATCH /supply-chain/purchase-orders/{id}`
+- **View item fields:** Cantidad, Costo unit., SKU prov. (shows `—` if null), Subtotal
+- **CSS:** Uses `OrderForm.module.css` (copy of `SaleForm.module.css`) + `.emptyFieldValue` for null supplier_sku display
+
+## Orders Page Layout (`/orders`)
+
+- **Breadcrumb:** `PED / Registro`
+- **No KPI strip** — no stats endpoint
+- **Command Bar filters:**
+  - **Proveedor** — debounced API dropdown from `providersApi.getProviders()`, sends `provider_id`
+  - **Estado pago** — static: `pending`, `paid` → sends `payment_status`
+  - **Estado** — static: `pending`, `sent`, `received`, `cancelled` → sends `status`
+  - **Fecha inicio / Fecha fin** — `<input type="date">` → sends `min_date` / `max_date`
+- **Table columns:** ID, Proveedor, Total, Fecha, Estado, Pago, (Eye + Trash buttons)
+- **Status badges:** `pending/sent` → warning, `received` → success, `cancelled` → destructive
+- **Payment status badges:** `pending` → destructive, `paid` → success
+- **Pagination:** `has_next`-based prev/next
 
 ## Inventory API Endpoints (`src/lib/api/inventory.ts`)
 
@@ -433,15 +507,16 @@ Mode detection: `const isCreateMode = !useParams().id`
   - Present options and get user approval before writing code
   - Document the plan in comments before implementation
   - This prevents rework and ensures alignment on approach
-- **ALWAYS update `CLAUDE.md` on breaking changes or structural updates:**
-  - New component files or directories added
-  - Major component behavior changes (e.g., collapsible sidebar)
-  - New state management patterns
-  - Font, color, or design system changes
-  - New CSS modules or styling patterns
-  - localStorage keys or persistent state changes
-  - Route additions/removals
-  - API endpoint structure changes
-  - Dependencies added/removed/upgraded
-  - **Update Section:** Identify which CLAUDE.md section(s) need updates (Project Structure, Sidebar Behavior, Tailwind Config, Design System, etc.) and keep documentation in sync with actual code.
+- **ALWAYS update `CLAUDE.md` immediately after any breaking change or structural update — no exceptions:**
+  - New pages, components, or directories added → update Project Structure + Routes
+  - TypeScript type changes (new interfaces, renamed fields, updated shapes) → update TypeScript Types section
+  - New or changed API endpoints → update the relevant API Endpoints section
+  - New page documented behavior → add a dedicated section (e.g., "OrderForm Page")
+  - Major component behavior changes → update or add the relevant section
+  - New state management patterns, CSS modules, or styling conventions → document them
+  - localStorage keys or persistent state changes → update Sidebar Behavior or relevant section
+  - Route additions/removals → update Routes table
+  - Dependencies added/removed/upgraded → update Tech Stack table
+  - **This rule applies to every single task, not just "big" ones.** If you add a route, update the routes table. If you change a type, update the types section. If you add a page, document it. CLAUDE.md is the single source of truth — future sessions depend on it being accurate and complete.
+  - **Update Section:** Identify which CLAUDE.md section(s) are affected, update them before finishing the task.
 - **Use Tailwind CSS, CSS, and shadcn/ui** to develop and build out components. (This supersedes any previous instructions to avoid shadcn).
