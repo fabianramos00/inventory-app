@@ -1,0 +1,782 @@
+/* ─── Layout ─────────────────────────────────────────────────────────────────── */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .pageHeader {
+    align-items: center;
+  }
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-1);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 200ms ease;
+}
+
+.backButton:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.headerContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+
+.breadcrumbDivider { color: var(--border-strong); }
+.breadcrumbActive { color: var(--ink-2); }
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink-1);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cancelButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-1);
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.cancelButton:hover { background: var(--surface-2); }
+
+.deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--destructive);
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.deleteButton:hover { background: rgba(220,38,38,0.05); border-color: rgba(220,38,38,0.2); }
+
+.editButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--ink-1);
+  color: var(--surface);
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.editButton:hover { background: var(--ink-2); }
+
+.saveButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.saveButton:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+.saveButton:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--accent);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.errorBox {
+  padding: 16px;
+  background-color: #fee;
+  border: 1px solid var(--destructive);
+  border-radius: 8px;
+  color: var(--destructive);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ─── Two-column grid ────────────────────────────────────────────────────────── */
+.sectionsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .sectionsGrid {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────────── */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-1);
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+/* ─── Field rows (shared with ProductForm pattern) ───────────────────────────── */
+.fieldList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.fieldRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.fieldRowEditing {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.fieldValue {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-1);
+  text-align: right;
+  margin: 0;
+}
+
+.fieldValueFull {
+  position: relative;
+  margin: 0;
+  width: 100%;
+}
+
+.totalValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.mono { font-family: 'DM Mono', monospace; }
+
+/* ─── Input field ────────────────────────────────────────────────────────────── */
+.inputField {
+  background-color: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink-1);
+  transition: border-color 150ms ease, background-color 150ms ease;
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.inputField::placeholder { color: var(--ink-3); }
+
+.inputField:focus {
+  border-color: var(--accent);
+  background-color: var(--surface-2);
+}
+
+.inputField.inputFieldError {
+  border-color: var(--destructive);
+  background-color: rgba(220, 38, 38, 0.03);
+}
+
+.inputField.inputFieldError:focus {
+  border-color: var(--destructive);
+  background-color: rgba(220, 38, 38, 0.05);
+}
+
+.fieldError {
+  display: block;
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--destructive);
+  letter-spacing: 0.01em;
+}
+
+
+/* ─── Product search ─────────────────────────────────────────────────────────── */
+.productSearchWrapper {
+  position: relative;
+}
+
+.productSearchField {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+.productSearchInput {
+  width: 100%;
+  padding: 10px 36px 10px 36px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ink-1);
+  outline: none;
+  transition: all 150ms ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.productSearchInput::placeholder { color: var(--ink-3); }
+
+.productSearchInput:focus {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.searchSpinner {
+  position: absolute;
+  right: 12px;
+  animation: spin 1s linear infinite;
+  color: var(--ink-3);
+}
+
+.productResults {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 30;
+  overflow: hidden;
+  animation: slideDown 150ms ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.productOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.productOption:last-child { border-bottom: none; }
+
+.productOption:hover { background: var(--surface-2); }
+
+.productOptionAdded {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.productOptionEmpty {
+  color: var(--ink-3);
+  font-size: 13px;
+  justify-content: center;
+  cursor: default;
+}
+
+.productOptionInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.productOptionName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.productOptionSize {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.productOptionTags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.productOptionTag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.productOptionMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.productOptionSku {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.productOptionPrice {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* ─── Empty items state ──────────────────────────────────────────────────────── */
+.emptyItems {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--ink-3);
+}
+
+.emptyIcon { opacity: 0.4; }
+
+.emptyItems p {
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── Loading state ──────────────────────────────────────────────────────────── */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 16px;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+/* ─── Item cards ─────────────────────────────────────────────────────────────── */
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.itemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  border-left: 3px solid var(--accent);
+}
+
+.itemCardPending {
+  border-left-color: var(--ink-3);
+  border-style: dashed;
+}
+
+.itemNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.itemTags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.itemTag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.itemIdentity {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSku {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.itemEditActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.itemSaveBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--success);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.itemSaveBtn:hover {
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.3);
+}
+
+.removeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--ink-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 150ms ease;
+}
+
+.removeBtn:hover {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: var(--destructive);
+}
+
+.itemFieldsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.itemFieldsRowFour {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.itemField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemFieldLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--ink-3);
+}
+
+/* ─── Client row with action button ─────────────────────────────────────────── */
+.selectWithAction {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.selectWithAction .selectDropdown {
+  flex: 1;
+  min-width: 0;
+}
+
+.addClientBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  min-width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--accent-fg);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.addClientBtn:hover {
+  background: var(--accent-hover);
+}
+
+/* ─── Form dropdowns (matches Sales dynamicDropdown pattern) ─────────────────── */
+.selectDropdown {
+  position: relative;
+}
+
+.selectTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 12px;
+  height: 40px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+  gap: 8px;
+}
+
+.selectTrigger:hover { background: var(--surface-2); color: var(--ink-1); }
+.selectTrigger:focus { outline: none; }
+
+.selectTriggerActive {
+  color: var(--ink-1);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.selectContent {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+  animation: slideDown 150ms ease-out;
+}
+
+.selectSearch {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--control-bg);
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px 8px 0 0;
+  font-size: 13px;
+  color: var(--ink-1);
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 200ms ease-out;
+}
+
+.selectSearch::placeholder { color: var(--ink-3); }
+.selectSearch:focus { border-bottom-color: var(--accent); }
+
+.selectOptions {
+  max-height: 192px;
+  overflow-y: auto;
+}
+
+.selectOption {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 200ms ease-out;
+}
+
+.selectOption:hover { background: var(--surface-2); color: var(--ink-1); }
+
+.selectOptionActive {
+  background: rgba(250, 204, 21, 0.12);
+  color: var(--accent);
+  font-weight: 500;
+}

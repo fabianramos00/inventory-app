@@ -62,12 +62,24 @@
 }
 
 .breadcrumb {
-  font-size: 12px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   color: var(--ink-3);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 6px;
+}
+
+.breadcrumbDivider {
+  color: var(--border-strong);
+}
+
+.breadcrumbActive {
+  color: var(--ink-2);
 }
 
 .titleRow {
@@ -119,19 +131,21 @@
   gap: 8px;
   padding: 10px 16px;
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--destructive);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 150ms ease;
   font-family: inherit;
 }
 
 .deleteButton:hover {
-  background: #fee2e2;
-  border-color: var(--destructive);
+  background: rgba(220, 38, 38, 0.05);
+  border-color: rgba(220, 38, 38, 0.2);
 }
 
 .editButton {
@@ -139,20 +153,25 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: var(--accent);
-  color: var(--accent-fg);
+  background: var(--ink-1);
+  color: var(--surface);
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 4px;
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 150ms ease;
   font-family: inherit;
 }
 
 .editButton:hover {
-  background: var(--accent-hover);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  background: var(--ink-2);
+}
+
+.editButton:active {
+  transform: translateY(1px);
 }
 
 .cancelButton {
@@ -161,19 +180,20 @@
   gap: 8px;
   padding: 10px 16px;
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--ink-1);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 150ms ease;
   font-family: inherit;
 }
 
 .cancelButton:hover {
   background: var(--surface-2);
-  border-color: var(--border-strong);
 }
 
 .saveButton {
@@ -183,23 +203,26 @@
   padding: 10px 16px;
   background: var(--accent);
   color: var(--accent-fg);
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 150ms ease;
   font-family: inherit;
 }
 
 .saveButton:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent-hover);
 }
 
 .saveButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 .errorBox {
@@ -239,17 +262,19 @@
   padding: 24px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 4px; /* Industrial sharp corners */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .cardTitle {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--ink-1);
   margin: 0;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-strong);
 }
 
 .fieldList {
@@ -290,7 +315,8 @@
 }
 
 .fieldValue {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--ink-1);
   text-align: right;
   margin: 0;
@@ -313,13 +339,13 @@
 
 /* Inputs in edit/create mode */
 .inputField {
-  background-color: var(--control-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background-color: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink-1);
-  transition: all 0.2s;
+  transition: all 150ms ease;
   width: 100%;
   outline: none;
   font-family: inherit;
@@ -332,11 +358,14 @@
 
 .inputField:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.1);
+  background-color: var(--surface-2);
 }
 
 .errorMessage {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--destructive);
   margin: 4px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }

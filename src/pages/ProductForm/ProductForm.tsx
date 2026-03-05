@@ -177,14 +177,20 @@ export default function ProductForm() {
     setApiError(null)
     try {
       const { price, sku, ...rest } = data
-      const payload = {
-        ...rest,
-        price: price,
+      const payload: CreateProductInput = {
+        name: rest.name,
+        brand_id: rest.brand_id,
+        category_id: rest.category_id,
+        material_id: rest.material_id,
+        min_stock_quantity: rest.min_stock_quantity,
+        cost: rest.cost,
+        sale_price: price,
+        initial_quantity: rest.stock_quantity,
         size_value: !rest.size_value || rest.size_value.trim() === '' ? null : rest.size_value,
         measurement_unit_id: rest.measurement_unit_id ?? null,
       }
       if (isCreateMode) {
-        await inventoryApi.createProduct(payload as CreateProductInput)
+        await inventoryApi.createProduct({ ...payload, sku })
         navigate('/inventory', { state: { successMessage: 'Producto creado exitosamente' } })
       } else {
         const response = await inventoryApi.updateProduct(Number(id), { ...payload, sku })
@@ -229,26 +235,23 @@ export default function ProductForm() {
           <ChevronLeft size={20} />
         </button>
         <div className={styles.headerContent}>
-          <p className={styles.breadcrumb}>
-            {isCreateMode ? 'INV / REGISTRO' : 'INV / PRODUCTO'}
-          </p>
+          <div className={styles.breadcrumb}>
+            <span>INV</span>
+            <span className={styles.breadcrumbDivider}>/</span>
+            <span className={styles.breadcrumbActive}>
+              {isCreateMode ? 'Registro' : 'Producto'}
+            </span>
+          </div>
           {isCreateMode ? (
-            <>
-              <h1 className={styles.pageTitle}>Registro de Producto</h1>
-              <p className={styles.pageDescription}>
-                Complete la información detallada para registrar el producto en el catálogo
-              </p>
-            </>
+            <h1 className={styles.pageTitle}>Registro de Producto</h1>
           ) : (
-            <>
-              <div className={styles.titleRow}>
-                <h1 className={styles.pageTitle}>{product?.name || '-'}</h1>
-                <span className={styles.skuBadge}>{product?.sku}</span>
-              </div>
-              <div className={styles.statusRow}>
-                <span className={`badge ${statusMap[status]}`}>{statusLabel[status]}</span>
-              </div>
-            </>
+            <div className={styles.titleRow}>
+              <h1 className={styles.pageTitle}>{product?.name || '-'}</h1>
+              <span className={styles.skuBadge}>{product?.sku}</span>
+              <span className={`badge ${statusMap[status]}`} style={{ marginLeft: '12px' }}>
+                {statusLabel[status]}
+              </span>
+            </div>
           )}
         </div>
         <div className={styles.headerActions}>
@@ -438,7 +441,7 @@ export default function ProductForm() {
                 <dd className={styles.fieldValueFull}>
                   <input
                     type="text"
-                    className={styles.inputField}
+                    className={`${styles.inputField} ${styles.mono}`}
                     placeholder="ej: 10, 5.5, 12 x 5"
                     {...register('size_value')}
                   />
@@ -494,7 +497,7 @@ export default function ProductForm() {
                   <dd className={styles.fieldValueFull}>
                     <input
                       type="number"
-                      className={styles.inputField}
+                      className={`${styles.inputField} ${styles.mono}`}
                       placeholder="0.00"
                       step="0.01"
                       {...register('price', { valueAsNumber: true })}
@@ -514,7 +517,7 @@ export default function ProductForm() {
                   <dd className={styles.fieldValueFull}>
                     <input
                       type="number"
-                      className={styles.inputField}
+                      className={`${styles.inputField} ${styles.mono}`}
                       placeholder="0.00"
                       step="0.01"
                       {...register('cost', { valueAsNumber: true })}
@@ -542,7 +545,7 @@ export default function ProductForm() {
                   <dd className={styles.fieldValueFull}>
                     <input
                       type="number"
-                      className={styles.inputField}
+                      className={`${styles.inputField} ${styles.mono}`}
                       placeholder="0"
                       {...register('stock_quantity', { valueAsNumber: true })}
                     />
@@ -563,7 +566,7 @@ export default function ProductForm() {
                   <dd className={styles.fieldValueFull}>
                     <input
                       type="number"
-                      className={styles.inputField}
+                      className={`${styles.inputField} ${styles.mono}`}
                       placeholder="0"
                       {...register('min_stock_quantity', { valueAsNumber: true })}
                     />

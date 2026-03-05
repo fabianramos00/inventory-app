@@ -81,20 +81,37 @@ export interface Order {
 // ─── Sale ────────────────────────────────────────────────────────────────────
 export interface SaleItem {
   id: number
-  product: Product
+  sale_id: number
+  product_id: number
   quantity: number
+  delivered_quantity: number
   unit_price: number
   subtotal: number
+  product_name: string
+  product_sku: string
+  brand_name: string | null
+  material_name: string | null
+  category_name: string | null
 }
+
+export type PaymentStatus = 'pending' | 'paid' | 'partial'
+export type DeliveryStatus = 'pending' | 'partial' | 'delivered'
+export type PaymentMethod = 'cash' | 'credit' | 'debit' | null
 
 export interface Sale {
   id: number
-  code: string
-  customer_name?: string
-  items: SaleItem[]
-  total: number
+  total_amount: number
+  debt_amount: number
+  payment_status: PaymentStatus
+  delivery_status: DeliveryStatus
+  payment_method: PaymentMethod
+  amount_paid: number
+  client_id: number | null
   created_at: string
-  created_by: Pick<User, 'id' | 'full_name'>
+  updated_at: string | null
+  created_by_id: number
+  created_by: Pick<User, 'id' | 'full_name' | 'email' | 'is_active' | 'is_superuser'>
+  client: { id: number; name: string } | null
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
@@ -106,11 +123,32 @@ export interface PaginatedResponse<T> {
   pages: number
 }
 
+export interface CursorPaginatedResponse<T> {
+  items: T[]
+  has_next: boolean
+  skip: number
+  limit: number
+}
+
 // ─── Dropdown / Filter Options ────────────────────────────────────────────────
 export interface FilterOption {
   id: number
   name: string
   abbreviation?: string
+}
+
+// ─── Sale Creation Form ───────────────────────────────────────────────────────
+export interface CreateSaleInput {
+  payment_status: PaymentStatus
+  payment_method: PaymentMethod
+  amount_paid: number
+  client_id: number | null
+  items: {
+    product_id: number
+    quantity: number
+    delivered_quantity: number
+    unit_price: number | null
+  }[]
 }
 
 // ─── Product Creation Form ────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useModalContext } from '@/context/ModalContext'
 import Sidebar from './Sidebar'
@@ -6,9 +6,23 @@ import styles from './AppLayout.module.css'
 
 export default function AppLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const { isModalOpen } = useModalContext()
 
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebarCollapsed')
+    if (saved !== null) {
+      setIsSidebarCollapsed(JSON.parse(saved))
+    }
+  }, [])
+
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
+
+  const toggleSidebar = () => {
+    const newState = !isSidebarCollapsed
+    setIsSidebarCollapsed(newState)
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState))
+  }
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
@@ -27,9 +41,11 @@ export default function AppLayout() {
         <Sidebar
           isMobileMenuOpen={isMobileMenuOpen}
           closeMobileMenu={closeMobileMenu}
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={toggleSidebar}
         />
         <main
-          className="min-h-screen flex-1 transition-all duration-300 md:ml-[var(--sidebar-w)]"
+          className={`min-h-screen flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[var(--sidebar-w)]'}`}
           style={{ background: 'var(--bg-page)' }}
         >
           <div className="p-4 md:p-6 animate-fade-in">

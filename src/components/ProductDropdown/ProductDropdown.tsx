@@ -91,15 +91,53 @@ export default function ProductDropdown({
   return (
     <div className={styles.container} ref={containerRef}>
       <div className={styles.row}>
-        <button
-          type="button"
-          className={styles.dropdownButton}
-          onClick={() => onOpenChange(isOpen ? null : id)}
-          disabled={disabled}
-        >
-          <span>{displayLabel}</span>
-          <ChevronDown size={16} />
-        </button>
+        <div className={styles.dropdownWrapper} style={{ zIndex: isOpen ? 50 : 1 }}>
+          <button
+            type="button"
+            className={styles.dropdownButton}
+            onClick={() => onOpenChange(isOpen ? null : id)}
+            disabled={disabled}
+          >
+            <span>{displayLabel}</span>
+            <ChevronDown size={16} />
+          </button>
+          
+          {isOpen && (
+            <div className={styles.dropdownMenu}>
+              <input
+                type="text"
+                className={styles.dropdownSearch}
+                placeholder={`Buscar ${label}...`}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                autoFocus
+              />
+              {loading && (
+                <div className={styles.dropdownLoading}>
+                  <Loader size={16} className={styles.spinner} />
+                </div>
+              )}
+              {!loading && options.length === 0 && (
+                <div className={styles.dropdownEmpty}>Sin opciones</div>
+              )}
+              {!loading && options.map(option => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`${styles.dropdownOption} ${value === option.id ? styles.dropdownOptionActive : ''}`}
+                  onClick={() => {
+                    onSelect(option)
+                    onOpenChange(null)
+                    setSearch('')
+                  }}
+                >
+                  {formatLabel ? formatLabel(option) : option.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <button
           type="button"
           className={styles.addButton}
@@ -110,40 +148,6 @@ export default function ProductDropdown({
           <Plus size={16} />
         </button>
       </div>
-      {isOpen && (
-        <div className={styles.dropdownMenu}>
-          <input
-            type="text"
-            className={styles.dropdownSearch}
-            placeholder={`Buscar ${label}...`}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            autoFocus
-          />
-          {loading && (
-            <div className={styles.dropdownLoading}>
-              <Loader size={16} className={styles.spinner} />
-            </div>
-          )}
-          {!loading && options.length === 0 && (
-            <div className={styles.dropdownEmpty}>Sin opciones</div>
-          )}
-          {!loading && options.map(option => (
-            <button
-              key={option.id}
-              type="button"
-              className={`${styles.dropdownOption} ${value === option.id ? styles.dropdownOptionActive : ''}`}
-              onClick={() => {
-                onSelect(option)
-                onOpenChange(null)
-                setSearch('')
-              }}
-            >
-              {formatLabel ? formatLabel(option) : option.name}
-            </button>
-          ))}
-        </div>
-      )}
       {error && <p className={styles.errorMessage}>{error}</p>}
     </div>
   )

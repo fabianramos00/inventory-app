@@ -8,7 +8,8 @@ import Dashboard from '@/pages/Dashboard/Dashboard'
 import Inventory from '@/pages/Inventory/Inventory'
 import ProductForm from '@/pages/ProductForm/ProductForm'
 import Providers from '@/pages/Providers/Providers'
-import Sells from './pages/Sells/Sells'
+import Sales from './pages/Sales/Sales'
+import SaleForm from './pages/SaleForm/SaleForm'
 import Orders from './pages/Orders/Orders'
 import Users from './pages/Users/Users'
 
@@ -29,7 +30,9 @@ export default function App() {
                 <Route path="/inventory/create" element={<ProductForm />} />
                 <Route path="/inventory/product/:id" element={<ProductForm />} />
                 <Route path="/providers" element={<Providers />} />
-                <Route path="/sells" element={<Sells />} />
+                <Route path="/sales" element={<Sales />} />
+                <Route path="/sales/create" element={<SaleForm />} />
+                <Route path="/sales/:id" element={<SaleForm />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/users" element={<Users />} />
               </Route>

@@ -246,68 +246,68 @@ export default function Inventory() {
     <div className={styles.container}>
       <div className={styles.pageHeader}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '12px', fontWeight: '600', color: 'var(--ink-3)' }}>
+          <div className={styles.breadcrumb}>
             <span>INV</span>
-            <span>/</span>
-            <span style={{ fontWeight: '500', color: 'var(--ink-2)' }}>Productos</span>
+            <span className={styles.breadcrumbDivider}>/</span>
+            <span className={styles.breadcrumbActive}>Productos</span>
           </div>
-          <h1 className={styles.pageTitle}>Control de Inventario</h1>
-          <p className={styles.pageDescription}>Gestión centralizada de stock, hardware y componentes.</p>
+          <h1 className={styles.pageTitle}>Inventario Principal</h1>
         </div>
         <button
           className={styles.newProductBtn}
           onClick={() => navigate('/inventory/create')}
         >
-          <Plus size={16} /> Nuevo Producto
+          <Plus size={16} strokeWidth={2.5} />
+          <span>Nuevo Producto</span>
         </button>
       </div>
 
-      <div className={styles.kpiGrid}>
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ background: 'rgba(250, 204, 21, 0.1)', color: 'var(--accent)' }}>
-            <Grid size={20} />
+      <div className={styles.kpiStrip}>
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <Grid size={14} className={styles.kpiIconAccent} />
+            <div className={styles.kpiLabel}>Total Variantes</div>
           </div>
-          <div className={styles.kpiContent}>
-            <div className={styles.kpiLabel}>TOTAL VARIANTES</div>
-            <div className={styles.kpiValue}>{stats.totalVariants}</div>
-          </div>
+          <div className={styles.kpiValue}>{stats.totalVariants}</div>
         </div>
 
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ background: 'rgba(217, 119, 6, 0.1)', color: 'var(--warning)' }}>
-            <Package size={20} />
+        <div className={styles.kpiDivider} />
+
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <Package size={14} className={styles.kpiIconWarning} />
+            <div className={styles.kpiLabel}>Total Stock</div>
           </div>
-          <div className={styles.kpiContent}>
-            <div className={styles.kpiLabel}>TOTAL STOCK</div>
-            <div className={styles.kpiValue} style={{ color: 'var(--warning)' }}>{stats.totalStock}</div>
-          </div>
+          <div className={styles.kpiValue} style={{ color: 'var(--warning)' }}>{stats.totalStock}</div>
         </div>
 
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ background: 'rgba(220, 38, 38, 0.1)', color: 'var(--destructive)' }}>
-            <AlertCircle size={20} />
+        <div className={styles.kpiDivider} />
+
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <AlertCircle size={14} className={styles.kpiIconDestructive} />
+            <div className={styles.kpiLabel}>Stock Bajo</div>
           </div>
-          <div className={styles.kpiContent}>
-            <div className={styles.kpiLabel}>STOCK BAJO</div>
-            <div className={styles.kpiValue} style={{ color: 'var(--destructive)' }}>{stats.lowStockCount}</div>
-          </div>
+          <div className={styles.kpiValue} style={{ color: 'var(--destructive)' }}>{stats.lowStockCount}</div>
         </div>
 
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ background: 'rgba(22, 163, 74, 0.1)', color: 'var(--success)' }}>
-            <DollarSign size={20} />
+        <div className={styles.kpiDivider} />
+
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <DollarSign size={14} className={styles.kpiIconSuccess} />
+            <div className={styles.kpiLabel}>Valor Total</div>
           </div>
-          <div className={styles.kpiContent}>
-            <div className={styles.kpiLabel}>VALOR TOTAL</div>
-            <div className={styles.kpiValue} style={{ color: 'var(--success)' }}>
-              $ {stats.totalValue.toLocaleString('es-PE', { maximumFractionDigits: 0 })}
-            </div>
+          <div className={styles.kpiValue} style={{ color: 'var(--success)' }}>
+            <span className={styles.currencySymbol}>$</span>
+            {stats.totalValue.toLocaleString('es-PE', { maximumFractionDigits: 0 })}
           </div>
         </div>
       </div>
 
-      <div className={styles.filtersCard}>
-        <div className={styles.controlsBar}>
+      <div className={styles.tableSection}>
+        <div className={styles.commandBar}>
+          <div className={styles.controlsBar}>
           <div className={styles.searchWrapper}>
             <Search size={14} className={styles.searchIcon} />
             <input
@@ -617,7 +617,7 @@ export default function Inventory() {
                         <td><span className={styles.materialCell}>{p.material?.name || '-'}</span></td>
                         <td><span className={styles.brandCell}>{p.brand?.name || '-'}</span></td>
                         <td><span className={styles.priceCell}>$ {(p.price || 0).toFixed(2)}</span></td>
-                        <td><span className={`badge ${statusMap[status]}`}>{statusLabel[status]}</span></td>
+                        <td><span className={styles[statusMap[status]]}>{statusLabel[status]}</span></td>
                         <td>
                           <div className={styles.actionButtons}>
                             <button
@@ -657,6 +657,7 @@ export default function Inventory() {
             />
           </>
         )}
+      </div>
       </div>
 
       {productToDelete && (

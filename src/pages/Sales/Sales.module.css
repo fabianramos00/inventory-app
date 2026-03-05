@@ -47,7 +47,7 @@
   color: var(--ink-2);
 }
 
-.newProductBtn {
+.newSaleBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,16 +65,16 @@
   transition: all 150ms ease;
 }
 
-.newProductBtn:hover {
+.newSaleBtn:hover {
   background: var(--accent);
   color: var(--accent-fg);
 }
 
-.newProductBtn:active {
+.newSaleBtn:active {
   transform: translateY(1px);
 }
 
-/* KPI Strip (Data Terminal Style) */
+/* KPI Strip */
 .kpiStrip {
   display: flex;
   flex-direction: column;
@@ -150,7 +150,7 @@
   color: var(--ink-3);
 }
 
-/* Table Section Wrapper */
+/* Table Section */
 .tableSection {
   display: flex;
   flex-direction: column;
@@ -158,7 +158,6 @@
   border-radius: 10px;
 }
 
-/* Unified Command Bar */
 .commandBar {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -167,7 +166,6 @@
   padding: 0;
 }
 
-/* Controls Bar */
 .controlsBar {
   display: flex;
   flex-direction: column;
@@ -178,50 +176,8 @@
   .controlsBar {
     flex-direction: row;
     height: 48px;
+    justify-content: flex-end;
   }
-}
-
-.searchWrapper {
-  position: relative;
-  flex: 1;
-  min-height: 48px;
-  border-bottom: 1px solid var(--border);
-}
-
-@media (min-width: 768px) {
-  .searchWrapper {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
-  }
-}
-
-.searchIcon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--ink-3);
-  pointer-events: none;
-}
-
-.searchInput {
-  width: 100%;
-  height: 100%;
-  padding: 0 16px 0 40px;
-  background: transparent;
-  border: none;
-  font-size: 14px;
-  color: var(--ink-1);
-  outline: none;
-  transition: background 150ms ease;
-}
-
-.searchInput::placeholder {
-  color: var(--ink-3);
-}
-
-.searchInput:focus {
-  background: var(--surface-2);
 }
 
 /* Dynamic Dropdowns */
@@ -241,6 +197,7 @@
     border-bottom: none;
     border-right: 1px solid var(--border);
   }
+
   .dynamicDropdown:last-child {
     border-right: none;
   }
@@ -263,6 +220,7 @@
   cursor: pointer;
   transition: all 150ms ease;
   gap: 8px;
+  min-height: 48px;
 }
 
 @media (min-width: 768px) {
@@ -280,17 +238,16 @@
   outline: none;
 }
 
-/* Active State using border inside */
 .filterActive {
   background: var(--surface);
   color: var(--ink-1);
   font-weight: 600;
-  box-shadow: inset 4px 0 0 var(--accent); /* Mobile visual cue */
+  box-shadow: inset 4px 0 0 var(--accent);
 }
 
 @media (min-width: 768px) {
   .filterActive {
-    box-shadow: inset 0 -2px 0 var(--accent); /* Desktop inline brand indicator */
+    box-shadow: inset 0 -2px 0 var(--accent);
   }
 }
 
@@ -309,15 +266,8 @@
 }
 
 @keyframes dropdownSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdownSearch {
@@ -352,6 +302,8 @@
   color: var(--ink-2);
   cursor: pointer;
   transition: all 200ms ease-out;
+  display: flex;
+  align-items: center;
 }
 
 .dropdownOption:hover {
@@ -365,7 +317,57 @@
   font-weight: 500;
 }
 
-/* Table Card */
+/* Date filter */
+.dateWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--border);
+  transition: all 150ms ease;
+}
+
+.dateWrapper:last-child {
+  border-bottom: none;
+}
+
+@media (min-width: 768px) {
+  .dateWrapper {
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+  }
+
+  .dateWrapper:last-child {
+    border-right: none;
+  }
+}
+
+.dateWrapper:hover {
+  background: var(--surface-2);
+}
+
+.dateIcon {
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.dateInput {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  color: var(--ink-2);
+  outline: none;
+  cursor: pointer;
+  width: 130px;
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  opacity: 0.4;
+  cursor: pointer;
+}
+
 .tableCard {
   background: var(--surface);
   border-radius: 0 0 10px 10px;
@@ -374,212 +376,64 @@
   border-top: none;
 }
 
-.skuCell {
+/* Cell Styles */
+.codeCell {
   font-family: 'DM Mono', monospace;
   font-size: 12px;
   color: var(--ink-3);
 }
 
-.nameCell {
+.customerCell {
   font-weight: 500;
   font-size: 14px;
   color: var(--ink-1);
 }
 
-.categoryCell {
+.itemsCell {
+  font-family: 'DM Mono', monospace;
   font-size: 14px;
   color: var(--ink-2);
 }
 
-.unitCell {
-  font-size: 14px;
-  color: var(--ink-2);
-}
-
-.materialCell {
-  font-size: 14px;
-  color: var(--ink-2);
-}
-
-.brandCell {
-  font-size: 14px;
-  color: var(--ink-2);
-}
-
-.stockCell {
+.totalCell {
   font-family: 'DM Mono', monospace;
   font-weight: 600;
   font-size: 14px;
-}
-
-.stockCellOk {
   color: var(--ink-1);
 }
 
-.stockCellLow {
-  color: var(--destructive);
-}
-
-.stockUnit {
-  font-size: 12px;
-  font-weight: normal;
-  color: var(--ink-3);
-}
-
-.minCell {
-  font-family: 'DM Mono', monospace;
+.userCell {
   font-size: 14px;
+  color: var(--ink-2);
+}
+
+.dateCell {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
   color: var(--ink-3);
 }
 
-.priceCell {
+.amountCell {
   font-family: 'DM Mono', monospace;
   font-size: 14px;
   color: var(--ink-2);
 }
 
-.skuLink {
+.debtCell {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ink-3);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  transition: all 200ms ease-out;
 }
 
-.skuLink:hover {
-  color: var(--ink-1);
-  text-decoration-color: var(--ink-3);
-}
-
-.actionButtons {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.iconBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.iconBtn:hover {
-  background: var(--surface-2);
-  color: var(--ink-1);
-}
-
-.iconBtnDestructive {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.iconBtnDestructive:hover {
-  background: rgba(220, 38, 38, 0.08);
+.debtCellActive {
   color: var(--destructive);
 }
 
-.emptyState {
-  padding: 48px 16px;
-  text-align: center;
+.emptyCell {
   color: var(--ink-3);
+  font-style: italic;
 }
 
-.loadingState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 16px;
-  gap: 12px;
-  color: var(--ink-3);
-}
-
-.loadingSpinner {
-  animation: spin 1s linear infinite;
-  color: var(--accent);
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Global Table Styles (Terminal Aesthetic) */
-:global(.data-table) {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-:global(.data-table thead) {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-strong);
-}
-
-:global(.data-table thead th) {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-3);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: none;
-}
-
-:global(.data-table tbody tr) {
-  border-bottom: 1px solid var(--border);
-  transition: all 150ms ease;
-}
-
-:global(.data-table tbody tr:hover) {
-  background: var(--surface-2);
-}
-
-:global(.data-table tbody td) {
-  padding: 12px 16px;
-  font-size: 13px;
-  color: var(--ink-1);
-  border: none;
-  vertical-align: middle;
-}
-
-:global(.data-table thead th:nth-child(5)),
-:global(.data-table tbody td:nth-child(5)),
-:global(.data-table thead th:nth-child(6)),
-:global(.data-table tbody td:nth-child(6)),
-:global(.data-table thead th:nth-child(9)),
-:global(.data-table tbody td:nth-child(9)) {
-  text-align: right; /* Align numerical columns to the right for tabular reading */
-}
-
-/* Sharp Technical Status Badges instead of soft pills */
 .badge--success {
   display: inline-flex;
   align-items: center;
@@ -593,21 +447,6 @@
   color: var(--success);
   border: 1px solid rgba(22, 163, 74, 0.3);
   background: rgba(22, 163, 74, 0.05);
-}
-
-.badge--destructive {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--destructive);
-  border: 1px solid rgba(220, 38, 38, 0.3);
-  background: rgba(220, 38, 38, 0.05);
 }
 
 .badge--warning {
@@ -625,10 +464,173 @@
   background: rgba(217, 119, 6, 0.05);
 }
 
-:global(.data-table th:last-child),
-:global(.data-table td:last-child) {
-  width: 100px;
-  text-align: right;
-  padding-right: 16px;
+.badge--destructive {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--destructive);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 200ms ease-out;
+}
+
+.actionBtn:hover {
+  background: var(--surface-2);
+  color: var(--ink-1);
+}
+
+.actionCell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.deleteActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 200ms ease-out;
+}
+
+.deleteActionBtn:hover {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: var(--destructive);
+}
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   white-space: nowrap;
+}
+
+.confirmText {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--destructive);
+}
+
+.confirmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--destructive);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.confirmBtn:hover { background: #b91c1c; }
+.confirmBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.cancelBtn:hover { background: var(--surface-2); }
+.cancelBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+  gap: 12px;
+  color: var(--ink-3);
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+  color: var(--accent);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.emptyState {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--ink-3);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.pageBtn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--ink-1);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-3);
 }
