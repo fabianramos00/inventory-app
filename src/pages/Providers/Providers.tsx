@@ -146,26 +146,31 @@ export default function Providers() {
         </button>
       </div>
 
-      {/* Search */}
-      <div className={styles.searchCard}>
-        <div className={styles.searchWrapper}>
-          <Search size={14} className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Buscar proveedor..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+      {/* Command Bar (replacing searchCard) */}
+      <div className={styles.commandBar}>
+        <div className={styles.controlsBar}>
+          <div className={styles.searchWrapper}>
+            <Search size={14} className={styles.searchIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Buscar proveedor por nombre o contacto..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
       {/* Loading state */}
-      {loading && <div className={styles.loadingContainer}><Loader size={20} className={styles.spinner} /> Cargando proveedores...</div>}
-
-      {/* Cards grid */}
-      {!loading && (
+      {loading ? (
+        <div className={styles.loadingContainer}>
+          <Loader size={24} className={styles.spinner} />
+          <p>Cargando proveedores...</p>
+        </div>
+      ) : (
         <>
+          {/* Cards grid */}
           <div className={styles.gridContainer}>
             {providers.map(p => (
               <div key={p.id} className={styles.providerCard}>
@@ -187,14 +192,14 @@ export default function Providers() {
                 <div className={styles.detailsList}>
                   {p.email && (
                     <div className={styles.detailItem}>
-                      <Mail size={12} className={styles.detailIcon} />
-                      {p.email}
+                      <Mail size={14} className={styles.detailIcon} />
+                      <span>{p.email}</span>
                     </div>
                   )}
                   {p.phone && (
                     <div className={styles.detailItem}>
-                      <Phone size={12} className={styles.detailIcon} />
-                      {p.phone}
+                      <Phone size={14} className={styles.detailIcon} />
+                      <span>{p.phone}</span>
                     </div>
                   )}
                 </div>
@@ -202,24 +207,31 @@ export default function Providers() {
             ))}
           </div>
 
+          {/* Empty state */}
+          {providers.length === 0 && !loading && (
+            <div className={styles.emptyState}>No se encontraron proveedores.</div>
+          )}
+
           {/* Pagination */}
-          <div className={styles.paginationContainer}>
-            <button
-              className={styles.paginationBtn}
-              disabled={page === 1 || loading}
-              onClick={() => setPage(page - 1)}
-            >
-              Anterior
-            </button>
-            <span className={styles.paginationInfo}>Página {page} de {totalPages}</span>
-            <button
-              className={styles.paginationBtn}
-              disabled={page >= totalPages || loading}
-              onClick={() => setPage(page + 1)}
-            >
-              Siguiente
-            </button>
-          </div>
+          {(page > 1 || page < totalPages) && (
+            <div className={styles.paginationContainer}>
+              <button
+                className={styles.paginationBtn}
+                disabled={page === 1 || loading}
+                onClick={() => setPage(page - 1)}
+              >
+                Anterior
+              </button>
+              <span className={styles.paginationInfo}>Página {page} de {totalPages}</span>
+              <button
+                className={styles.paginationBtn}
+                disabled={page >= totalPages || loading}
+                onClick={() => setPage(page + 1)}
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </>
       )}
 

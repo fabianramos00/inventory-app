@@ -154,33 +154,38 @@ export default function Clients() {
         </button>
       </div>
 
-      {/* Search */}
-      <div className={styles.searchCard}>
-        <div className={styles.searchWrapper}>
-          <Search size={14} className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Buscar cliente..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+      {/* Command Bar (replacing searchCard) */}
+      <div className={styles.commandBar}>
+        <div className={styles.controlsBar}>
+          <div className={styles.searchWrapper}>
+            <Search size={14} className={styles.searchIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Buscar cliente por nombre, cédula o contacto..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
       {/* Loading state */}
-      {loading && <div className={styles.loadingContainer}><Loader size={20} className={styles.spinner} /> Cargando clientes...</div>}
-
-      {/* Cards grid */}
-      {!loading && (
+      {loading ? (
+        <div className={styles.loadingContainer}>
+          <Loader size={24} className={styles.spinner} />
+          <p>Cargando clientes...</p>
+        </div>
+      ) : (
         <>
+          {/* Cards grid */}
           <div className={styles.gridContainer}>
             {clients.map(c => (
               <div key={c.id} className={styles.clientCard}>
                 <div className={styles.cardHeader}>
                   <div className={styles.clientInfo}>
                     <div className={styles.clientName}>{c.name}</div>
-                    {c.identity_card && <div className={styles.clientIdCard}>{c.identity_card}</div>}
+                    {c.identity_card && <div className={styles.clientIdCard}>ID: {c.identity_card}</div>}
                   </div>
                   <div className={styles.actionButtons}>
                     <button className={styles.actionBtn} onClick={() => openEditModal(c)} title="Editar">
@@ -195,14 +200,14 @@ export default function Clients() {
                 <div className={styles.detailsList}>
                   {c.email && (
                     <div className={styles.detailItem}>
-                      <Mail size={12} className={styles.detailIcon} />
-                      {c.email}
+                      <Mail size={14} className={styles.detailIcon} />
+                      <span>{c.email}</span>
                     </div>
                   )}
                   {c.phone && (
                     <div className={styles.detailItem}>
-                      <Phone size={12} className={styles.detailIcon} />
-                      {c.phone}
+                      <Phone size={14} className={styles.detailIcon} />
+                      <span>{c.phone}</span>
                     </div>
                   )}
                   <div className={styles.detailItem}>
@@ -214,24 +219,31 @@ export default function Clients() {
             ))}
           </div>
 
+          {/* Empty state */}
+          {clients.length === 0 && !loading && (
+            <div className={styles.emptyState}>No se encontraron clientes.</div>
+          )}
+
           {/* Pagination */}
-          <div className={styles.paginationContainer}>
-            <button
-              className={styles.paginationBtn}
-              disabled={page === 1 || loading}
-              onClick={() => setPage(page - 1)}
-            >
-              Anterior
-            </button>
-            <span className={styles.paginationInfo}>Página {page}</span>
-            <button
-              className={styles.paginationBtn}
-              disabled={!hasNext || loading}
-              onClick={() => setPage(page + 1)}
-            >
-              Siguiente
-            </button>
-          </div>
+          {(page > 1 || hasNext) && (
+            <div className={styles.paginationContainer}>
+              <button
+                className={styles.paginationBtn}
+                disabled={page === 1 || loading}
+                onClick={() => setPage(page - 1)}
+              >
+                Anterior
+              </button>
+              <span className={styles.paginationInfo}>Página {page}</span>
+              <button
+                className={styles.paginationBtn}
+                disabled={!hasNext || loading}
+                onClick={() => setPage(page + 1)}
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </>
       )}
 
