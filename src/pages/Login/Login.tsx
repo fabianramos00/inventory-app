@@ -71,13 +71,13 @@ export default function Login() {
         {/* Right panel */}
         <div className={styles.rightPanel}>
           <div className={styles.formContainer}>
-            <div className={styles.formHeader} style={{ animation: `${styles.fadeSlideUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: '0.1s' }}>
+            <div className={styles.formHeader}>
               <h2 className={styles.formTitle}>¡BIENVENIDO!</h2>
               <p className={styles.formSubtitle}>Ingresa tus detalles para acceder.</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className={styles.formBody}>
-              <div className={styles.inputGroup} style={{ animation: `${styles.fadeSlideUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: '0.2s' }}>
+              <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>Correo Electrónico</label>
                 <input
                   type="email"
@@ -91,13 +91,13 @@ export default function Login() {
                 )}
               </div>
 
-              <div className={styles.inputGroup} style={{ animation: `${styles.fadeSlideUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: '0.3s' }}>
+              <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>Contraseña</label>
                 <div className={styles.passwordInputWrapper}>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     className={styles.inputField}
-                    style={{ paddingRight: '2.5rem', letterSpacing: showPassword ? 'normal' : '0.1em' }}
+                    style={{ paddingRight: '2.5rem' }}
                     placeholder="••••••••"
                     {...register('password')}
                     autoComplete="current-password"
@@ -116,7 +116,7 @@ export default function Login() {
                 )}
               </div>
 
-              <div className={styles.formOptions} style={{ animation: `${styles.fadeSlideUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: '0.4s' }}>
+              <div className={styles.formOptions}>
                 <label className={styles.rememberMeLabel}>
                   <div className={styles.checkboxWrapper}>
                     <input
@@ -136,7 +136,7 @@ export default function Login() {
                 <div className={styles.apiErrorBox}>{apiError}</div>
               )}
 
-              <button type="submit" disabled={loading} className={styles.submitBtn} style={{ animation: `${styles.fadeSlideUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: '0.5s' }}>
+              <button type="submit" disabled={loading} className={styles.submitBtn}>
                 {loading ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
