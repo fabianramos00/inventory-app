@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Loader, X, ChevronDown } from 'lucide-react'
+import { Loader, X } from 'lucide-react'
 import styles from '../CreateEntityModal/CreateEntityModal.module.css'
-import dropdownStyles from './CreateFormModal.module.css'
+import Dropdown, { type DropdownOption } from '@/components/Dropdown/Dropdown'
 
 export interface FieldConfig {
   key: string
@@ -36,8 +36,6 @@ export default function CreateFormModal<T>({
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   function setValue(key: string, value: string) {
     setValues(prev => ({ ...prev, [key]: value }))
@@ -88,36 +86,12 @@ export default function CreateFormModal<T>({
                   rows={3}
                 />
               ) : field.type === 'select' ? (
-                <div className={dropdownStyles.selectDropdown} ref={el => { if (el) dropdownRefs.current[field.key] = el }}>
-                  <button
-                    type="button"
-                    className={`${dropdownStyles.selectTrigger} ${values[field.key] ? dropdownStyles.selectTriggerActive : ''}`}
-                    onClick={() => setOpenDropdown(openDropdown === field.key ? null : field.key)}
-                    autoFocus={i === 0}
-                  >
-                    <span>{values[field.key] ? field.options?.find(o => o.value === values[field.key])?.label : 'Seleccionar...'}</span>
-                    <ChevronDown size={16} />
-                  </button>
-                  {openDropdown === field.key && (
-                    <div className={dropdownStyles.selectContent}>
-                      <div className={dropdownStyles.selectOptions}>
-                        {field.options?.map(opt => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            className={`${dropdownStyles.selectOption} ${values[field.key] === opt.value ? dropdownStyles.selectOptionActive : ''}`}
-                            onClick={() => {
-                              setValue(field.key, opt.value)
-                              setOpenDropdown(null)
-                            }}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <Dropdown
+                  value={values[field.key]}
+                  options={(field.options || []) as DropdownOption[]}
+                  onChange={v => setValue(field.key, v)}
+                  placeholder={field.placeholder}
+                />
               ) : (
                 <input
                   type={field.type ?? 'text'}

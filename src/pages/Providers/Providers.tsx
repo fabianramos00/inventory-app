@@ -131,13 +131,18 @@ export default function Providers() {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <div className={styles.header}>
+      <div className={styles.pageHeader}>
         <div>
-          <span className="bin-label mb-1 inline-block">PROV / Lista</span>
-          <h2 className={styles.title}>Proveedores</h2>
+          <div className={styles.breadcrumb}>
+            <span>PROV</span>
+            <span className={styles.breadcrumbDivider}>/</span>
+            <span className={styles.breadcrumbActive}>Lista</span>
+          </div>
+          <h1 className={styles.pageTitle}>Proveedores</h1>
         </div>
-        <button className={styles.headerActions} onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={13} /> Nuevo Proveedor
+        <button className={styles.newProviderBtn} onClick={() => setIsCreateModalOpen(true)}>
+          <Plus size={16} strokeWidth={2.5} />
+          <span>Nuevo Proveedor</span>
         </button>
       </div>
 

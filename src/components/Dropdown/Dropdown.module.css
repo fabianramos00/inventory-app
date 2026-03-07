@@ -1,4 +1,4 @@
-/* Custom Dropdown for Select Fields */
+/* Custom Dropdown Component */
 .selectDropdown {
   position: relative;
 }
@@ -21,13 +21,22 @@
   outline: none;
 }
 
-.selectTrigger:hover {
+.selectTrigger:hover:not(:disabled) {
   background: var(--surface-2);
   color: var(--ink-1);
 }
 
 .selectTrigger:focus {
   outline: none;
+}
+
+.selectTrigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selectTriggerDisabled {
+  pointer-events: none;
 }
 
 .selectTriggerActive {
@@ -80,6 +89,25 @@
   font-weight: 500;
 }
 
+.loadingOption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  color: var(--ink-3);
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+}
+
+.emptyOption {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -88,5 +116,14 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

@@ -2,17 +2,74 @@
   @apply space-y-4;
 }
 
-.header {
-  @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 8px;
 }
 
-.title {
-  @apply text-lg font-bold;
+@media (min-width: 640px) {
+  .pageHeader {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
   color: var(--ink-1);
+  letter-spacing: -0.02em;
 }
 
-.headerActions {
-  @apply btn-accent flex items-center gap-1.5 text-xs py-2 px-3;
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+
+.breadcrumbDivider {
+  color: var(--border-strong);
+}
+
+.breadcrumbActive {
+  color: var(--ink-2);
+}
+
+.newProviderBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--ink-1);
+  color: var(--surface);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.newProviderBtn:hover {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.newProviderBtn:active {
+  transform: translateY(1px);
 }
 
 .searchCard {

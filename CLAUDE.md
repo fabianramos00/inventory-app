@@ -51,6 +51,9 @@ src/
 │   └── ModalContext.tsx      # Modal visibility state for backdrop blur (provides isModalOpen, openModal(), closeModal())
 ├── components/
 │   ├── PrivateRoute.tsx      # Route guard — redirects to /login if no token
+│   ├── Dropdown/             # Reusable dropdown component for filters and forms
+│   │   ├── Dropdown.tsx      # Component: value, options, onChange, placeholder, isLoading, onOpen, isControlled, onOpenChange, disabled props
+│   │   └── Dropdown.module.css # Dropdown styling with animations
 │   ├── ProductDropdown/      # Reusable debounced API dropdown for product form fields
 │   │   ├── ProductDropdown.tsx         # Component: openDropdownId, fetchOptions, onSelect, onAddNew props
 │   │   └── ProductDropdown.module.css  # Dropdown/spinner styles
@@ -61,7 +64,8 @@ src/
 │   │   ├── ConfirmDeleteModal.tsx      # Component: productName, onConfirm (async), onClose props; handles isDeleting state + error display
 │   │   └── ConfirmDeleteModal.module.css # Modal styles with destructive button
 │   ├── CreateFormModal/      # Generic portal modal for creating/editing any entity via a field config array
-│   │   └── CreateFormModal.tsx         # Component: title, fields: FieldConfig[], onSubmit (async, caller owns API), onClose, onCreated, initialValues? props
+│   │   ├── CreateFormModal.tsx         # Component: title, fields: FieldConfig[], onSubmit (async, caller owns API), onClose, onCreated, initialValues? props
+│   │   └── CreateFormModal.module.css  # Modal and form field styling
 │   └── layout/
 │       ├── AppLayout.tsx     # Shell: Sidebar + mobile menu backdrop
 │       ├── Sidebar.tsx       # Responsive collapsible sidebar (232px expanded, 80px collapsed icon-only mode)
@@ -163,22 +167,13 @@ Full spec at `.interface-design/system.md`. Summary:
 
 ### Design Rules
 
-1. **One accent color only** — yellow `#FACC15`. Everything else uses ink hierarchy.
-2. **Color contrast structure:**
-   - **Page background:** Light gray `#F3F4F6` (--bg-page) for main content area
-   - **Cards & UI:** White `#ffffff` (--surface) for KPI strips, command bars, tables, sidebar
-   - **Secondary surfaces:** Warm off-white `#F9F8F7` (--surface-2) for table headers, hover states
-3. **Depth strategy:** Focus on rigid structural borders (`1px`) and dense layouts over soft floating drop shadows. Only use drop shadows for floating dropdowns, everything else should snap together (e.g. "Flush Rail" sidebar).
-4. **Sidebar "Flush Rail":** Maintains visual separation from gray page background via `border-right` without rounding the container or adding card shadows. Active items use edge-to-edge flush backgrounds with a sharp left-border indicator.
-5. **KPI Strip (Data Terminal format):**
-   - Solid white background container (`.kpiStrip`)
-   - Flex layout fused side-by-side with 1px structural dividers (`.kpiDivider`). No gap margins or outer shadows.
-   - Column layout inside with a top-left flex header (icon + label) and a massive monospace value below.
-6. **Breadcrumb:** Monospace, dense upper-case text with structural dividers, no background.
-7. **Active Highlights:** Sharp `3px solid var(--accent)` left-bar on active layout containers (sidebar links, command-bar dropdowns).
-8. **Use only Bricolage Grotesque for UI & DM Mono for Data** — Ensure rigorous right-alignment on all tabular numbers.
-9. **Border radius:** `0` to `4px` for structural elements and form controls (cards, inputs, buttons) · `10px` only for top-level layout containers.
-10. **Form Controls:** Text/Number inputs (`.inputField`) use sharp borders (`4px` radius) with solid focus states (`var(--accent)` border and `var(--surface-2)` background), rejecting soft blurred drop shadows. Data entry must feel like a tabular terminal.
+Full design spec in `.interface-design/system.md`. Core principles:
+1. **One accent color only** — yellow `#FACC15`
+2. **Structural borders** (1px) instead of soft shadows, except floating dropdowns
+3. **Border radius:** 4px max for controls, 10px for top-level containers
+4. **Typography:** Bricolage Grotesque for UI, DM Mono for data (right-aligned)
+5. **Active states:** Sharp `3px` left-border with accent color
+6. **Form controls:** Solid focus state with accent border + surface-2 background, no soft shadows
 
 ## Sidebar Behavior
 
@@ -222,65 +217,27 @@ Full spec at `.interface-design/system.md`. Summary:
 
 ## Inventory Page Layout
 
-- **Page Header:**
-  - Breadcrumb: Dense, monospace "INV / Productos" (11px font)
-  - Title "Inventario Principal" + `Nuevo Producto` highly structured button with black background
-- **KPI "Data Terminal" Strip:** 1-column responsive layout that collapses into a single horizontal block on desktop:
-  - Fused block: No margins or borders between items, just 1px internal dividers.
-  - Highlighted labels with corresponding semantic colors.
-  - High impact, strict `DM Mono` numerals.
-- **Unified Command Bar & Filters:**
-  - Placed horizontally in a flush, seamless `.commandBar` without a floating container card.
-  - **Name/ID Search:** Flex-1 width cleanly integrated without nested borders.
-  - Dropdown Triggers: Ghost buttons that bleed into the command bar; active triggers show sharp bottom-borders (on desktop) or left-borders (on mobile) using `var(--accent)`.
-  - **Name/ID Search:** Text input with icon (placeholder: "Nombre o ID...")
-  - **Categoría Dropdown:** Dynamic options from `inventoryApi.getCategories()`
-  - **Material Dropdown:** Dynamic options from `inventoryApi.getMaterials()`
-  - **Marca Dropdown:** Dynamic options from `inventoryApi.getBrands()`
-  - **Disponibilidad Select:** Standard select (Todos, En Stock, Stock Bajo, Sin Stock)
-- **Dynamic Dropdowns (API-Driven with Search):**
-  - Load options from API when dropdown opens
-  - API calls with pagination params: `skip: 0, limit: 10, search: userInput`
-  - Search/filter triggers API request (debounced 300ms to avoid spam)
-  - Response structure: `{ items: [{ id, name }], has_next, skip, limit }`
-  - Click outside to close
-  - Active selection highlighted via `box-shadow: inset 0 -2px 0 var(--accent)`
-  - Loading spinner shows while fetching options
-  - **Structure:** Dropdown trigger button and `.dropdownMenu` must be wrapped in a `.dropdownWrapper` (`position: relative; flex: 1`) to ensure the popover width exactly matches the input button and not the parent container. The wrapper dynamically elevates its z-index when open to avoid overlapping form fields.
-- **Stats Loading:** KPI cards load on component mount via `inventoryApi.getStats()`
-  - Response structure: `{ total_variants, total_stock, low_stock_count, total_inventory_value }`
-  - Maps to state: `{ totalVariants, totalStock, lowStockCount, totalValue }`
-- **Data Table:** Product list with strict industrial styling:
-  - Container fuses seamlessly under the `.commandBar`.
-  - Header: Strict `border-bottom: 1px solid var(--border-strong)`.
-  - Columns 5, 6, 9 (Stock, Mín., Price): Strict right-alignment layout.
-  - Rows: Subtle border-bottom (1px), sharp typographic contrast.
-  - Badges: Sharp `.badge--[status]` classes using transparency rather than solid pastel blobs.
-- **API Parameters:** All filters sent to backend via `inventoryApi.getProducts(params)`:
-  - `skip`: pagination offset `(page - 1) * limit`
-  - `limit`: items per page (default: 10)
-  - `search`: text search from name/ID input
-  - `category_id`: selected category filter (numeric ID)
-  - `material_id`: selected material filter (numeric ID)
-  - `brand_id`: selected brand filter (numeric ID)
-  - `stock_status`: disponibilidad filter (in_stock, low_stock, out_of_stock)
-- **Pagination:** Previous/Next buttons, shows current page and total pages
-- **Loading State:** Spinner while fetching products
-- **Error Handling:** Fallback to mock data if API fails for categories/materials
-- **Spacing:** 32px section gaps, 16px card padding inside containers, consistent grid layouts
+**Breadcrumb:** `INV / Productos` (DM Mono, 11px) | **Header:** Title "Inventario Principal" + button "Nuevo Producto" (black bg, yellow hover)
+
+**KPI Strip:** Loads via `inventoryApi.getStats()` on mount — 4 cards: total_variants, total_stock, low_stock_count, total_inventory_value. 1px dividers, DM Mono values.
+
+**Filters:** Name/ID search (icon input), Category/Material/Marca dropdowns (dynamic, load on open), Disponibilidad (static: Todos/En Stock/Stock Bajo/Sin Stock). Active state: accent bottom border.
+
+**Table:** Product list with right-aligned numeric columns (Stock, Mín., Price), subtle row borders, status badges. Pagination: previous/next buttons with page number.
+
+**API params:** skip, limit, search, category_id, material_id, brand_id, stock_status
 
 ## Product Form Layout (`/inventory/create` & `/inventory/product/:id`)
 
-- **Page Header:**
-  - Breadcrumb: Standardized "INV / Registro" or "INV / Producto" structure.
-  - Actions: Strict block-level buttons (Save, Cancel, Edit, Delete). Action buttons do not float, they snap into place with `4px` minimal rounding.
-- **Data Terminal Panels (`.card`):**
-  - High-density containers with `4px` borders and minimal `0.02` opacity drop shadows to act as structural blocks rather than floating SaaS cards.
-  - Divided horizontally into "Información General", "Valores Económicos", and "Control de Stock".
-- **Form Controls:**
-  - Standard `.inputField`: `border-radius: 4px`, solid borders.
-  - Focus state: Hard switch to `var(--surface-2)` background + `var(--accent)` border, no blurred glow.
-  - Price, Cost, Size, Stock: Strictly `DM Mono` (`.mono`) and right-aligned to create a rigorous data-entry mathematical feel.
+Mode detection: `const isCreateMode = !useParams().id`
+
+**Breadcrumb:** `INV / Registro` or `INV / Producto`
+
+**Layout:** 3 cards: Información General, Valores Económicos, Control de Stock. 4px borders, minimal shadow.
+
+**Controls:** Text inputs (4px radius, solid borders), focus state: surface-2 background + accent border. Numeric fields (Price, Cost, Size, Stock): DM Mono, right-aligned.
+
+**Features:** Product/Category/Material/Brand/Unit dropdowns (with "Agregar nuevo" buttons open CreateEntityModal). Image upload/preview. Save/Cancel/Edit/Delete buttons (block-level, 4px radius).
 
 ## Tailwind Config
 
@@ -349,237 +306,115 @@ Key interfaces: `User`, `Product`, `Category`, `Provider`, `Client`, `Order`, `O
 
 ## Sales API Endpoints (`src/lib/api/sales.ts`)
 
-- `getSales(params?)` — `GET /sales` → `CursorPaginatedResponse<Sale>`
-  - Params: `skip`, `limit`, `user_id`, `client_id`, `no_client`, `payment_method`, `delivery_status`, `payment_status`, `start_date`, `end_date`
+- `getSales(params?)` — `GET /sales` with filters: skip, limit, user_id, client_id, no_client, payment_method, delivery_status, payment_status, start_date, end_date
 - `getSale(id)` — `GET /sales/{id}`
-- `getSaleItems(id, params?)` — `GET /sales/{id}/items` → `CursorPaginatedResponse<SaleItem>`
-- `getClients(params?)` — `GET /sales/clients` → `CursorPaginatedResponse<{ id, name }>`
-  - `createClient(data)` — `POST /sales/clients` — fields: `name` (required), `identity_card?`, `email?`, `phone?`
-- `getStats()` — `GET /sales/stats` → `{ unpaid_count, undelivered_count, total_amount_sum, amount_paid_sum }`
-- `createSale(data)` — `POST /sales`
-- `updateSale(id, data)` — `PATCH /sales/{id}` — fields: `payment_method?`, `amount_paid?`, `client_id?`
-- `deleteSale(id)` — `DELETE /sales/{id}`
-- `addSaleItem(saleId, data)` — `POST /sales/{id}/items` — returns `Sale`; fields: `product_id`, `quantity`, `delivered_quantity`, `unit_price?`
-- `updateSaleItem(saleId, itemId, data)` — `PUT /sales/{id}/items/{itemId}` — returns `Sale`; fields: `quantity?`, `delivered_quantity?`, `unit_price?`
-- `deleteSaleItem(saleId, itemId)` — `DELETE /sales/{id}/items/{itemId}` — returns `Sale`
+- `getSaleItems(id, params?)` — `GET /sales/{id}/items`
+- `getClients(params?)` — `GET /sales/clients`; `createClient(data)` — `POST /sales/clients` (name required, identity_card/email/phone optional)
+- `getStats()` — `GET /sales/stats` → unpaid_count, undelivered_count, total_amount_sum, amount_paid_sum
+- `createSale(data)` — `POST /sales`; `updateSale(id, data)` — `PATCH /sales/{id}` (payment_method?, amount_paid?, client_id?); `deleteSale(id)` — `DELETE /sales/{id}`
+- `addSaleItem(saleId, data)` — `POST /sales/{id}/items` (product_id, quantity, delivered_quantity, unit_price?); `updateSaleItem(saleId, itemId, data)` — `PUT /sales/{id}/items/{itemId}`; `deleteSaleItem(saleId, itemId)` — `DELETE /sales/{id}/items/{itemId}`
 
 ## SaleForm Page (`/sales/create` & `/sales/:id`)
 
 Mode detection: `const isCreateMode = !useParams().id`
 
-### Create mode (`/sales/create`)
-- **Breadcrumb:** `VNT / Nueva Venta`
-- **Layout:** 2-column grid (`3fr 2fr`) — items on left, summary + details on right
-- **Product search:** Debounced input (300ms) → `inventoryApi.getProducts()`. Results dropdown shows name, size, SKU, price, and category/brand/material tags. Selecting adds an item card; duplicate products are blocked.
-- **Item cards:** Yellow left-border accent. Shows product name, SKU badge, category/brand/material tags. Three inputs: Cantidad, Cant. entregada, Precio unit. (empty = `null` in payload = use backend default).
-- **Live validation:** `delivered_quantity ≤ quantity` per item (red border + inline error); `amount_paid ≤ estimated total` (red border + inline error). Save button disabled while errors exist.
-- **Right panel:**
-  - Resumen card: item count + estimated total
-  - Detalles card: Cliente (API dropdown + `+` button opens `CreateFormModal`), Estado pago, Método pago, Monto pagado — all using custom `selectDropdown`/`selectTrigger`/`selectContent` pattern (no native `<select>`)
-- **Payload:** `POST /sales` via `salesApi.createSale(CreateSaleInput)`. On success → navigates to `/sales`.
+**Create mode:** 2-column layout (items left, summary+details right). Breadcrumb `VNT / Nueva Venta`. Debounced product search (300ms), item cards with yellow left-border, fields: Cantidad, Cant. entregada, Precio unit. Right panel has Resumen card (item count + total) and Detalles card (Cliente dropdown + payment fields). Live validation on delivered_quantity and amount_paid. Save via `POST /sales`.
 
-### View/Edit mode (`/sales/:id`)
-- Loads sale via `salesApi.getSale(id)` + items via `salesApi.getSaleItems(id)` in parallel on mount
-- **Page header:** Only "Eliminar" button (opens `ConfirmDeleteModal`). No global edit mode.
-- **Productos card (scoped edit):** "Editar/Cancelar" button in card header activates item editing independently
-  - Edit mode: product search at top; each saved item shows editable inputs + ✓ (PUT) + ✗ (DELETE) with individual loading spinners (`savingItemId`, `deletingItemId`)
-  - New items: selecting from search adds a draft card (POST on ✓, discard on ✗); after POST, items list is re-fetched to get server-assigned id
-  - Live validation: `delivered_quantity ≤ quantity` per item
-- **Detalles de Venta card (scoped edit):** "Editar/Guardar/Cancelar" in card header, independent of items
-  - Editable: Cliente, Método pago, Monto pagado
-  - Live validation: `amount_paid ≤ total`
-  - Saves via `PATCH /sales/{id}`
-- **Two independent edit states:** `isEditingItems: boolean` and `isEditingDetails: boolean` (both can be active simultaneously)
-- **Resumen card:** Total updates live when `isEditingItems`; Debt = `displayTotal − (isEditingDetails ? editAmountPaid : sale.amount_paid)`
-- **CSS pattern:** `.cardHeader` (flex row + border-bottom) + `.cardActions` (flex row for buttons) in `SaleForm.module.css` — used whenever a card needs an inline action button next to its title
-- **Form dropdowns pattern** (`selectDropdown` in SaleForm.module.css): `border: 1px solid var(--border-strong)`, `border-radius: 4px`, height `40px`. Active: `box-shadow: inset 0 -2px 0 var(--accent)`.
+**View/Edit mode:** Two independent scoped edit states — `isEditingItems` (product search + per-item controls) and `isEditingDetails` (Cliente, Método pago, Monto pagado). Per-item controls: ✓ (PUT) + ✗ (DELETE) with spinners. New items draft cards (POST on ✓). Live validation per item. Resumen updates live. Debt = `total − amount_paid`. Delete button opens `ConfirmDeleteModal`.
 
-### Sales table (Sales.tsx)
-- Last column has Eye button (navigate to `/sales/:id`) + Trash button (opens `ConfirmDeleteModal`)
-- After deletion: reloads table and stats via `reloadTrigger` counter state
+**Dropdowns:** Custom pattern in SaleForm.module.css with `border: 1px solid var(--border-strong)`, `height: 40px`, active state: `box-shadow: inset 0 -2px 0 var(--accent)`.
 
 ## Sales Page Layout (`/sales`)
 
-- **Breadcrumb:** `VNT / Registro`
-- **KPI Strip:** Loads from `salesApi.getStats()` on mount — 4 items: Total ventas, Total cobrado, Sin pagar, Sin entregar
-- **Command Bar filters** (right-aligned on desktop):
-  - **Usuario** — debounced API dropdown from `usersApi.getUsers()`, sends `user_id`
-  - **Cliente** — debounced API dropdown from `salesApi.getClients()`, includes "Sin cliente" option → sends `no_client=true`; specific client → sends `client_id`
-  - **Método pago** — static dropdown: `cash`, `credit`, `debit` → sends `payment_method`
-  - **Entrega** — static dropdown: `pending`, `partial`, `delivered` → sends `delivery_status`
-  - **Estado pago** — static dropdown: `paid`, `pending`, `partial` → sends `payment_status`
-  - **Fecha inicio / Fecha fin** — native `<input type="date">` → sends `start_date` / `end_date`
-- **Table columns:** Código, Cliente, Total, Pagado, Deuda, Pago (badge), Entrega (badge), Usuario, Fecha, Ver
-- **Badges:** Defined as local CSS module classes (`.badge--success`, `.badge--warning`, `.badge--destructive`) referenced via `styles[key]`
-- **Pagination:** `has_next`-based prev/next buttons (no total count)
+**Breadcrumb:** `VNT / Registro` | **KPI Strip:** Total ventas, Total cobrado, Sin pagar, Sin entregar (loads from `salesApi.getStats()`)
+
+**Filters:** Usuario (debounced API), Cliente (debounced API + "Sin cliente" option), Método pago (static), Entrega (static), Estado pago (static), Date range (native inputs)
+
+**Table:** Código, Cliente, Total, Pagado, Deuda, Pago (badge), Entrega (badge), Usuario, Fecha, Eye+Trash buttons | **Pagination:** `has_next`-based prev/next
 
 ## Orders API Endpoints (`src/lib/api/orders.ts`)
 
-- `getOrders(params?)` — `GET /supply-chain/purchase-orders` → `CursorPaginatedResponse<Order>`
-  - Params: `skip`, `limit`, `provider_id`, `payment_status`, `status`, `min_date`, `max_date`
-- `getOrder(id)` — `GET /supply-chain/purchase-orders/{id}`
-- `getOrderItems(id, params?)` — `GET /supply-chain/purchase-orders/{id}/items` → `CursorPaginatedResponse<OrderItem>`
-- `createOrder(data: CreateOrderInput)` — `POST /supply-chain/purchase-orders`
-- `updateOrder(id, data)` — `PATCH /supply-chain/purchase-orders/{id}` — fields: `provider_id?`, `status?`, `payment_status?`
-- `addOrderItem(orderId, data)` — `POST /supply-chain/purchase-orders/{id}/items` — returns `Order`; fields: `product_id`, `quantity`, `unit_cost`, `supplier_sku?`
-- `updateOrderItem(orderId, itemId, data)` — `PUT /supply-chain/purchase-orders/{id}/items/{itemId}` — returns `Order`; fields: `quantity?`, `unit_cost?`, `supplier_sku?`
-- `deleteOrderItem(orderId, itemId)` — `DELETE /supply-chain/purchase-orders/{id}/items/{itemId}` — returns `Order`
-- `deleteOrder(id)` — `DELETE /supply-chain/purchase-orders/{id}`
+- `getOrders(params?)` — `GET /supply-chain/purchase-orders` with filters: skip, limit, provider_id, payment_status, status, min_date, max_date
+- `getOrder(id)` — `GET /supply-chain/purchase-orders/{id}`; `getOrderItems(id, params?)` — `GET /supply-chain/purchase-orders/{id}/items`
+- `createOrder(data: CreateOrderInput)` — `POST /supply-chain/purchase-orders`; `updateOrder(id, data)` — `PATCH /supply-chain/purchase-orders/{id}` (provider_id?, status?, payment_status?); `deleteOrder(id)` — `DELETE /supply-chain/purchase-orders/{id}`
+- `addOrderItem(orderId, data)` — `POST /supply-chain/purchase-orders/{id}/items` (product_id, quantity, unit_cost, supplier_sku?); `updateOrderItem(orderId, itemId, data)` — `PUT /supply-chain/purchase-orders/{id}/items/{itemId}`; `deleteOrderItem(orderId, itemId)` — `DELETE /supply-chain/purchase-orders/{id}/items/{itemId}`
 
 ## OrderForm Page (`/orders/create` & `/orders/:id`)
 
 Mode detection: `const isCreateMode = !useParams().id`
 
-### Create mode (`/orders/create`)
-- **Breadcrumb:** `PED / Nuevo Pedido`
-- **Layout:** 2-column grid (`3fr 2fr`) — items on left, summary + details on right
-- **Product search:** Debounced (300ms) → `inventoryApi.getProducts()`. Pre-fills `unit_cost` from `product.cost`.
-- **Item cards:** Yellow left-border accent. Shows product name, SKU badge, category/brand/material tags. Three inputs: Cantidad, Costo unit., SKU prov. (optional text field).
-- **Right panel:**
-  - Resumen card: item count + estimated total cost
-  - Detalles card: Proveedor (required, debounced API dropdown from `providersApi.getProviders()` + `+` button opens `CreateFormModal`), Estado, Estado pago — all using `selectDropdown`/`selectTrigger`/`selectContent` pattern
-- **Validation:** Provider required, at least one item, quantity > 0
-- **Payload:** `POST /supply-chain/purchase-orders` via `ordersApi.createOrder(CreateOrderInput)`. On success → navigates to `/orders`.
+**Create mode:** 2-column layout. Breadcrumb `PED / Nuevo Pedido`. Product search (300ms debounce, pre-fills unit_cost from product.cost). Item cards with fields: Cantidad, Costo unit., SKU prov. (optional). Right panel: Resumen (item count + total) and Detalles (Proveedor required, Estado, Estado pago). Validation: provider required, at least one item, quantity > 0. Save via `POST /supply-chain/purchase-orders`.
 
-### View/Edit mode (`/orders/:id`)
-- Loads order via `ordersApi.getOrder(id)` + items via `ordersApi.getOrderItems(id)` in parallel on mount
-- **Page header:** Only "Eliminar" button (opens `ConfirmDeleteModal`). No global edit mode.
-- **Productos card (scoped edit):** Same pattern as SaleForm — Editar/Cancelar activates product search + per-item controls
-  - Edit mode: each item shows Cantidad, Costo unit., SKU prov. inputs + ✓ (PUT) + ✗ (DELETE)
-  - New items: draft card (POST on ✓, discard on ✗); after POST, items re-fetched
-- **Detalles del Pedido card (scoped edit):** Editar/Guardar/Cancelar, independent of items
-  - Editable: Proveedor, Estado, Estado pago via `PATCH /supply-chain/purchase-orders/{id}`
-- **View item fields:** Cantidad, Costo unit., SKU prov. (shows `—` if null), Subtotal
-- **CSS:** Uses `OrderForm.module.css` (copy of `SaleForm.module.css`) + `.emptyFieldValue` for null supplier_sku display
+**View/Edit mode:** Scoped edit states — `isEditingItems` and `isEditingDetails` (independent). Per-item controls: ✓ (PUT) + ✗ (DELETE). New items draft cards. Detalles editable: Proveedor, Estado, Estado pago via `PATCH`. CSS: `OrderForm.module.css` (copy of `SaleForm.module.css`) with `.emptyFieldValue` for null supplier_sku.
 
 ## Orders Page Layout (`/orders`)
 
-- **Breadcrumb:** `PED / Registro`
-- **No KPI strip** — no stats endpoint
-- **Command Bar filters:**
-  - **Proveedor** — debounced API dropdown from `providersApi.getProviders()`, sends `provider_id`
-  - **Estado pago** — static: `pending`, `paid` → sends `payment_status`
-  - **Estado** — static: `pending`, `sent`, `received`, `cancelled` → sends `status`
-  - **Fecha inicio / Fecha fin** — `<input type="date">` → sends `min_date` / `max_date`
-- **Table columns:** ID, Proveedor, Total, Fecha, Estado, Pago, (Eye + Trash buttons)
-- **Status badges:** `pending/sent` → warning, `received` → success, `cancelled` → destructive
-- **Payment status badges:** `pending` → destructive, `paid` → success
-- **Pagination:** `has_next`-based prev/next
+**Breadcrumb:** `PED / Registro` | **No KPI strip**
+
+**Filters:** Proveedor (debounced API), Estado pago (static: pending/paid), Estado (static: pending/sent/received/cancelled), Date range (native inputs)
+
+**Table:** ID, Proveedor, Total, Fecha, Estado (badge), Pago (badge), Eye+Trash buttons | **Pagination:** `has_next`-based prev/next
 
 ## Providers Page Layout (`/providers`)
 
-- **Breadcrumb:** `PROV / Lista`
-- **Page Header:** Title "Proveedores" + "Nuevo Proveedor" button (right-aligned)
-- **Search Bar:** Debounced input (300ms) — `getProviders({ search, skip, limit })` on change
-- **Card Grid Layout:** Displays providers in responsive 1-column (mobile) → 2-column (tablet) → 3-column (desktop) grid
-- **Provider Cards:** White background with subtle border. Contains:
-  - Card header: Provider name (semibold) + Action buttons (upper right corner)
-    - Contact person (optional, secondary text)
-    - Action buttons: Edit (pencil icon) + Delete (trash icon) positioned to the right — no "Ver" button
-  - Details section: Email icon + address (optional), Phone icon + number (optional)
-- **Modals:**
-  - **Create:** `CreateFormModal` with fields: `name` (required), `contact_info`, `email`, `phone`
-  - **Edit:** Same modal structure but pre-populated with existing provider data via `initialValues` prop
-  - **Delete:** `ConfirmDeleteModal` shows provider name: "¿Estás seguro que deseas eliminar "{name}"?"
-- **ModalContext Integration:** Syncs local modal states (`isCreateModalOpen`, `isEditModalOpen`, `providerToDelete`) with backdrop blur
-- **Pagination:** Offset-based (previous/next buttons). Shows "Página {page} de {totalPages}"
-- **API Calls:**
-  - Create: `POST /supply-chain/providers` via `providersApi.createProvider(data)`
-  - Edit: `PUT /supply-chain/providers/{id}` via `providersApi.updateProvider(id, data)`
-  - Delete: `DELETE /supply-chain/providers/{id}` via `providersApi.deleteProvider(id)`
-  - List: `GET /supply-chain/providers` with pagination and search params
+**Breadcrumb:** `PROV / Lista` | **Header:** Title "Proveedores" + button "Nuevo Proveedor"
+
+**Search:** Debounced input (300ms) calls `providersApi.getProviders({ search, skip, limit })`
+
+**Card Grid:** Responsive 1→2→3 columns. Cards show: name (semibold) + contact_info (optional), details (email, phone), Edit+Delete buttons (no View button)
+
+**Modals:** CreateFormModal (name, contact_info, email, phone) + ConfirmDeleteModal
+
+**Pagination:** Offset-based (previous/next), shows page number
+
+**API:** Create `POST /supply-chain/providers`, Edit `PUT /supply-chain/providers/{id}`, Delete `DELETE /supply-chain/providers/{id}`
 
 ## Clients API Endpoints (`src/lib/api/clients.ts`)
 
-- `getClients(params?)` — `GET /sales/clients` → `CursorPaginatedResponse<Client>`
-  - Params: `search?`, `skip?`, `limit?`
-- `createClient(data)` — `POST /sales/clients` — fields: `name` (required), `identity_card?`, `email?`, `phone?`
-- `updateClient(id, data)` — `PUT /sales/clients/{id}` — fields: `name?`, `identity_card?`, `email?`, `phone?`
-- `deleteClient(id)` — `DELETE /sales/clients/{id}`
+- `getClients(params?)` — `GET /sales/clients` with search, skip, limit
+- `createClient(data)` — `POST /sales/clients` (name required, identity_card/email/phone optional)
+- `updateClient(id, data)` — `PUT /sales/clients/{id}`; `deleteClient(id)` — `DELETE /sales/clients/{id}`
 
 ## Clients Page Layout (`/clients`)
 
-- **Breadcrumb:** `CLI / Lista`
-- **Page Header:** Title "Clientes" + "Nuevo Cliente" button (right-aligned)
-- **Search Bar:** Debounced input (300ms) — `clientsApi.getClients({ search, skip, limit })` on change
-- **Card Grid Layout:** Displays clients in responsive 1-column (mobile) → 2-column (tablet) → 3-column (desktop) grid
-- **Client Cards:** White background with subtle border. Contains:
-  - Card header: Client name (semibold) + Action buttons (upper right corner)
-    - Identity card number (optional, secondary text)
-    - Action buttons: Edit (pencil icon) + Delete (trash icon) positioned to the right — no "Ver" button
-  - Details section: Email icon + email (optional), Phone icon + phone (optional), Created date (always displayed)
-- **Modals:**
-  - **Create:** `CreateFormModal` with fields: `name` (required), `identity_card`, `email`, `phone`
-  - **Edit:** Same modal structure but pre-populated with existing client data via `initialValues` prop
-  - **Delete:** `ConfirmDeleteModal` shows client name: "¿Estás seguro que deseas eliminar "{name}"?"
-- **ModalContext Integration:** Syncs local modal states (`isCreateModalOpen`, `isEditModalOpen`, `clientToDelete`) with backdrop blur
-- **Pagination:** Cursor-based (previous/next buttons based on `has_next` from API)
-- **API Calls:**
-  - Create: `POST /sales/clients` via `clientsApi.createClient(data)`
-  - Edit: `PUT /sales/clients/{id}` via `clientsApi.updateClient(id, data)`
-  - Delete: `DELETE /sales/clients/{id}` via `clientsApi.deleteClient(id)`
-  - List: `GET /sales/clients` with pagination and search params
+**Breadcrumb:** `CLI / Lista` | **Header:** Title "Clientes" + button "Nuevo Cliente"
+
+**Search:** Debounced input (300ms) calls `clientsApi.getClients({ search, skip, limit })`
+
+**Card Grid:** Responsive 1→2→3 columns. Cards show: name (semibold) + identity_card (optional), details (email, phone, created_date), Edit+Delete buttons (no View button)
+
+**Modals:** CreateFormModal (name, identity_card, email, phone) + ConfirmDeleteModal
+
+**Pagination:** Cursor-based (has_next), previous/next buttons
+
+**API:** Create `POST /sales/clients`, Edit `PUT /sales/clients/{id}`, Delete `DELETE /sales/clients/{id}`
 
 ## Users Page Layout (`/users`)
 
-**Access Control:** Route is protected by `SuperuserRoute` component — only users with `is_superuser: true` can access. Non-superusers are redirected to dashboard. Menu item is hidden for non-superusers.
+**Access Control:** Protected by `SuperuserRoute` (redirect non-superusers to dashboard). Menu item hidden for non-superusers.
 
-- **Breadcrumb:** `USR / Gestión` (DM Mono, 11px, 600 weight, uppercase)
-- **Page Header:** Modernized header (matches Sales.tsx pattern) with title "Usuarios" (24px, 700 weight) + "Nuevo Usuario" button (black with yellow hover)
-- **Search Bar:** Debounced input (300ms) — `usersApi.getUsers({ search, skip, limit })` on change
-- **Data Table Layout:** Industrial table structure with columns:
-  - **Usuario** — Avatar (colored circle with initials) + full_name
-  - **Correo** — User email
-  - **Rol** — Badge showing "Administrador" (is_superuser=true, warning badge) or "Usuario" (neutral badge) with icon
-  - **Estado** — Toggle switch for is_active state
-    - Clicking toggle calls `usersApi.updateUser(id, { is_active: !current })` immediately
-    - Shows loading spinner during API call
-    - Green (#16A34A) when active, gray when inactive
-  - **Acciones** — Two icon buttons:
-    - Edit button (pencil icon) — opens `CreateFormModal` with pre-populated user data
-    - Delete button (trash icon) — opens `ConfirmDeleteModal` with user full_name
-- **Modals:**
-  - **Create:** `CreateFormModal` with fields:
-    - `full_name` (required, text)
-    - `email` (required, email type)
-    - `password` (required, password type)
-    - `role` (required, select dropdown with options "Usuario" | "Administrador") — defaults to "Usuario"
-  - **Edit:** Fields:
-    - `full_name` (required, text)
-    - `email` (required, email type)
-    - `password` (optional, password type, always empty — "Dejar en blanco para no cambiar")
-    - `role` (required, select dropdown) — pre-selected with current user's role
-    - Password field is not pre-populated (empty for security)
-    - Only password and modified fields sent to API
-  - **Delete:** `ConfirmDeleteModal` shows: "¿Estás seguro que deseas eliminar "{full_name}"?"
-- **ModalContext Integration:** Syncs local modal states (`isCreateModalOpen`, `isEditModalOpen`, `userToDelete`) with backdrop blur
-- **Pagination:** Offset-based inside table card (matches Sales.tsx pattern). Shows "Página {page}" with flex-end alignment, 1px top border
-- **Loading State:** Spinner shows while fetching users on initial load
-- **API Calls:**
-  - List: `GET /users` with pagination and search params via `usersApi.getUsers(params)`
-  - Create: `POST /users` via `usersApi.createUser(data)` — interface `CreateUserInput` with fields: `full_name`, `email`, `password`, `is_superuser` (derived from role dropdown)
-  - Edit: `PUT /users/{id}` via `usersApi.updateUser(id, data)` — interface `UpdateUserInput` with fields: `full_name?`, `email?`, `password?` (optional), `is_superuser?` (derived from role dropdown)
-  - Delete: `DELETE /users/{id}` via `usersApi.deleteUser(id)`
-  - Toggle Active: `PUT /users/{id}` with `{ is_active: boolean }`
+**Breadcrumb:** `USR / Gestión` | **Header:** Title "Usuarios" (24px, 700 weight) + button "Nuevo Usuario" (black bg, yellow hover)
+
+**Search:** Debounced (300ms) calls `usersApi.getUsers({ search, skip, limit })`
+
+**Table columns:** Usuario (avatar + name), Correo, Rol (badge: "Administrador" if is_superuser), Estado (toggle switch, green when active, calls updateUser immediately with spinner), Acciones (Edit + Delete buttons)
+
+**Modals:**
+- **Create:** full_name, email, password (required), role (select: Usuario/Administrador)
+- **Edit:** full_name, email, password (optional, empty if unchanged), role (pre-selected)
+- **Delete:** ConfirmDeleteModal with full_name
+
+**Pagination:** Offset-based, shows page number, flex-end aligned, 1px top border
+
+**API:** List `GET /users`, Create `POST /users`, Edit `PUT /users/{id}`, Delete `DELETE /users/{id}`, Toggle `PUT /users/{id}` with `{ is_active: boolean }`
 
 ## Inventory API Endpoints (`src/lib/api/inventory.ts`)
 
-**Product Management:**
-- `getProducts(params?)` — `GET /inventory/products` with pagination, search, filters
-- `getProduct(id)` — `GET /inventory/products/{id}`
-- `createProduct(data: CreateProductInput)` — `POST /inventory/products`
-- `updateProduct(id, data)` — `PUT /inventory/products/{id}`
-- `deleteProduct(id)` — `DELETE /inventory/products/{id}`
-
-**Filter/Dropdown Data:**
-- `getCategories(params?)` — `GET /inventory/categories` → returns `PaginatedResponse<FilterOption>`
-- `getMaterials(params?)` — `GET /inventory/materials` → returns `PaginatedResponse<FilterOption>`
-- `getBrands(params?)` — `GET /inventory/brands` → returns `PaginatedResponse<FilterOption>`
-- `getMeasurementUnits(params?)` — `GET /inventory/measurement-units` → returns `PaginatedResponse<FilterOption>`
-- `createMaterial/createCategory/createBrand/createMeasurementUnit` — POST endpoints for entity creation
-
-**Statistics:**
-- `getStats()` — `GET /inventory/products/stats/overview` → returns stats (total variants, stock, low stock count, total value)
+- `getProducts(params?)` — `GET /inventory/products` with pagination, search, filters; `getProduct(id)` — `GET /inventory/products/{id}`
+- `createProduct(data)` — `POST /inventory/products`; `updateProduct(id, data)` — `PUT /inventory/products/{id}`; `deleteProduct(id)` — `DELETE /inventory/products/{id}`
+- Filter dropdowns: `getCategories/getMaterials/getBrands/getMeasurementUnits(params?)` — `GET /inventory/[entity]` with search/skip/limit
+- Create filter entities: `createCategory/createMaterial/createBrand/createMeasurementUnit(data)` — `POST /inventory/[entity]`
+- `getStats()` — `GET /inventory/products/stats/overview` → total_variants, total_stock, low_stock_count, total_inventory_value
 
 ## Path Alias
 
@@ -608,6 +443,10 @@ Mode detection: `const isCreateMode = !useParams().id`
 
 ## Assistant Rules
 
+- **NEVER commit changes without explicit user permission:**
+  - Make changes and let the user decide if/when to commit
+  - Always ask before running `git commit`
+  - This ensures the user maintains control over their repository history
 - **ALWAYS create a plan BEFORE implementing any feature or significant change:**
   - Use `/brainstorming` skill to explore requirements and design
   - Present options and get user approval before writing code
