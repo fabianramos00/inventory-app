@@ -40,6 +40,7 @@ interface SaleItemDraft {
   product_name: string
   product_sku: string
   product_default_price: number
+  product_stock: number
   product_category: string
   product_brand: string
   product_material: string
@@ -71,7 +72,7 @@ export default function SaleForm() {
   const [editingItems, setEditingItems] = useState<{ id: number; quantity: string; delivered_quantity: string; unit_price: string }[]>([])
   const [pendingItems, setPendingItems] = useState<{
     product_id: number; product_name: string; product_sku: string
-    product_default_price: number; product_category: string; product_brand: string; product_material: string
+    product_default_price: number; product_stock: number; product_category: string; product_brand: string; product_material: string
     quantity: string; delivered_quantity: string; unit_price: string
   }[]>([])
   const [isSaving, setIsSaving] = useState(false)
@@ -151,6 +152,8 @@ export default function SaleForm() {
       unit_price: String(item.unit_price),
     })))
     setIsEditingItems(true)
+    setItemError(null)
+    setPendingItemError(null)
   }
 
   function handleCancelEditItems() {
@@ -159,6 +162,8 @@ export default function SaleForm() {
     setPendingItems([])
     setProductSearch('')
     setProductSearchOpen(false)
+    setItemError(null)
+    setPendingItemError(null)
   }
 
   function handleStartEditDetails() {
@@ -201,22 +206,31 @@ export default function SaleForm() {
   }
 
   function updateEditingItem(itemId: number, field: 'quantity' | 'delivered_quantity' | 'unit_price', value: string) {
-    setEditingItems(prev => prev.map(e => e.id === itemId ? { ...e, [field]: value } : e))
+    setEditingItems(prev => prev.map(e => {
+      if (e.id !== itemId) return e
+      // Note: For quantity changes, validation happens on save (need to fetch current stock)
+      return { ...e, [field]: value }
+    }))
   }
 
   async function handleSaveItemField(itemId: number) {
     if (!sale) return
     const editItem = editingItems.find(e => e.id === itemId)
     if (!editItem) return
+
+    const saleItem = saleItems.find(item => item.id === itemId)
+    if (!saleItem) return
+
+    const qty = parseFloat(editItem.quantity) || 1
+
     setSavingItemId(itemId)
     try {
       const res = await salesApi.updateSaleItem(sale.id, itemId, {
-        quantity: parseFloat(editItem.quantity) || 1,
+        quantity: qty,
         delivered_quantity: parseFloat(editItem.delivered_quantity) || 0,
         unit_price: editItem.unit_price !== '' ? parseFloat(editItem.unit_price) || null : null,
       })
       setSale(res.data)
-      const qty = parseFloat(editItem.quantity) || 1
       const price = editItem.unit_price !== '' ? parseFloat(editItem.unit_price) || 0 : 0
       setSaleItems(prev => prev.map(item => item.id === itemId ? {
         ...item,
@@ -225,8 +239,26 @@ export default function SaleForm() {
         unit_price: price,
         subtotal: qty * price,
       } : item))
-    } catch {
-      // keep editing
+      setValidationError(null)
+    } catch (err: any) {
+      console.error('Error saving item:', err)
+      const detail = err.response?.data?.detail || err.message || ''
+      console.error('Setting item error:', detail)
+
+      // Translate error message to Spanish
+      let errorMessage = 'Error al actualizar el artículo'
+      if (detail.includes('Insufficient stock')) {
+        const match = detail.match(/Available: (\d+), Requested: (\d+)/)
+        if (match) {
+          const available = match[1]
+          const requested = match[2]
+          errorMessage = `Stock insuficiente. Disponible: ${available}, solicitado: ${requested}`
+        }
+      } else if (detail) {
+        errorMessage = detail
+      }
+
+      setItemError({ itemId, message: errorMessage })
     } finally {
       setSavingItemId(null)
     }
@@ -250,6 +282,7 @@ export default function SaleForm() {
   function handleAddPendingItem(product: Product) {
     setProductSearch('')
     setProductSearchOpen(false)
+    if ((product.stock_quantity ?? 0) === 0) return // Cannot add if no stock
     if (saleItems.some(i => i.product_id === product.id) || pendingItems.some(p => p.product_id === product.id)) return
     const defaultPrice = product.sale_price ?? product.price ?? 0
     setPendingItems(prev => [...prev, {
@@ -257,6 +290,7 @@ export default function SaleForm() {
       product_name: product.name,
       product_sku: product.sku,
       product_default_price: defaultPrice,
+      product_stock: product.stock_quantity ?? 0,
       product_category: product.category?.name ?? '',
       product_brand: product.brand?.name ?? '',
       product_material: product.material?.name ?? '',
@@ -267,7 +301,17 @@ export default function SaleForm() {
   }
 
   function updatePendingItem(productId: number, field: 'quantity' | 'delivered_quantity' | 'unit_price', value: string) {
-    setPendingItems(prev => prev.map(p => p.product_id === productId ? { ...p, [field]: value } : p))
+    setPendingItems(prev => prev.map(p => {
+      if (p.product_id !== productId) return p
+      if (field === 'quantity') {
+        const qty = parseFloat(value) || 0
+        const maxQty = p.product_stock
+        // Limit quantity to available stock
+        const limitedQty = Math.min(qty, maxQty)
+        return { ...p, [field]: String(limitedQty) }
+      }
+      return { ...p, [field]: value }
+    }))
   }
 
   function handleDiscardPendingItem(productId: number) {
@@ -278,6 +322,7 @@ export default function SaleForm() {
     if (!sale) return
     const pending = pendingItems.find(p => p.product_id === productId)
     if (!pending) return
+
     try {
       const res = await salesApi.addSaleItem(sale.id, {
         product_id: pending.product_id,
@@ -304,7 +349,26 @@ export default function SaleForm() {
         }])
       }
       setPendingItems(prev => prev.filter(p => p.product_id !== productId))
-    } catch {
+      setPendingItemError(null)
+    } catch (err: any) {
+      console.error('Error adding pending item:', err)
+      const detail = err.response?.data?.detail || err.message || ''
+      console.error('Setting pending item error:', detail)
+
+      // Translate error message to Spanish
+      let errorMessage = 'Error al agregar el artículo'
+      if (detail.includes('Insufficient stock')) {
+        const match = detail.match(/Available: (\d+), Requested: (\d+)/)
+        if (match) {
+          const available = match[1]
+          const requested = match[2]
+          errorMessage = `Stock insuficiente. Disponible: ${available}, solicitado: ${requested}`
+        }
+      } else if (detail) {
+        errorMessage = detail
+      }
+
+      setPendingItemError({ productId, message: errorMessage })
       // keep pending so user can retry
     }
   }
@@ -368,6 +432,8 @@ export default function SaleForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [itemError, setItemError] = useState<{ itemId: number; message: string } | null>(null)
+  const [pendingItemError, setPendingItemError] = useState<{ productId: number; message: string } | null>(null)
 
   // Product search debounce + API
   useEffect(() => {
@@ -425,6 +491,7 @@ export default function SaleForm() {
   }, [])
 
   function addProduct(product: Product) {
+    if ((product.stock_quantity ?? 0) === 0) return // Cannot add if no stock
     if (items.some(i => i.product_id === product.id)) {
       setProductSearch('')
       setProductSearchOpen(false)
@@ -435,6 +502,7 @@ export default function SaleForm() {
       product_name: product.name,
       product_sku: product.sku,
       product_default_price: product.sale_price ?? product.price ?? 0,
+      product_stock: product.stock_quantity ?? 0,
       product_category: product.category?.name ?? '',
       product_brand: product.brand?.name ?? '',
       product_material: product.material?.name ?? '',
@@ -573,6 +641,8 @@ export default function SaleForm() {
           </div>
         </div>
 
+        {apiError && <div className={styles.errorBox}>{apiError}</div>}
+
         <div className={styles.sectionsGrid}>
           <section className={styles.card}>
             <div className={styles.cardHeader}>
@@ -615,28 +685,39 @@ export default function SaleForm() {
                     ) : productResults.length === 0 ? (
                       <div className={`${styles.productOption} ${styles.productOptionEmpty}`}>Sin resultados</div>
                     ) : (
-                      productResults.map(p => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          className={`${styles.productOption} ${saleItems.some(i => i.product_id === p.id) || pendingItems.some(pi => pi.product_id === p.id) ? styles.productOptionAdded : ''}`}
-                          onClick={() => handleAddPendingItem(p)}
-                        >
-                          <div className={styles.productOptionInfo}>
-                            <span className={styles.productOptionName}>{p.name}</span>
-                            {p.size_value && <span className={styles.productOptionSize}>{p.size_value} {p.measurement_unit?.abbreviation}</span>}
-                            <div className={styles.productOptionTags}>
-                              {p.category?.name && <span className={styles.productOptionTag}>{p.category.name}</span>}
-                              {p.brand?.name && <span className={styles.productOptionTag}>{p.brand.name}</span>}
-                              {p.material?.name && <span className={styles.productOptionTag}>{p.material.name}</span>}
+                      productResults.map(p => {
+                        const isAdded = saleItems.some(i => i.product_id === p.id) || pendingItems.some(pi => pi.product_id === p.id)
+                        const hasNoStock = (p.stock_quantity ?? 0) === 0
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            disabled={hasNoStock}
+                            className={`${styles.productOption} ${isAdded ? styles.productOptionAdded : ''} ${hasNoStock ? styles.productOptionDisabled : ''}`}
+                            onClick={() => handleAddPendingItem(p)}
+                            title={hasNoStock ? 'Sin stock disponible' : ''}
+                          >
+                            <div className={styles.productOptionInfo}>
+                              <span className={styles.productOptionName}>{p.name}</span>
+                              {p.size_value && <span className={styles.productOptionSize}>{p.size_value} {p.measurement_unit?.abbreviation}</span>}
+                              <div className={styles.productOptionTags}>
+                                {p.category?.name && <span className={styles.productOptionTag}>{p.category.name}</span>}
+                                {p.brand?.name && <span className={styles.productOptionTag}>{p.brand.name}</span>}
+                                {p.material?.name && <span className={styles.productOptionTag}>{p.material.name}</span>}
+                              </div>
                             </div>
-                          </div>
-                          <div className={styles.productOptionMeta}>
-                            <span className={styles.productOptionSku}>{p.sku}</span>
-                            <span className={styles.productOptionPrice}>$ {(p.sale_price ?? p.price ?? 0).toFixed(2)}</span>
-                          </div>
-                        </button>
-                      ))
+                            <div className={styles.productOptionMeta}>
+                              <span className={styles.productOptionSku}>{p.sku}</span>
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span className={styles.productOptionPrice}>$ {(p.sale_price ?? p.price ?? 0).toFixed(2)}</span>
+                                <span style={{ fontSize: '12px', color: hasNoStock ? '#DC2626' : '#64748B' }}>
+                                  Stock: {p.stock_quantity ?? 0}
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      })
                     )}
                   </div>
                 )}
@@ -655,7 +736,12 @@ export default function SaleForm() {
                     const editItem = editingItems.find(e => e.id === item.id)
                     if (!editItem) return null
                     return (
-                      <div key={item.id} className={styles.itemCard}>
+                      <div key={item.id} className={`${styles.itemCard} ${itemError?.itemId === item.id ? styles.itemCardError : ''}`}>
+                        {itemError?.itemId === item.id && (
+                          <div style={{ padding: '12px', backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: '4px', marginBottom: '12px', color: '#DC2626', fontSize: '13px' }}>
+                            {itemError.message}
+                          </div>
+                        )}
                         <div className={styles.itemHeader}>
                           <div className={styles.itemIdentity}>
                             <div className={styles.itemNameRow}>
@@ -769,7 +855,12 @@ export default function SaleForm() {
                   )
                 })}
                 {isEditingItems && pendingItems.map(pending => (
-                  <div key={pending.product_id} className={`${styles.itemCard} ${styles.itemCardPending}`}>
+                  <div key={pending.product_id} className={`${styles.itemCard} ${styles.itemCardPending} ${pendingItemError?.productId === pending.product_id ? styles.itemCardError : ''}`}>
+                    {pendingItemError?.productId === pending.product_id && (
+                      <div style={{ padding: '12px', backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: '4px', marginBottom: '12px', color: '#DC2626', fontSize: '13px' }}>
+                        {pendingItemError.message}
+                      </div>
+                    )}
                     <div className={styles.itemHeader}>
                       <div className={styles.itemIdentity}>
                         <div className={styles.itemNameRow}>
@@ -780,6 +871,9 @@ export default function SaleForm() {
                           {pending.product_category && <span className={styles.itemTag}>{pending.product_category}</span>}
                           {pending.product_brand && <span className={styles.itemTag}>{pending.product_brand}</span>}
                           {pending.product_material && <span className={styles.itemTag}>{pending.product_material}</span>}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
+                          Stock disponible: <span style={{ fontWeight: 600 }}>{pending.product_stock}</span>
                         </div>
                       </div>
                       <div className={styles.itemEditActions}>
@@ -1070,28 +1164,39 @@ export default function SaleForm() {
                     Sin resultados
                   </div>
                 ) : (
-                  productResults.map(p => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      className={`${styles.productOption} ${items.some(i => i.product_id === p.id) ? styles.productOptionAdded : ''}`}
-                      onClick={() => addProduct(p)}
-                    >
-                      <div className={styles.productOptionInfo}>
-                        <span className={styles.productOptionName}>{p.name}</span>
-                        {p.size_value && <span className={styles.productOptionSize}>{p.size_value} {p.measurement_unit?.abbreviation}</span>}
-                        <div className={styles.productOptionTags}>
-                          {p.category?.name && <span className={styles.productOptionTag}>{p.category.name}</span>}
-                          {p.brand?.name && <span className={styles.productOptionTag}>{p.brand.name}</span>}
-                          {p.material?.name && <span className={styles.productOptionTag}>{p.material.name}</span>}
+                  productResults.map(p => {
+                    const isAdded = items.some(i => i.product_id === p.id)
+                    const hasNoStock = (p.stock_quantity ?? 0) === 0
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        disabled={hasNoStock}
+                        className={`${styles.productOption} ${isAdded ? styles.productOptionAdded : ''} ${hasNoStock ? styles.productOptionDisabled : ''}`}
+                        onClick={() => addProduct(p)}
+                        title={hasNoStock ? 'Sin stock disponible' : ''}
+                      >
+                        <div className={styles.productOptionInfo}>
+                          <span className={styles.productOptionName}>{p.name}</span>
+                          {p.size_value && <span className={styles.productOptionSize}>{p.size_value} {p.measurement_unit?.abbreviation}</span>}
+                          <div className={styles.productOptionTags}>
+                            {p.category?.name && <span className={styles.productOptionTag}>{p.category.name}</span>}
+                            {p.brand?.name && <span className={styles.productOptionTag}>{p.brand.name}</span>}
+                            {p.material?.name && <span className={styles.productOptionTag}>{p.material.name}</span>}
+                          </div>
                         </div>
-                      </div>
-                      <div className={styles.productOptionMeta}>
-                        <span className={styles.productOptionSku}>{p.sku}</span>
-                        <span className={styles.productOptionPrice}>$ {(p.sale_price ?? p.price ?? 0).toFixed(2)}</span>
-                      </div>
-                    </button>
-                  ))
+                        <div className={styles.productOptionMeta}>
+                          <span className={styles.productOptionSku}>{p.sku}</span>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span className={styles.productOptionPrice}>$ {(p.sale_price ?? p.price ?? 0).toFixed(2)}</span>
+                            <span style={{ fontSize: '12px', color: hasNoStock ? '#DC2626' : '#64748B' }}>
+                              Stock: {p.stock_quantity ?? 0}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })
                 )}
               </div>
             )}
@@ -1121,6 +1226,9 @@ export default function SaleForm() {
                           {item.product_category && <span className={styles.itemTag}>{item.product_category}</span>}
                           {item.product_brand && <span className={styles.itemTag}>{item.product_brand}</span>}
                           {item.product_material && <span className={styles.itemTag}>{item.product_material}</span>}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
+                          Stock disponible: <span style={{ fontWeight: 600 }}>{item.product_stock}</span>
                         </div>
                       </div>
                       <button type="button" className={styles.removeBtn} onClick={() => removeItem(index)} title="Quitar producto">

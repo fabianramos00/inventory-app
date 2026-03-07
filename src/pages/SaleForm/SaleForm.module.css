@@ -422,6 +422,16 @@
   cursor: default;
 }
 
+.productOptionDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--ink-3);
+}
+
+.productOptionDisabled:hover {
+  background: transparent;
+}
+
 .productOptionEmpty {
   color: var(--ink-3);
   font-size: 13px;
