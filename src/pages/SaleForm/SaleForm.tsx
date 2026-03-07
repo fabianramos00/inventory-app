@@ -5,7 +5,7 @@ import styles from './SaleForm.module.css'
 import { salesApi } from '@/lib/api/sales'
 import { inventoryApi } from '@/lib/api/inventory'
 import { useModalContext } from '@/context/ModalContext'
-import CreateClientModal from '@/components/CreateClientModal/CreateClientModal'
+import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
 import type { Product, Sale, SaleItem, FilterOption, CreateSaleInput, PaymentStatus, PaymentMethod } from '@/types'
 
@@ -47,6 +47,13 @@ interface SaleItemDraft {
   delivered_quantity: number
   unit_price: string
 }
+
+const CLIENT_FIELDS: FieldConfig[] = [
+  { key: 'name', label: 'Nombre', placeholder: 'Nombre del cliente', required: true },
+  { key: 'identity_card', label: 'Cédula de identidad (opcional)', placeholder: 'Número de cédula' },
+  { key: 'email', label: 'Correo electrónico (opcional)', placeholder: 'correo@ejemplo.com', type: 'email' },
+  { key: 'phone', label: 'Teléfono (opcional)', placeholder: 'Número de teléfono', type: 'tel' },
+]
 
 export default function SaleForm() {
   const navigate = useNavigate()
@@ -331,6 +338,22 @@ export default function SaleForm() {
   const [openFormDropdown, setOpenFormDropdown] = useState<string | null>(null)
   const paymentStatusRef = useRef<HTMLDivElement>(null)
   const paymentMethodRef = useRef<HTMLDivElement>(null)
+
+  async function submitCreateClient(v: Record<string, string>) {
+    const res = await salesApi.createClient({
+      name: v.name,
+      ...(v.identity_card && { identity_card: v.identity_card }),
+      ...(v.email && { email: v.email }),
+      ...(v.phone && { phone: v.phone }),
+    })
+    return res.data
+  }
+
+  function handleClientCreated(client: { id: number; name: string }) {
+    setClientOptions(prev => [client, ...prev.filter(c => c.id !== client.id)])
+    setClientId(client.id)
+    setShowCreateClient(false)
+  }
 
   // Create client modal
   const [showCreateClient, setShowCreateClient] = useState(false)
@@ -1319,13 +1342,12 @@ export default function SaleForm() {
         </div>
       </div>
       {showCreateClient && (
-        <CreateClientModal
+        <CreateFormModal
+          title="Agregar Cliente"
+          fields={CLIENT_FIELDS}
+          onSubmit={submitCreateClient}
           onClose={() => setShowCreateClient(false)}
-          onCreated={client => {
-            setClientOptions(prev => [client, ...prev.filter(c => c.id !== client.id)])
-            setClientId(client.id)
-            setShowCreateClient(false)
-          }}
+          onCreated={handleClientCreated}
         />
       )}
     </form>

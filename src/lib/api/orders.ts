@@ -15,7 +15,7 @@ export const ordersApi = {
     api.post<Order>('/supply-chain/purchase-orders', data),
 
   updateOrder: (id: number, data: { provider_id?: number; status?: OrderStatus; payment_status?: OrderPaymentStatus }) =>
-    api.patch<Order>(`/supply-chain/purchase-orders/${id}`, data),
+    api.put<Order>(`/supply-chain/purchase-orders/${id}`, data),
 
   addOrderItem: (orderId: number, data: { product_id: number; quantity: number; unit_cost: number; supplier_sku?: string }) =>
     api.post<Order>(`/supply-chain/purchase-orders/${orderId}/items`, data),

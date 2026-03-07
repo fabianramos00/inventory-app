@@ -60,8 +60,8 @@ src/
 │   ├── ConfirmDeleteModal/   # Portal modal for confirming product/sale deletion
 │   │   ├── ConfirmDeleteModal.tsx      # Component: productName, onConfirm (async), onClose props; handles isDeleting state + error display
 │   │   └── ConfirmDeleteModal.module.css # Modal styles with destructive button
-│   ├── CreateClientModal/    # Portal modal for creating a new sale client
-│   │   └── CreateClientModal.tsx       # Component: onClose, onCreated props; fields: name (required), identity_card, email, phone
+│   ├── CreateFormModal/      # Generic portal modal for creating any entity via a field config array
+│   │   └── CreateFormModal.tsx         # Component: title, fields: FieldConfig[], onSubmit (async, caller owns API), onClose, onCreated props
 │   └── layout/
 │       ├── AppLayout.tsx     # Shell: Sidebar + mobile menu backdrop
 │       ├── Sidebar.tsx       # Responsive collapsible sidebar (232px expanded, 80px collapsed icon-only mode)
@@ -372,7 +372,7 @@ Mode detection: `const isCreateMode = !useParams().id`
 - **Live validation:** `delivered_quantity ≤ quantity` per item (red border + inline error); `amount_paid ≤ estimated total` (red border + inline error). Save button disabled while errors exist.
 - **Right panel:**
   - Resumen card: item count + estimated total
-  - Detalles card: Cliente (API dropdown + `+` button opens `CreateClientModal`), Estado pago, Método pago, Monto pagado — all using custom `selectDropdown`/`selectTrigger`/`selectContent` pattern (no native `<select>`)
+  - Detalles card: Cliente (API dropdown + `+` button opens `CreateFormModal`), Estado pago, Método pago, Monto pagado — all using custom `selectDropdown`/`selectTrigger`/`selectContent` pattern (no native `<select>`)
 - **Payload:** `POST /sales` via `salesApi.createSale(CreateSaleInput)`. On success → navigates to `/sales`.
 
 ### View/Edit mode (`/sales/:id`)
@@ -434,7 +434,7 @@ Mode detection: `const isCreateMode = !useParams().id`
 - **Item cards:** Yellow left-border accent. Shows product name, SKU badge, category/brand/material tags. Three inputs: Cantidad, Costo unit., SKU prov. (optional text field).
 - **Right panel:**
   - Resumen card: item count + estimated total cost
-  - Detalles card: Proveedor (required, debounced API dropdown from `providersApi.getProviders()`), Estado, Estado pago — all using `selectDropdown`/`selectTrigger`/`selectContent` pattern
+  - Detalles card: Proveedor (required, debounced API dropdown from `providersApi.getProviders()` + `+` button opens `CreateFormModal`), Estado, Estado pago — all using `selectDropdown`/`selectTrigger`/`selectContent` pattern
 - **Validation:** Provider required, at least one item, quantity > 0
 - **Payload:** `POST /supply-chain/purchase-orders` via `ordersApi.createOrder(CreateOrderInput)`. On success → navigates to `/orders`.
 
@@ -499,6 +499,13 @@ Mode detection: `const isCreateMode = !useParams().id`
 - Currency formatted as `$ X,XXX.XX` (Peruvian Sol)
 - Ensure all pages are mobile-responsive, utilizing Tailwind breakpoints (`sm:`, `md:`) and wrapping wide data tables in `overflow-x-auto` to allow horizontal scrolling on small screens.
 - **No redundant or unnecessary comments:** Write self-documenting code with clear variable/function names. Only add comments to explain WHY, not WHAT. Avoid comments like `// increment counter` or `// set loading state`. Remove comments that simply repeat the code.
+- **No logic or complex expressions inside JSX props:** Always extract into named variables or functions defined before the `return`. This applies to:
+  - Event handlers with more than a single setter call → extract as `function handleXxx() {}`
+  - `onSubmit`, `onCreated`, `onConfirm` callbacks with API calls → extract as `async function submitXxx()` / `function handleXxxCreated()`
+  - Derived values computed inline in JSX → extract as `const xxxLabel = ...` or `const isXxx = ...`
+  - Module-level constants for config arrays (e.g. field configs, column definitions) → define at module level, outside the component
+  - ✅ OK inline: `onClick={() => setState(false)}`, `onChange={e => setValue(e.target.value)}`
+  - ❌ Not OK inline: `onSubmit={async v => { const res = await api.call(...); return res.data }}` or multi-line `onCreated` handlers
 
 ## Assistant Rules
 

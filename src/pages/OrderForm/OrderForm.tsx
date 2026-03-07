@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, Search, X, Loader, ChevronDown, Package, Pencil, Check, Trash2 } from 'lucide-react'
+import { ChevronLeft, Search, X, Loader, ChevronDown, Package, Pencil, Check, Trash2, Plus } from 'lucide-react'
 import styles from './OrderForm.module.css'
 import { ordersApi } from '@/lib/api/orders'
 import { inventoryApi } from '@/lib/api/inventory'
 import { providersApi } from '@/lib/api/providers'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
+import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 import type { Product, Order, OrderItem, OrderStatus, OrderPaymentStatus, FilterOption, CreateOrderInput } from '@/types'
 
 const statusLabel: Record<string, string> = {
@@ -37,6 +38,13 @@ interface OrderItemDraft {
   unit_cost: string
   supplier_sku: string
 }
+
+const PROVIDER_FIELDS: FieldConfig[] = [
+  { key: 'name', label: 'Nombre', placeholder: 'Nombre del proveedor', required: true },
+  { key: 'contact_info', label: 'Información de contacto (opcional)', placeholder: 'Persona de contacto u otra info' },
+  { key: 'email', label: 'Correo electrónico (opcional)', placeholder: 'correo@ejemplo.com', type: 'email' },
+  { key: 'phone', label: 'Teléfono (opcional)', placeholder: 'Número de teléfono', type: 'tel' },
+]
 
 export default function OrderForm() {
   const navigate = useNavigate()
@@ -76,6 +84,7 @@ export default function OrderForm() {
   const editProviderTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showCreateProvider, setShowCreateProvider] = useState(false)
   const { openModal: contextOpenModal, closeModal: contextCloseModal } = useModalContext()
 
   // Create mode state
@@ -126,9 +135,9 @@ export default function OrderForm() {
   }, [id, isCreateMode, navigate])
 
   useEffect(() => {
-    if (showDeleteModal) contextOpenModal()
+    if (showDeleteModal || showCreateProvider) contextOpenModal()
     else contextCloseModal()
-  }, [showDeleteModal, contextOpenModal, contextCloseModal])
+  }, [showDeleteModal, showCreateProvider, contextOpenModal, contextCloseModal])
 
   // ─── Edit provider search (view mode) ─────────────────────────────────────
   useEffect(() => {
@@ -276,6 +285,24 @@ export default function OrderForm() {
     if (!order) return
     await ordersApi.deleteOrder(order.id)
     navigate('/orders')
+  }
+
+  async function submitCreateProvider(v: Record<string, string>) {
+    const res = await providersApi.createProvider({
+      name: v.name,
+      ...(v.contact_info && { contact_info: v.contact_info }),
+      ...(v.email && { email: v.email }),
+      ...(v.phone && { phone: v.phone }),
+    })
+    return { id: res.data.id, name: res.data.name }
+  }
+
+  function handleProviderCreated(provider: { id: number; name: string }) {
+    setProviderOptions(prev => [provider, ...prev.filter(p => p.id !== provider.id)])
+    setProviderId(provider.id)
+    setEditProviderOptions(prev => [provider, ...prev.filter(p => p.id !== provider.id)])
+    setEditProviderId(provider.id)
+    setShowCreateProvider(false)
   }
 
   function updateEditingItem(itemId: number, field: 'quantity' | 'unit_cost' | 'supplier_sku', value: string) {
@@ -809,27 +836,37 @@ export default function OrderForm() {
                   <dt className={styles.fieldLabel}>Proveedor</dt>
                   {isEditingDetails ? (
                     <dd className={styles.fieldValueFull}>
-                      <div className={styles.selectDropdown} ref={editProviderRef}>
+                      <div className={styles.selectWithAction}>
+                        <div className={styles.selectDropdown} ref={editProviderRef}>
+                          <button
+                            type="button"
+                            className={`${styles.selectTrigger} ${editProviderId ? styles.selectTriggerActive : ''}`}
+                            onClick={() => { setEditProviderOpen(o => !o); setEditProviderSearch('') }}
+                          >
+                            <span>{editProviderOptions.find(p => p.id === editProviderId)?.name ?? 'Seleccionar proveedor'}</span>
+                            <ChevronDown size={13} />
+                          </button>
+                          {editProviderOpen && (
+                            <div className={styles.selectContent}>
+                              <input type="text" className={styles.selectSearch} placeholder="Buscar proveedor..." value={editProviderSearch} onChange={e => setEditProviderSearch(e.target.value)} autoFocus />
+                              <div className={styles.selectOptions}>
+                                {editProviderLoading ? (
+                                  <div className={styles.selectOption} style={{ justifyContent: 'center' }}><Loader size={13} className={styles.spinner} /></div>
+                                ) : editProviderOptions.map(p => (
+                                  <div key={p.id} className={`${styles.selectOption} ${editProviderId === p.id ? styles.selectOptionActive : ''}`} onClick={() => { setEditProviderId(p.id); setEditProviderOpen(false) }}>{p.name}</div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         <button
                           type="button"
-                          className={`${styles.selectTrigger} ${editProviderId ? styles.selectTriggerActive : ''}`}
-                          onClick={() => { setEditProviderOpen(o => !o); setEditProviderSearch('') }}
+                          className={styles.addClientBtn}
+                          onClick={() => { setEditProviderOpen(false); setShowCreateProvider(true) }}
+                          title="Crear nuevo proveedor"
                         >
-                          <span>{editProviderOptions.find(p => p.id === editProviderId)?.name ?? 'Seleccionar proveedor'}</span>
-                          <ChevronDown size={13} />
+                          <Plus size={14} />
                         </button>
-                        {editProviderOpen && (
-                          <div className={styles.selectContent}>
-                            <input type="text" className={styles.selectSearch} placeholder="Buscar proveedor..." value={editProviderSearch} onChange={e => setEditProviderSearch(e.target.value)} autoFocus />
-                            <div className={styles.selectOptions}>
-                              {editProviderLoading ? (
-                                <div className={styles.selectOption} style={{ justifyContent: 'center' }}><Loader size={13} className={styles.spinner} /></div>
-                              ) : editProviderOptions.map(p => (
-                                <div key={p.id} className={`${styles.selectOption} ${editProviderId === p.id ? styles.selectOptionActive : ''}`} onClick={() => { setEditProviderId(p.id); setEditProviderOpen(false) }}>{p.name}</div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </dd>
                   ) : (
@@ -923,6 +960,15 @@ export default function OrderForm() {
             productName={`Pedido #${order.id} — ${order.provider.name}`}
             onConfirm={handleDeleteOrder}
             onClose={() => setShowDeleteModal(false)}
+          />
+        )}
+        {showCreateProvider && (
+          <CreateFormModal
+            title="Agregar Proveedor"
+            fields={PROVIDER_FIELDS}
+            onSubmit={submitCreateProvider}
+            onClose={() => setShowCreateProvider(false)}
+            onCreated={handleProviderCreated}
           />
         )}
       </div>
@@ -1100,27 +1146,37 @@ export default function OrderForm() {
               <div className={styles.fieldRowEditing}>
                 <dt className={styles.fieldLabel}>Proveedor *</dt>
                 <dd className={styles.fieldValueFull}>
-                  <div className={styles.selectDropdown} ref={providerRef}>
+                  <div className={styles.selectWithAction}>
+                    <div className={styles.selectDropdown} ref={providerRef}>
+                      <button
+                        type="button"
+                        className={`${styles.selectTrigger} ${providerId ? styles.selectTriggerActive : ''}`}
+                        onClick={() => { setProviderOpen(o => !o); setProviderSearch('') }}
+                      >
+                        <span>{selectedProviderName}</span>
+                        <ChevronDown size={13} />
+                      </button>
+                      {providerOpen && (
+                        <div className={styles.selectContent}>
+                          <input type="text" className={styles.selectSearch} placeholder="Buscar proveedor..." value={providerSearch} onChange={e => setProviderSearch(e.target.value)} autoFocus />
+                          <div className={styles.selectOptions}>
+                            {providerLoading ? (
+                              <div className={styles.selectOption} style={{ justifyContent: 'center' }}><Loader size={13} className={styles.spinner} /></div>
+                            ) : providerOptions.map(p => (
+                              <div key={p.id} className={`${styles.selectOption} ${providerId === p.id ? styles.selectOptionActive : ''}`} onClick={() => { setProviderId(p.id); setProviderOpen(false) }}>{p.name}</div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <button
                       type="button"
-                      className={`${styles.selectTrigger} ${providerId ? styles.selectTriggerActive : ''}`}
-                      onClick={() => { setProviderOpen(o => !o); setProviderSearch('') }}
+                      className={styles.addClientBtn}
+                      onClick={() => { setProviderOpen(false); setShowCreateProvider(true) }}
+                      title="Crear nuevo proveedor"
                     >
-                      <span>{selectedProviderName}</span>
-                      <ChevronDown size={13} />
+                      <Plus size={14} />
                     </button>
-                    {providerOpen && (
-                      <div className={styles.selectContent}>
-                        <input type="text" className={styles.selectSearch} placeholder="Buscar proveedor..." value={providerSearch} onChange={e => setProviderSearch(e.target.value)} autoFocus />
-                        <div className={styles.selectOptions}>
-                          {providerLoading ? (
-                            <div className={styles.selectOption} style={{ justifyContent: 'center' }}><Loader size={13} className={styles.spinner} /></div>
-                          ) : providerOptions.map(p => (
-                            <div key={p.id} className={`${styles.selectOption} ${providerId === p.id ? styles.selectOptionActive : ''}`} onClick={() => { setProviderId(p.id); setProviderOpen(false) }}>{p.name}</div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </dd>
               </div>
@@ -1185,6 +1241,15 @@ export default function OrderForm() {
           </section>
         </div>
       </div>
+      {showCreateProvider && (
+        <CreateFormModal
+          title="Agregar Proveedor"
+          fields={PROVIDER_FIELDS}
+          onSubmit={submitCreateProvider}
+          onClose={() => setShowCreateProvider(false)}
+          onCreated={handleProviderCreated}
+        />
+      )}
     </form>
   )
 }

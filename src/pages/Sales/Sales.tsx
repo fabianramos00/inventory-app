@@ -487,7 +487,11 @@ export default function Sales() {
                   <tbody>
                     {sales.map(s => (
                       <tr key={s.id}>
-                        <td><span className={styles.codeCell}>{s.id}</span></td>
+                        <td>
+                          <button className={styles.codeLink} onClick={() => navigate(`/sales/${s.id}`)} title="Ver venta">
+                            #{s.id}
+                          </button>
+                        </td>
                         <td><span className={styles.customerCell}>{s.client?.name ?? <span className={styles.emptyCell}>Sin cliente</span>}</span></td>
                         <td><span className={styles.totalCell}>$ {s.total_amount.toFixed(2)}</span></td>
                         <td><span className={styles.amountCell}>$ {s.amount_paid.toFixed(2)}</span></td>

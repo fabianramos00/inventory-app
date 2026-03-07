@@ -50,7 +50,7 @@ export interface Product {
 export interface Provider {
   id: number
   name: string
-  contact_name?: string
+  contact_info?: string
   email?: string
   phone?: string
   address?: string

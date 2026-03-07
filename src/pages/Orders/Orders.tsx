@@ -308,7 +308,11 @@ export default function Orders() {
                   <tbody>
                     {orders.map(o => (
                       <tr key={o.id}>
-                        <td><span className={styles.codeCell}>{o.id}</span></td>
+                        <td>
+                          <button className={styles.codeLink} onClick={() => navigate(`/orders/${o.id}`)} title="Ver pedido">
+                            #{o.id}
+                          </button>
+                        </td>
                         <td><span className={styles.customerCell}>{o.provider.name}</span></td>
                         <td><span className={styles.totalCell}>$ {o.total_amount.toFixed(2)}</span></td>
                         <td><span className={styles.dateCell}>{formatDate(o.order_date)}</span></td>
