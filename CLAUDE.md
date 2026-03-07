@@ -60,8 +60,8 @@ src/
 │   ├── ConfirmDeleteModal/   # Portal modal for confirming product/sale deletion
 │   │   ├── ConfirmDeleteModal.tsx      # Component: productName, onConfirm (async), onClose props; handles isDeleting state + error display
 │   │   └── ConfirmDeleteModal.module.css # Modal styles with destructive button
-│   ├── CreateFormModal/      # Generic portal modal for creating any entity via a field config array
-│   │   └── CreateFormModal.tsx         # Component: title, fields: FieldConfig[], onSubmit (async, caller owns API), onClose, onCreated props
+│   ├── CreateFormModal/      # Generic portal modal for creating/editing any entity via a field config array
+│   │   └── CreateFormModal.tsx         # Component: title, fields: FieldConfig[], onSubmit (async, caller owns API), onClose, onCreated, initialValues? props
 │   └── layout/
 │       ├── AppLayout.tsx     # Shell: Sidebar + mobile menu backdrop
 │       ├── Sidebar.tsx       # Responsive collapsible sidebar (232px expanded, 80px collapsed icon-only mode)
@@ -73,6 +73,7 @@ src/
 │       ├── auth.ts           # login, logout, me
 │       ├── inventory.ts      # CRUD products
 │       ├── providers.ts      # CRUD suppliers
+│       ├── clients.ts        # CRUD clients
 │       ├── sales.ts          # Sales endpoints
 │       ├── orders.ts         # Purchase orders
 │       └── users.ts          # User management
@@ -84,6 +85,7 @@ src/
     │   ├── ProductForm.tsx             # Mode detection: isCreateMode = !useParams().id
     │   └── ProductForm.module.css      # Layout-only CSS (header, sectionsGrid, cards, field rows)
     ├── Providers/            # /providers + Providers.module.css
+    ├── Clients/              # /clients + Clients.module.css
     ├── Sales/                # /sales + Sales.module.css
     ├── SaleForm/             # /sales/create + /sales/:id — unified create/view/edit page + SaleForm.module.css
     ├── Orders/               # /orders + Orders.module.css
@@ -103,13 +105,14 @@ src/
 | `/inventory/create` | `ProductForm` (create mode) | Protected |
 | `/inventory/product/:id` | `ProductForm` (view/edit mode) | Protected |
 | `/providers` | `Providers` | Protected |
+| `/clients` | `Clients` | Protected |
 | `/sales` | `Sales` | Protected |
 | `/sales/create` | `SaleForm` (create mode) | Protected |
 | `/sales/:id` | `SaleForm` (view/edit mode) | Protected |
 | `/orders` | `Orders` | Protected |
 | `/orders/create` | `OrderForm` (create mode) | Protected |
 | `/orders/:id` | `OrderForm` (view/edit mode) | Protected |
-| `/users` | `Users` | Protected |
+| `/users` | `Users` | Protected (Superuser only) |
 
 All protected routes live inside `<PrivateRoute>` → `<AppLayout>`.
 
@@ -318,7 +321,7 @@ Extended in `tailwind.config.js`:
 
 ## TypeScript Types (`src/types/index.ts`)
 
-Key interfaces: `User`, `Product`, `Category`, `Provider`, `Order`, `OrderItem`, `Sale`, `SaleItem`, `CreateSaleInput`, `CreateOrderInput`, `PaginatedResponse<T>`, `CursorPaginatedResponse<T>`, `LoginPayload`, `AuthResponse`, `FilterOption`, `CreateProductInput`.
+Key interfaces: `User`, `Product`, `Category`, `Provider`, `Client`, `Order`, `OrderItem`, `Sale`, `SaleItem`, `CreateSaleInput`, `CreateOrderInput`, `PaginatedResponse<T>`, `CursorPaginatedResponse<T>`, `LoginPayload`, `AuthResponse`, `FilterOption`, `CreateProductInput`.
 
 **Pagination types:**
 - `PaginatedResponse<T>` — `{ items, total, page, size, pages }` — used by inventory/users/providers endpoints
@@ -462,6 +465,102 @@ Mode detection: `const isCreateMode = !useParams().id`
 - **Status badges:** `pending/sent` → warning, `received` → success, `cancelled` → destructive
 - **Payment status badges:** `pending` → destructive, `paid` → success
 - **Pagination:** `has_next`-based prev/next
+
+## Providers Page Layout (`/providers`)
+
+- **Breadcrumb:** `PROV / Lista`
+- **Page Header:** Title "Proveedores" + "Nuevo Proveedor" button (right-aligned)
+- **Search Bar:** Debounced input (300ms) — `getProviders({ search, skip, limit })` on change
+- **Card Grid Layout:** Displays providers in responsive 1-column (mobile) → 2-column (tablet) → 3-column (desktop) grid
+- **Provider Cards:** White background with subtle border. Contains:
+  - Card header: Provider name (semibold) + Action buttons (upper right corner)
+    - Contact person (optional, secondary text)
+    - Action buttons: Edit (pencil icon) + Delete (trash icon) positioned to the right — no "Ver" button
+  - Details section: Email icon + address (optional), Phone icon + number (optional)
+- **Modals:**
+  - **Create:** `CreateFormModal` with fields: `name` (required), `contact_info`, `email`, `phone`
+  - **Edit:** Same modal structure but pre-populated with existing provider data via `initialValues` prop
+  - **Delete:** `ConfirmDeleteModal` shows provider name: "¿Estás seguro que deseas eliminar "{name}"?"
+- **ModalContext Integration:** Syncs local modal states (`isCreateModalOpen`, `isEditModalOpen`, `providerToDelete`) with backdrop blur
+- **Pagination:** Offset-based (previous/next buttons). Shows "Página {page} de {totalPages}"
+- **API Calls:**
+  - Create: `POST /supply-chain/providers` via `providersApi.createProvider(data)`
+  - Edit: `PUT /supply-chain/providers/{id}` via `providersApi.updateProvider(id, data)`
+  - Delete: `DELETE /supply-chain/providers/{id}` via `providersApi.deleteProvider(id)`
+  - List: `GET /supply-chain/providers` with pagination and search params
+
+## Clients API Endpoints (`src/lib/api/clients.ts`)
+
+- `getClients(params?)` — `GET /sales/clients` → `CursorPaginatedResponse<Client>`
+  - Params: `search?`, `skip?`, `limit?`
+- `createClient(data)` — `POST /sales/clients` — fields: `name` (required), `identity_card?`, `email?`, `phone?`
+- `updateClient(id, data)` — `PUT /sales/clients/{id}` — fields: `name?`, `identity_card?`, `email?`, `phone?`
+- `deleteClient(id)` — `DELETE /sales/clients/{id}`
+
+## Clients Page Layout (`/clients`)
+
+- **Breadcrumb:** `CLI / Lista`
+- **Page Header:** Title "Clientes" + "Nuevo Cliente" button (right-aligned)
+- **Search Bar:** Debounced input (300ms) — `clientsApi.getClients({ search, skip, limit })` on change
+- **Card Grid Layout:** Displays clients in responsive 1-column (mobile) → 2-column (tablet) → 3-column (desktop) grid
+- **Client Cards:** White background with subtle border. Contains:
+  - Card header: Client name (semibold) + Action buttons (upper right corner)
+    - Identity card number (optional, secondary text)
+    - Action buttons: Edit (pencil icon) + Delete (trash icon) positioned to the right — no "Ver" button
+  - Details section: Email icon + email (optional), Phone icon + phone (optional), Created date (always displayed)
+- **Modals:**
+  - **Create:** `CreateFormModal` with fields: `name` (required), `identity_card`, `email`, `phone`
+  - **Edit:** Same modal structure but pre-populated with existing client data via `initialValues` prop
+  - **Delete:** `ConfirmDeleteModal` shows client name: "¿Estás seguro que deseas eliminar "{name}"?"
+- **ModalContext Integration:** Syncs local modal states (`isCreateModalOpen`, `isEditModalOpen`, `clientToDelete`) with backdrop blur
+- **Pagination:** Cursor-based (previous/next buttons based on `has_next` from API)
+- **API Calls:**
+  - Create: `POST /sales/clients` via `clientsApi.createClient(data)`
+  - Edit: `PUT /sales/clients/{id}` via `clientsApi.updateClient(id, data)`
+  - Delete: `DELETE /sales/clients/{id}` via `clientsApi.deleteClient(id)`
+  - List: `GET /sales/clients` with pagination and search params
+
+## Users Page Layout (`/users`)
+
+**Access Control:** Route is protected by `SuperuserRoute` component — only users with `is_superuser: true` can access. Non-superusers are redirected to dashboard. Menu item is hidden for non-superusers.
+
+- **Breadcrumb:** `USR / Gestión` (DM Mono, 11px, 600 weight, uppercase)
+- **Page Header:** Modernized header (matches Sales.tsx pattern) with title "Usuarios" (24px, 700 weight) + "Nuevo Usuario" button (black with yellow hover)
+- **Search Bar:** Debounced input (300ms) — `usersApi.getUsers({ search, skip, limit })` on change
+- **Data Table Layout:** Industrial table structure with columns:
+  - **Usuario** — Avatar (colored circle with initials) + full_name
+  - **Correo** — User email
+  - **Rol** — Badge showing "Administrador" (is_superuser=true, warning badge) or "Usuario" (neutral badge) with icon
+  - **Estado** — Toggle switch for is_active state
+    - Clicking toggle calls `usersApi.updateUser(id, { is_active: !current })` immediately
+    - Shows loading spinner during API call
+    - Green (#16A34A) when active, gray when inactive
+  - **Acciones** — Two icon buttons:
+    - Edit button (pencil icon) — opens `CreateFormModal` with pre-populated user data
+    - Delete button (trash icon) — opens `ConfirmDeleteModal` with user full_name
+- **Modals:**
+  - **Create:** `CreateFormModal` with fields:
+    - `full_name` (required, text)
+    - `email` (required, email type)
+    - `password` (required, password type)
+    - `role` (required, select dropdown with options "Usuario" | "Administrador") — defaults to "Usuario"
+  - **Edit:** Fields:
+    - `full_name` (required, text)
+    - `email` (required, email type)
+    - `password` (optional, password type, always empty — "Dejar en blanco para no cambiar")
+    - `role` (required, select dropdown) — pre-selected with current user's role
+    - Password field is not pre-populated (empty for security)
+    - Only password and modified fields sent to API
+  - **Delete:** `ConfirmDeleteModal` shows: "¿Estás seguro que deseas eliminar "{full_name}"?"
+- **ModalContext Integration:** Syncs local modal states (`isCreateModalOpen`, `isEditModalOpen`, `userToDelete`) with backdrop blur
+- **Pagination:** Offset-based inside table card (matches Sales.tsx pattern). Shows "Página {page}" with flex-end alignment, 1px top border
+- **Loading State:** Spinner shows while fetching users on initial load
+- **API Calls:**
+  - List: `GET /users` with pagination and search params via `usersApi.getUsers(params)`
+  - Create: `POST /users` via `usersApi.createUser(data)` — interface `CreateUserInput` with fields: `full_name`, `email`, `password`, `is_superuser` (derived from role dropdown)
+  - Edit: `PUT /users/{id}` via `usersApi.updateUser(id, data)` — interface `UpdateUserInput` with fields: `full_name?`, `email?`, `password?` (optional), `is_superuser?` (derived from role dropdown)
+  - Delete: `DELETE /users/{id}` via `usersApi.deleteUser(id)`
+  - Toggle Active: `PUT /users/{id}` with `{ is_active: boolean }`
 
 ## Inventory API Endpoints (`src/lib/api/inventory.ts`)
 

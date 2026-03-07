@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Loader, X } from 'lucide-react'
+import { Loader, X, ChevronDown } from 'lucide-react'
 import styles from '../CreateEntityModal/CreateEntityModal.module.css'
+import dropdownStyles from './CreateFormModal.module.css'
 
 export interface FieldConfig {
   key: string
   label: string
   placeholder?: string
-  type?: 'text' | 'email' | 'tel' | 'url' | 'textarea'
+  type?: 'text' | 'email' | 'tel' | 'url' | 'textarea' | 'password' | 'select'
   required?: boolean
+  options?: { value: string; label: string }[]
 }
 
 interface CreateFormModalProps<T> {
@@ -17,6 +19,7 @@ interface CreateFormModalProps<T> {
   onSubmit: (values: Record<string, string>) => Promise<T>
   onClose: () => void
   onCreated: (result: T) => void
+  initialValues?: Record<string, string>
 }
 
 export default function CreateFormModal<T>({
@@ -25,12 +28,16 @@ export default function CreateFormModal<T>({
   onSubmit,
   onClose,
   onCreated,
+  initialValues,
 }: CreateFormModalProps<T>) {
-  const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(fields.map(f => [f.key, '']))
-  )
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    if (initialValues) return initialValues
+    return Object.fromEntries(fields.map(f => [f.key, '']))
+  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   function setValue(key: string, value: string) {
     setValues(prev => ({ ...prev, [key]: value }))
@@ -80,6 +87,37 @@ export default function CreateFormModal<T>({
                   autoFocus={i === 0}
                   rows={3}
                 />
+              ) : field.type === 'select' ? (
+                <div className={dropdownStyles.selectDropdown} ref={el => { if (el) dropdownRefs.current[field.key] = el }}>
+                  <button
+                    type="button"
+                    className={`${dropdownStyles.selectTrigger} ${values[field.key] ? dropdownStyles.selectTriggerActive : ''}`}
+                    onClick={() => setOpenDropdown(openDropdown === field.key ? null : field.key)}
+                    autoFocus={i === 0}
+                  >
+                    <span>{values[field.key] ? field.options?.find(o => o.value === values[field.key])?.label : 'Seleccionar...'}</span>
+                    <ChevronDown size={16} />
+                  </button>
+                  {openDropdown === field.key && (
+                    <div className={dropdownStyles.selectContent}>
+                      <div className={dropdownStyles.selectOptions}>
+                        {field.options?.map(opt => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            className={`${dropdownStyles.selectOption} ${values[field.key] === opt.value ? dropdownStyles.selectOptionActive : ''}`}
+                            onClick={() => {
+                              setValue(field.key, opt.value)
+                              setOpenDropdown(null)
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <input
                   type={field.type ?? 'text'}

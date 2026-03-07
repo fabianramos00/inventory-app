@@ -32,16 +32,38 @@
   @apply form-input pl-9 py-2;
 }
 
+.loadingContainer {
+  @apply flex items-center justify-center gap-2 py-8;
+  color: var(--ink-2);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .gridContainer {
   @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4;
 }
 
 .providerCard {
-  @apply card p-5 space-y-4;
+  @apply card p-5 space-y-3;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  position: relative;
 }
 
 .cardHeader {
   @apply flex items-start justify-between;
+}
+
+.providerInfo {
+  @apply flex-1;
 }
 
 .providerName {
@@ -65,29 +87,82 @@
 
 .detailIcon {
   color: var(--ink-3);
+  flex-shrink: 0;
 }
 
-.cardFooter {
-  @apply flex items-center justify-between pt-2 border-t;
-  border-color: var(--border);
-}
-
-.productCount {
-  @apply text-xs;
-  color: var(--ink-3);
-}
-
-.productNumber {
-  @apply font-semibold font-mono;
-  color: var(--ink-1);
-}
 
 .actionButtons {
-  @apply flex gap-2;
+  @apply flex gap-1 flex-shrink-0;
 }
 
 .actionBtn {
-  @apply text-xs px-2.5 py-1 rounded;
-  background: var(--control-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 200ms ease-out;
+}
+
+.actionBtn:hover {
+  background: var(--surface-2);
+  color: var(--ink-1);
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deleteActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 200ms ease-out;
+}
+
+.deleteActionBtn:hover {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: var(--destructive);
+}
+
+.paginationContainer {
+  @apply flex items-center justify-center gap-4 py-4;
+}
+
+.paginationBtn {
+  @apply px-4 py-2 rounded text-xs font-medium;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink-1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.paginationInfo {
+  @apply text-xs;
   color: var(--ink-2);
 }

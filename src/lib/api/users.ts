@@ -1,6 +1,18 @@
 import api from '@/lib/axios'
 import type { PaginatedResponse, User } from '@/types'
 
+export interface CreateUserInput {
+  full_name: string
+  email: string
+  password: string
+  is_superuser?: boolean
+}
+
+export interface UpdateUserInput extends Partial<User> {
+  password?: string
+  is_superuser?: boolean
+}
+
 export const usersApi = {
   getUsers: (params?: Record<string, unknown>) =>
     api.get<PaginatedResponse<User>>('/users', { params }),
@@ -8,10 +20,10 @@ export const usersApi = {
   getUser: (id: number) =>
     api.get<User>(`/users/${id}`),
 
-  createUser: (data: Partial<User>) =>
+  createUser: (data: CreateUserInput) =>
     api.post<User>('/users', data),
 
-  updateUser: (id: number, data: Partial<User>) =>
+  updateUser: (id: number, data: UpdateUserInput) =>
     api.put<User>(`/users/${id}`, data),
 
   deleteUser: (id: number) =>

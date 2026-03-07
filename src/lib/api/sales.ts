@@ -1,5 +1,5 @@
 import api from '@/lib/axios'
-import type { CursorPaginatedResponse, Sale, SaleItem, CreateSaleInput, PaymentMethod } from '@/types'
+import type { CursorPaginatedResponse, Sale, SaleItem, CreateSaleInput, PaymentMethod, Client } from '@/types'
 
 export interface SalesParams {
   skip?: number
@@ -25,7 +25,7 @@ export const salesApi = {
     api.get<CursorPaginatedResponse<SaleItem>>(`/sales/${id}/items`, { params }),
 
   getClients: (params?: { search?: string; skip?: number; limit?: number }) =>
-    api.get<CursorPaginatedResponse<{ id: number; name: string }>>('/sales/clients', { params }),
+    api.get<CursorPaginatedResponse<Client>>('/sales/clients', { params }),
 
   createClient: (data: { name: string; identity_card?: string; email?: string; phone?: string }) =>
     api.post<{ id: number; name: string }>('/sales/clients', data),

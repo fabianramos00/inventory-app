@@ -53,8 +53,17 @@ export interface Provider {
   contact_info?: string
   email?: string
   phone?: string
-  address?: string
-  is_active: boolean
+}
+
+// ─── Client ───────────────────────────────────────────────────────────────────
+export interface Client {
+  id: number
+  name: string
+  identity_card?: string | null
+  email?: string | null
+  phone?: string | null
+  created_at: string
+  updated_at: string | null
 }
 
 // ─── Order ───────────────────────────────────────────────────────────────────

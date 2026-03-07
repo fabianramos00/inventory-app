@@ -1,62 +1,218 @@
 .container {
-  @apply space-y-4;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
-.header {
-  @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
+/* Page Header */
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 8px;
 }
 
-.title {
-  @apply text-lg font-bold;
+@media (min-width: 640px) {
+  .pageHeader {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
   color: var(--ink-1);
+  letter-spacing: -0.02em;
 }
 
-.headerActions {
-  @apply btn-accent flex items-center gap-1.5 text-xs py-2 px-3;
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  text-transform: uppercase;
 }
 
-.searchCard {
-  @apply card p-4;
+.breadcrumbDivider {
+  color: var(--border-strong);
+}
+
+.breadcrumbActive {
+  color: var(--ink-2);
+}
+
+.newUserBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--ink-1);
+  color: var(--surface);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.newUserBtn:hover {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.newUserBtn:active {
+  transform: translateY(1px);
+}
+
+/* Table Section */
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  border-radius: 10px;
+}
+
+/* Command Bar */
+.commandBar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+  padding: 0;
+}
+
+/* Controls Bar */
+.controlsBar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .controlsBar {
+    flex-direction: row;
+    height: 48px;
+  }
 }
 
 .searchWrapper {
-  @apply relative max-w-sm;
+  position: relative;
+  flex: 1;
+  min-height: 48px;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .searchWrapper {
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+  }
 }
 
 .searchIcon {
-  @apply absolute left-3 top-1/2 -translate-y-1/2;
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--ink-3);
+  pointer-events: none;
 }
 
 .searchInput {
-  @apply form-input pl-9 py-2;
+  width: 100%;
+  height: 100%;
+  padding: 0 16px 0 40px;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: var(--ink-1);
+  outline: none;
+  transition: background 150ms ease;
 }
 
+.searchInput::placeholder {
+  color: var(--ink-3);
+}
+
+.searchInput:focus {
+  background: var(--surface-2);
+}
+
+/* Table Card */
 .tableCard {
-  @apply card overflow-hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Table Cells */
 .userCell {
-  @apply flex items-center gap-2.5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .avatar {
-  @apply w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
   color: #111;
+  flex-shrink: 0;
 }
 
 .userName {
-  @apply font-medium text-sm;
+  font-weight: 500;
+  font-size: 14px;
   color: var(--ink-1);
 }
 
 .emailCell {
-  @apply text-sm;
+  font-size: 14px;
   color: var(--ink-2);
 }
 
 .roleCell {
-  @apply flex items-center gap-1.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .adminIcon {
@@ -67,23 +223,138 @@
   color: var(--ink-3);
 }
 
-.lastActivityCell {
-  @apply text-xs;
+/* Estado Toggle */
+.stateToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 4px;
+  transition: background 150ms ease;
+}
+
+.stateToggle:hover {
+  background: var(--surface-2);
+}
+
+.stateToggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.toggleSwitch {
+  display: block;
+  width: 32px;
+  height: 16px;
+  background: var(--border);
+  border-radius: 8px;
+  position: relative;
+  transition: background 200ms ease;
+}
+
+.toggleSwitch::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--surface);
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: all 200ms ease;
+}
+
+.toggleActive {
+  background: var(--success);
+}
+
+.toggleActive::before {
+  left: 18px;
+}
+
+.toggleSpinner {
+  animation: spin 1s linear infinite;
   color: var(--ink-3);
 }
 
+/* Actions */
 .actionsContainer {
-  @apply flex gap-1.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.editBtn {
-  @apply text-xs px-2 py-1 rounded;
-  color: var(--ink-2);
+.editBtn,
+.deleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   background: var(--control-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--ink-2);
+  transition: all 150ms ease;
 }
 
-.toggleStatusBtn {
-  @apply text-xs px-2 py-1 rounded;
-  color: var(--destructive);
+.editBtn:hover {
+  background: var(--surface-2);
+  color: var(--ink-1);
+  border-color: var(--accent);
+}
+
+.deleteBtn:hover {
   background: #FEE2E2;
+  color: var(--destructive);
+  border-color: var(--destructive);
+}
+
+.editBtn:active,
+.deleteBtn:active {
+  transform: translateY(1px);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.pageBtn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--ink-1);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-3);
 }

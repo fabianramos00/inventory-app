@@ -42,7 +42,7 @@ export default function Login() {
     setLoading(true)
     try {
       const res = await authApi.login({ email: data.email, password: data.password })
-      login(res.data.access_token, null)
+      login(res.data.access_token, res.data.user)
       navigate('/', { replace: true })
     } catch {
       setApiError('Correo o contraseña incorrectos.')

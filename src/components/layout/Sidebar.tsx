@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Package,
   Truck,
+  ContactRound,
   ShoppingCart,
   ClipboardList,
   Users,
@@ -18,6 +19,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, code: 'DASH' },
   { to: '/inventory', label: 'Inventario', icon: Package, code: 'INV' },
   { to: '/providers', label: 'Proveedores', icon: Truck, code: 'PROV' },
+  { to: '/clients', label: 'Clientes', icon: ContactRound, code: 'CLI' },
   { to: '/sales', label: 'Ventas', icon: ShoppingCart, code: 'VNT' },
   { to: '/orders', label: 'Pedidos', icon: ClipboardList, code: 'PED' },
   { to: '/users', label: 'Usuarios', icon: Users, code: 'USR' },
@@ -99,7 +101,9 @@ export default function Sidebar({ isMobileMenuOpen, closeMobileMenu, isCollapsed
               </div>
             )}
             <ul className="flex flex-col">
-              {navItems.map((item) => (
+              {navItems.map((item) => {
+                if (item.to === '/users' && !user?.is_superuser) return null
+                return (
                 <li key={item.to} className="w-full">
                   <NavLink
                     to={item.to}
@@ -149,7 +153,8 @@ export default function Sidebar({ isMobileMenuOpen, closeMobileMenu, isCollapsed
                     )}
                   </NavLink>
                 </li>
-              ))}
+              )
+              })}
             </ul>
           </div>
         </div>
