@@ -1,146 +1,276 @@
 .container {
-  @apply space-y-6;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-bottom: 32px;
 }
 
-.statsGrid {
-  @apply grid gap-4;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-@media (min-width: 1024px) {
-  .statsGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+/* Page Header */
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
-.statCard {
-  @apply card p-5 space-y-3;
-}
-
-.statHeader {
-  @apply flex items-start justify-between;
-}
-
-.statIconBox {
-  @apply w-9 h-9 rounded flex items-center justify-center;
-}
-
-.statTrending {
-  color: var(--ink-3);
-}
-
-.statValue {
-  @apply text-2xl font-bold;
+.pageTitle {
+  font-size: 28px;
+  font-weight: 800;
   color: var(--ink-1);
   letter-spacing: -0.03em;
 }
 
-.statLabel {
-  @apply text-xs mt-0.5;
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   color: var(--ink-3);
+  text-transform: uppercase;
 }
 
-.statDelta {
-  @apply text-xs font-medium;
+.breadcrumbDivider {
+  color: var(--border-strong);
+}
+
+.breadcrumbActive {
   color: var(--ink-2);
 }
 
-.contentGrid {
-  @apply grid grid-cols-1 lg:grid-cols-3 gap-4;
+/* KPI Strip */
+.kpiStrip {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.feedCard {
-  @apply card lg:col-span-2;
+@media (min-width: 640px) {
+  .kpiStrip {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.kpiItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 20px;
+  gap: 16px;
+  transition: background 200ms ease;
+}
+
+.kpiItem:hover {
+  background: var(--surface-2);
+}
+
+.kpiDivider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+}
+
+@media (min-width: 640px) {
+  .kpiDivider {
+    width: 1px;
+    height: auto;
+  }
+}
+
+.kpiHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kpiLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.kpiIconAccent { color: var(--accent); }
+.kpiIconSuccess { color: var(--success); }
+.kpiIconWarning { color: var(--warning); }
+.kpiIconDestructive { color: var(--destructive); }
+
+.kpiValue {
+  font-family: 'DM Mono', monospace;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ink-1);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.currencySymbol {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+/* Charts Row */
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .chartsRow {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tables Row */
+.tablesRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .tablesRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Shared card structure */
+.chartCard,
+.tableCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
 }
 
 .cardHeader {
-  @apply px-5 py-4 border-b flex items-center justify-between;
-  border-color: var(--border);
-}
-
-.cardHeaderLeft {
-  @apply flex items-center gap-2;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
 }
 
 .cardTitle {
-  @apply text-sm font-semibold;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--ink-1);
+  letter-spacing: -0.01em;
 }
 
-.viewAllBtn {
-  @apply text-xs;
-  color: var(--ink-3);
-  background: transparent;
-  border: none;
-  cursor: pointer;
+.chartBody {
+  padding: 20px 12px;
+  flex: 1;
 }
 
+/* Activity table elements */
 .feedDesc {
-  @apply text-sm;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--ink-1);
 }
 
 .feedUser {
-  @apply text-sm;
+  font-size: 13px;
   color: var(--ink-2);
 }
 
 .feedAmount {
-  @apply font-mono text-sm font-medium;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ink-1);
 }
 
 .feedTime {
-  @apply text-xs;
+  font-size: 12px;
   color: var(--ink-3);
+  white-space: nowrap;
 }
 
-.alertCard {
-  @apply card;
-}
-
-.alertHeader {
-  @apply px-5 py-4 border-b flex items-center gap-2;
-  border-color: var(--border);
-}
-
-.alertIcon {
-  color: var(--warning);
-}
-
+/* Low stock alert list */
 .alertList {
-  @apply divide-y;
-  border-color: var(--border);
+  display: flex;
+  flex-direction: column;
 }
 
 .alertItem {
-  @apply px-5 py-3.5 space-y-2;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms ease;
+}
+
+.alertItem:hover {
+  background: var(--surface-2);
+}
+
+.alertItem:last-child {
+  border-bottom: none;
 }
 
 .alertItemHeader {
-  @apply flex items-center justify-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .alertSku {
-  @apply text-xs font-mono;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
   color: var(--ink-3);
+  letter-spacing: 0.05em;
+  background: var(--bg-page);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .alertName {
-  @apply text-sm font-medium;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ink-1);
 }
 
 .alertBarBg {
-  @apply h-1.5 rounded-full;
-  background: var(--control-bg);
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-page);
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .alertBarFill {
-  @apply h-full rounded-full;
+  height: 100%;
+  border-radius: 0;
   background: var(--destructive);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .alertMin {
-  @apply text-xs;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
