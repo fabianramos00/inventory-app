@@ -41,33 +41,6 @@
 }
 
 
-.newProductBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--ink-1);
-  color: var(--surface);
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-
-.newProductBtn:hover {
-  background: var(--accent);
-  color: var(--accent-fg);
-}
-
-.newProductBtn:active {
-  transform: translateY(1px);
-}
-
 /* KPI Strip — 4-column card grid */
 .kpiStrip {
   display: grid;
@@ -279,15 +252,6 @@
   font-weight: 500;
 }
 
-/* Table Card */
-.tableCard {
-  background: var(--surface);
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
 .skuCell {
   font-family: 'DM Mono', monospace;
   font-size: 12px;
@@ -368,50 +332,6 @@
 .skuLink:hover {
   color: var(--ink-1);
   text-decoration-color: var(--ink-3);
-}
-
-.actionButtons {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.iconBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.iconBtn:hover {
-  background: var(--surface-2);
-  color: var(--ink-1);
-}
-
-.iconBtnDestructive {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.iconBtnDestructive:hover {
-  background: rgba(220, 38, 38, 0.08);
-  color: var(--destructive);
 }
 
 .emptyState {

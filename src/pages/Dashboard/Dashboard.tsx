@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Package, DollarSign, ClipboardList, ShoppingCart, CheckCircle } from 'lucide-react'
 import PageHeader from '@/components/PageHeader/PageHeader'
+import DataCard from '@/components/DataCard/DataCard'
 import {
   Tooltip, Legend,
   XAxis, YAxis, CartesianGrid,
@@ -218,10 +219,7 @@ export default function Dashboard() {
       {/* Charts Grid — asymmetric: left spans 2 rows */}
       <div className={styles.chartsGrid}>
         {/* Left (tall): Ventas y Pedidos — Últimos 7 Días */}
-        <div className={`${styles.chartCard} ${styles.chartCardLeft}`}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>Ventas y Pedidos — Últimos 7 Días</span>
-          </div>
+        <DataCard title="Ventas y Pedidos — Últimos 7 Días" className={styles.chartCardLeft}>
           <div className={styles.chartBody}>
             {errors.salesTrend ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: 'var(--ink-3)', fontSize: '14px' }}>
@@ -276,13 +274,10 @@ export default function Dashboard() {
               </ResponsiveContainer>
             )}
           </div>
-        </div>
+        </DataCard>
 
         {/* Top right: Estado de Pedidos */}
-        <div className={styles.tableCard}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>Estado de Pedidos</span>
-          </div>
+        <DataCard title="Estado de Pedidos">
           {errors.orderStatus ? (
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--ink-3)', fontSize: '14px' }}>
               {errors.orderStatus}
@@ -305,13 +300,10 @@ export default function Dashboard() {
               ))}
             </div>
           )}
-        </div>
+        </DataCard>
 
         {/* Bottom right: Stock Bajo */}
-        <div className={`${styles.tableCard} ${styles.stockCard}`}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>Stock Bajo</span>
-          </div>
+        <DataCard title="Stock Bajo" className={styles.stockCard}>
           {errors.lowStock ? (
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--ink-3)', fontSize: '14px' }}>
               {errors.lowStock}
@@ -338,14 +330,11 @@ export default function Dashboard() {
               ))}
             </div>
           )}
-        </div>
+        </DataCard>
       </div>
 
       {/* Top Productos — full-width table */}
-      <div className={styles.tableCard}>
-        <div className={styles.cardHeader}>
-          <span className={styles.cardTitle}>Top Productos Vendidos</span>
-        </div>
+      <DataCard title="Top Productos Vendidos">
         {errors.topProducts ? (
           <div style={{ padding: '24px', textAlign: 'center', color: 'var(--ink-3)', fontSize: '14px' }}>
             {errors.topProducts}
@@ -376,7 +365,7 @@ export default function Dashboard() {
             </table>
           </div>
         )}
-      </div>
+      </DataCard>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { Plus, AlertCircle, DollarSign, Package, Grid, ChevronDown, Loader, Eye,
 import styles from './Inventory.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
+import DataCard from '@/components/DataCard/DataCard'
 import { inventoryApi } from '@/lib/api/inventory'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
@@ -336,7 +337,7 @@ export default function Inventory() {
         title="Inventario Principal"
         action={
           <button
-            className={styles.newProductBtn}
+            className="btn-new"
             onClick={() => navigate('/inventory/create')}
           >
             <Plus size={16} strokeWidth={2.5} />
@@ -683,7 +684,7 @@ export default function Inventory() {
             </div>
         </CommandBar>
 
-        <div className={styles.tableCard}>
+        <DataCard>
           {loading ? (
             <div className={styles.loadingState}>
               <Loader size={24} className={styles.loadingSpinner} />
@@ -736,16 +737,16 @@ export default function Inventory() {
                           <td><span className={styles.priceCell}>$ {(p.price || 0).toFixed(2)}</span></td>
                           <td><span className={styles[statusMap[status]]}>{statusLabel[status]}</span></td>
                           <td>
-                            <div className={styles.actionButtons}>
+                            <div className="flex items-center gap-2">
                               <button
-                                className={styles.iconBtn}
+                                className="action-btn"
                                 title="Ver producto"
                                 onClick={() => navigate(`/inventory/product/${p.id}`)}
                               >
                                 <Eye size={15} />
                               </button>
                               <button
-                                className={styles.iconBtnDestructive}
+                                className="action-btn action-btn--destructive"
                                 title="Eliminar"
                                 onClick={() => setProductToDelete({ id: p.id, name: p.name + ' ' + p.size_value + ' ' + p.measurement_unit?.abbreviation })}
                               >
@@ -774,7 +775,7 @@ export default function Inventory() {
               />
             </>
           )}
-        </div>
+        </DataCard>
       </div>
       </>}
 

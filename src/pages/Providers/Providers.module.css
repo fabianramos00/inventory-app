@@ -5,34 +5,6 @@
 }
 
 
-.newProviderBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--ink-1);
-  color: var(--surface);
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-
-.newProviderBtn:hover {
-  background: var(--accent);
-  color: var(--accent-fg);
-}
-
-.newProviderBtn:active {
-  transform: translateY(1px);
-}
-
-
 .loadingContainer {
   display: flex;
   flex-direction: column;
@@ -132,52 +104,6 @@
 .detailIcon {
   color: var(--ink-3);
   flex-shrink: 0;
-}
-
-.actionButtons {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.actionBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.actionBtn:hover {
-  background: var(--surface-2);
-  color: var(--ink-1);
-  border-color: var(--border-strong);
-}
-
-.deleteActionBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.deleteActionBtn:hover {
-  background: rgba(220, 38, 38, 0.08);
-  border-color: rgba(220, 38, 38, 0.3);
-  color: var(--destructive);
 }
 
 .paginationContainer {

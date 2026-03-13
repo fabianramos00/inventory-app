@@ -145,7 +145,7 @@ export default function Clients() {
         activeLabel="Gestión"
         title="Clientes"
         action={
-          <button className={styles.newClientBtn} onClick={() => setIsCreateModalOpen(true)}>
+          <button className="btn-new" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={16} strokeWidth={2.5} />
             <span>Nuevo Cliente</span>
           </button>
@@ -175,11 +175,11 @@ export default function Clients() {
                     <div className={styles.clientName}>{c.name}</div>
                     {c.identity_card && <div className={styles.clientIdCard}>ID: {c.identity_card}</div>}
                   </div>
-                  <div className={styles.actionButtons}>
-                    <button className={styles.actionBtn} onClick={() => openEditModal(c)} title="Editar">
+                  <div className="flex items-center gap-2">
+                    <button className="action-btn" onClick={() => openEditModal(c)} title="Editar">
                       <Edit size={14} />
                     </button>
-                    <button className={styles.deleteActionBtn} onClick={() => setClientToDelete({ id: c.id, name: c.name })} title="Eliminar">
+                    <button className="action-btn action-btn--destructive" onClick={() => setClientToDelete({ id: c.id, name: c.name })} title="Eliminar">
                       <Trash2 size={14} />
                     </button>
                   </div>

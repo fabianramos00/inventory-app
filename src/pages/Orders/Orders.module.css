@@ -5,33 +5,6 @@
 }
 
 
-.newOrderBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--ink-1);
-  color: var(--surface);
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-
-.newOrderBtn:hover {
-  background: var(--accent);
-  color: var(--accent-fg);
-}
-
-.newOrderBtn:active {
-  transform: translateY(1px);
-}
-
 /* Table Section */
 .tableSection {
   display: flex;
@@ -197,14 +170,6 @@
   cursor: pointer;
 }
 
-.tableCard {
-  background: var(--surface);
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
 /* Cell Styles */
 .codeCell {
   font-family: 'DM Mono', monospace;
@@ -291,51 +256,6 @@
   color: var(--destructive);
   border: 1px solid rgba(220, 38, 38, 0.3);
   background: rgba(220, 38, 38, 0.05);
-}
-
-.actionBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.actionBtn:hover {
-  background: var(--surface-2);
-  color: var(--ink-1);
-}
-
-.actionCell {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.deleteActionBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all 200ms ease-out;
-}
-
-.deleteActionBtn:hover {
-  background: rgba(220, 38, 38, 0.08);
-  border-color: rgba(220, 38, 38, 0.3);
-  color: var(--destructive);
 }
 
 .loadingState {

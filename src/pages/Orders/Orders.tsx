@@ -4,6 +4,7 @@ import { Plus, Loader, Eye, Trash2, ChevronDown, Calendar } from 'lucide-react'
 import styles from './Orders.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
+import DataCard from '@/components/DataCard/DataCard'
 import { ordersApi } from '@/lib/api/orders'
 import { providersApi } from '@/lib/api/providers'
 import { useModalContext } from '@/context/ModalContext'
@@ -144,7 +145,7 @@ export default function Orders() {
         activeLabel="Gestión"
         title="Pedidos de Compra"
         action={
-          <button className={styles.newOrderBtn} onClick={() => navigate('/orders/create')}>
+          <button className="btn-new" onClick={() => navigate('/orders/create')}>
             <Plus size={16} strokeWidth={2.5} />
             <span>Nuevo Pedido</span>
           </button>
@@ -281,7 +282,7 @@ export default function Orders() {
 
         </CommandBar>
 
-        <div className={styles.tableCard}>
+        <DataCard>
           {loading ? (
             <div className={styles.loadingState}>
               <Loader size={24} className={styles.loadingSpinner} />
@@ -324,16 +325,16 @@ export default function Orders() {
                           </span>
                         </td>
                         <td>
-                          <div className={styles.actionCell}>
+                          <div className="flex items-center gap-2">
                             <button
-                              className={styles.actionBtn}
+                              className="action-btn"
                               onClick={() => navigate(`/orders/${o.id}`)}
                               title="Ver pedido"
                             >
                               <Eye size={14} />
                             </button>
                             <button
-                              className={styles.deleteActionBtn}
+                              className="action-btn action-btn--destructive"
                               onClick={() => setOrderToDelete({ id: o.id, label: `Pedido #${o.id} — ${o.provider.name}` })}
                               title="Eliminar pedido"
                             >
@@ -364,7 +365,7 @@ export default function Orders() {
               )}
             </>
           )}
-        </div>
+        </DataCard>
       </div>
       {orderToDelete && (
         <ConfirmDeleteModal

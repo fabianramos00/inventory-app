@@ -95,6 +95,54 @@
     box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.25);
   }
 
+  /* "Nuevo X" action button — black bg, yellow hover — used on every list page */
+  .btn-new {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--ink-1);
+    color: var(--surface);
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 150ms ease;
+    white-space: nowrap;
+  }
+  .btn-new:hover { background: var(--accent); color: var(--accent-fg); }
+  .btn-new:active { transform: translateY(1px); }
+
+  /* Icon action buttons — used in table rows */
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: all 150ms ease;
+    flex-shrink: 0;
+  }
+  .action-btn:hover {
+    background: rgba(59, 130, 246, 0.06);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--ink-1);
+  }
+  .action-btn--destructive:hover {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: var(--destructive);
+  }
+
   /* Primary button */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded text-sm font-semibold transition-all duration-150 cursor-pointer;

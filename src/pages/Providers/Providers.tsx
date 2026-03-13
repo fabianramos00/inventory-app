@@ -137,7 +137,7 @@ export default function Providers() {
         activeLabel="Gestión"
         title="Proveedores"
         action={
-          <button className={styles.newProviderBtn} onClick={() => setIsCreateModalOpen(true)}>
+          <button className="btn-new" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={16} strokeWidth={2.5} />
             <span>Nuevo Proveedor</span>
           </button>
@@ -167,11 +167,11 @@ export default function Providers() {
                     <div className={styles.providerName}>{p.name}</div>
                     {p.contact_info && <div className={styles.providerContact}>{p.contact_info}</div>}
                   </div>
-                  <div className={styles.actionButtons}>
-                    <button className={styles.actionBtn} onClick={() => openEditModal(p)} title="Editar">
+                  <div className="flex items-center gap-2">
+                    <button className="action-btn" onClick={() => openEditModal(p)} title="Editar">
                       <Edit size={14} />
                     </button>
-                    <button className={styles.deleteActionBtn} onClick={() => setProviderToDelete({ id: p.id, name: p.name })} title="Eliminar">
+                    <button className="action-btn action-btn--destructive" onClick={() => setProviderToDelete({ id: p.id, name: p.name })} title="Eliminar">
                       <Trash2 size={14} />
                     </button>
                   </div>

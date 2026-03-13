@@ -3,6 +3,7 @@ import { Plus, Shield, User as UserIcon, Loader, Trash2, Edit2 } from 'lucide-re
 import styles from './Users.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
+import DataCard from '@/components/DataCard/DataCard'
 import { usersApi, type CreateUserInput, type UpdateUserInput } from '@/lib/api/users'
 import { useModalContext } from '@/context/ModalContext'
 import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
@@ -164,7 +165,7 @@ export default function Users() {
         activeLabel="Gestión"
         title="Usuarios"
         action={
-          <button className={styles.newUserBtn} onClick={() => setIsCreateModalOpen(true)}>
+          <button className="btn-new" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={16} /> Nuevo Usuario
           </button>
         }
@@ -178,7 +179,7 @@ export default function Users() {
           placeholder="Buscar usuario..."
         />
 
-        <div className={styles.tableCard}>
+        <DataCard>
         {loading && users.length === 0 ? (
           <div className={styles.loadingContainer}>
             <Loader size={20} className={styles.spinner} />
@@ -238,16 +239,16 @@ export default function Users() {
                         </button>
                       </td>
                       <td>
-                        <div className={styles.actionsContainer}>
+                        <div className="flex items-center gap-2">
                           <button
-                            className={styles.editBtn}
+                            className="action-btn"
                             onClick={() => openEditModal(user)}
                             title="Editar usuario"
                           >
                             <Edit2 size={14} />
                           </button>
                           <button
-                            className={styles.deleteBtn}
+                            className="action-btn action-btn--destructive"
                             onClick={() => setUserToDelete({ id: user.id, name: user.full_name })}
                             title="Eliminar usuario"
                           >
@@ -283,7 +284,7 @@ export default function Users() {
             )}
           </>
         )}
-        </div>
+        </DataCard>
       </div>
 
       {/* Modals */}

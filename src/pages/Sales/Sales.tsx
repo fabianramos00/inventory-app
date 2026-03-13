@@ -4,6 +4,7 @@ import { Plus, DollarSign, ShoppingCart, Clock, Truck, Loader, Eye, ChevronDown,
 import styles from './Sales.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
+import DataCard from '@/components/DataCard/DataCard'
 import { salesApi } from '@/lib/api/sales'
 import { usersApi } from '@/lib/api/users'
 import { useModalContext } from '@/context/ModalContext'
@@ -192,7 +193,7 @@ export default function Sales() {
         activeLabel="Gestión"
         title="Ventas"
         action={
-          <button className={styles.newSaleBtn} onClick={() => navigate('/sales/create')}>
+          <button className="btn-new" onClick={() => navigate('/sales/create')}>
             <Plus size={16} strokeWidth={2.5} />
             <span>Nueva Venta</span>
           </button>
@@ -451,7 +452,7 @@ export default function Sales() {
 
         </CommandBar>
 
-        <div className={styles.tableCard}>
+        <DataCard>
           {loading ? (
             <div className={styles.loadingState}>
               <Loader size={24} className={styles.loadingSpinner} />
@@ -500,16 +501,16 @@ export default function Sales() {
                         <td><span className={styles.userCell}>{s.created_by.full_name}</span></td>
                         <td><span className={styles.dateCell}>{formatDate(s.created_at)}</span></td>
                         <td>
-                          <div className={styles.actionCell}>
+                          <div className="flex items-center gap-2">
                             <button
-                              className={styles.actionBtn}
+                              className="action-btn"
                               onClick={() => navigate(`/sales/${s.id}`)}
                               title="Ver venta"
                             >
                               <Eye size={14} />
                             </button>
                             <button
-                              className={styles.deleteActionBtn}
+                              className="action-btn action-btn--destructive"
                               onClick={() => setSaleToDelete({ id: s.id, label: `Venta #${s.id}${s.client ? ` — ${s.client.name}` : ''}` })}
                               title="Eliminar venta"
                             >
@@ -540,7 +541,7 @@ export default function Sales() {
               )}
             </>
           )}
-        </div>
+        </DataCard>
       </div>
       {saleToDelete && (
         <ConfirmDeleteModal
