@@ -1,12 +1,63 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Search, Plus, AlertCircle, DollarSign, Package, Grid, ChevronDown, Loader, Eye, Trash2 } from 'lucide-react'
 import styles from './Inventory.module.css'
 import { inventoryApi } from '@/lib/api/inventory'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
+import AttributeTab from '@/components/AttributeTab/AttributeTab'
 import Pagination from '@/components/Pagination'
 import type { Product } from '@/types'
+import type { EntityType } from '@/components/CreateEntityModal/CreateEntityModal'
+
+interface AttributeTabConfig {
+  key: string
+  label: string
+  entityType: EntityType
+  columns: Array<{ key: string; label: string }>
+  fetchFn: (params: { search?: string; skip?: number; limit?: number }) => Promise<{ data: { items: { id: number; name: string }[] } }>
+  updateFn: (id: number, data: Record<string, string>) => Promise<unknown>
+  deleteFn: (id: number) => Promise<unknown>
+}
+
+const ATTRIBUTE_TABS: AttributeTabConfig[] = [
+  {
+    key: 'categorias',
+    label: 'Categorías',
+    entityType: 'category',
+    columns: [{ key: 'name', label: 'Nombre' }, { key: 'description', label: 'Descripción' }],
+    fetchFn: inventoryApi.getCategories,
+    updateFn: (id, data) => inventoryApi.updateCategory(id, data as { name: string; description?: string }),
+    deleteFn: inventoryApi.deleteCategory,
+  },
+  {
+    key: 'marcas',
+    label: 'Marcas',
+    entityType: 'brand',
+    columns: [{ key: 'name', label: 'Nombre' }, { key: 'logo_url', label: 'Logo URL' }],
+    fetchFn: inventoryApi.getBrands,
+    updateFn: (id, data) => inventoryApi.updateBrand(id, data as { name: string; logo_url?: string }),
+    deleteFn: inventoryApi.deleteBrand,
+  },
+  {
+    key: 'materiales',
+    label: 'Materiales',
+    entityType: 'material',
+    columns: [{ key: 'name', label: 'Nombre' }],
+    fetchFn: inventoryApi.getMaterials,
+    updateFn: (id, data) => inventoryApi.updateMaterial(id, data as { name: string }),
+    deleteFn: inventoryApi.deleteMaterial,
+  },
+  {
+    key: 'unidades',
+    label: 'Unidades de Medida',
+    entityType: 'measurementUnit',
+    columns: [{ key: 'name', label: 'Nombre' }, { key: 'abbreviation', label: 'Abreviatura' }],
+    fetchFn: inventoryApi.getMeasurementUnits,
+    updateFn: (id, data) => inventoryApi.updateMeasurementUnit(id, data as { name: string; abbreviation: string }),
+    deleteFn: inventoryApi.deleteMeasurementUnit,
+  },
+]
 
 interface FilterOption {
   id: number
@@ -27,6 +78,8 @@ const statusLabel: Record<string, string> = {
 
 export default function Inventory() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get('tab') ?? 'productos'
   const { openModal: contextOpenModal, closeModal: contextCloseModal } = useModalContext()
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('')
@@ -242,6 +295,11 @@ export default function Inventory() {
     return stock <= threshold ? 'low_stock' : 'in_stock'
   }
 
+  const activeLabelMap: Record<string, string> = {
+    productos: 'Productos',
+    ...Object.fromEntries(ATTRIBUTE_TABS.map(t => [t.key, t.label])),
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.pageHeader}>
@@ -249,7 +307,7 @@ export default function Inventory() {
           <div className={styles.breadcrumb}>
             <span>INV</span>
             <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Productos</span>
+            <span className={styles.breadcrumbActive}>{activeLabelMap[activeTab] ?? 'Productos'}</span>
           </div>
           <h1 className={styles.pageTitle}>Inventario Principal</h1>
         </div>
@@ -262,6 +320,40 @@ export default function Inventory() {
         </button>
       </div>
 
+      <nav className={styles.tabBar}>
+        <button
+          className={`${styles.tab} ${activeTab === 'productos' ? styles.tabActive : ''}`}
+          onClick={() => setSearchParams({})}
+        >
+          Productos
+        </button>
+        {ATTRIBUTE_TABS.map(tab => (
+          <button
+            key={tab.key}
+            className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
+            onClick={() => setSearchParams({ tab: tab.key })}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab !== 'productos' && (() => {
+        const tabConfig = ATTRIBUTE_TABS.find(t => t.key === activeTab)
+        if (!tabConfig) return null
+        return (
+          <AttributeTab
+            key={activeTab}
+            entityType={tabConfig.entityType}
+            columns={tabConfig.columns}
+            fetchFn={tabConfig.fetchFn}
+            updateFn={tabConfig.updateFn}
+            deleteFn={tabConfig.deleteFn}
+          />
+        )
+      })()}
+
+      {activeTab === 'productos' && <>
       <div className={styles.kpiStrip}>
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
@@ -659,6 +751,7 @@ export default function Inventory() {
           )}
         </div>
       </div>
+      </>}
 
       {productToDelete && (
         <ConfirmDeleteModal

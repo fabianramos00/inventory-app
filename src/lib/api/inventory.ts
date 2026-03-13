@@ -41,6 +41,22 @@ export const inventoryApi = {
   createMeasurementUnit: (data: { name: string; abbreviation: string }) =>
     api.post<FilterOption>('/inventory/measurement-units', data),
 
+  updateCategory: (id: number, data: { name: string; description?: string }) =>
+    api.put<FilterOption>(`/inventory/categories/${id}`, data),
+  deleteCategory: (id: number) => api.delete(`/inventory/categories/${id}`),
+
+  updateBrand: (id: number, data: { name: string; logo_url?: string }) =>
+    api.put<FilterOption>(`/inventory/brands/${id}`, data),
+  deleteBrand: (id: number) => api.delete(`/inventory/brands/${id}`),
+
+  updateMaterial: (id: number, data: { name: string }) =>
+    api.put<FilterOption>(`/inventory/materials/${id}`, data),
+  deleteMaterial: (id: number) => api.delete(`/inventory/materials/${id}`),
+
+  updateMeasurementUnit: (id: number, data: { name: string; abbreviation: string }) =>
+    api.put<FilterOption>(`/inventory/measurement-units/${id}`, data),
+  deleteMeasurementUnit: (id: number) => api.delete(`/inventory/measurement-units/${id}`),
+
   getStats: () =>
     api.get<PaginatedResponse<FilterOption>>('/inventory/products/stats/overview'),
 }

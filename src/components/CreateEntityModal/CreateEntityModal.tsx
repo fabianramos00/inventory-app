@@ -11,20 +11,31 @@ interface CreateEntityModalProps {
   type: EntityType
   onClose: () => void
   onCreated: (entity: FilterOption) => void
+  entityId?: number
+  initialValues?: Record<string, string>
 }
 
-const entityConfig: Record<EntityType, { title: string }> = {
+const entityCreateConfig: Record<EntityType, { title: string }> = {
   material: { title: 'Agregar Material' },
   category: { title: 'Agregar Categoría' },
   brand: { title: 'Agregar Marca' },
   measurementUnit: { title: 'Agregar Unidad de Medida' },
 }
 
-export default function CreateEntityModal({ type, onClose, onCreated }: CreateEntityModalProps) {
-  const [name, setName] = useState('')
-  const [extra, setExtra] = useState('')
+const entityEditConfig: Record<EntityType, { title: string }> = {
+  material: { title: 'Editar Material' },
+  category: { title: 'Editar Categoría' },
+  brand: { title: 'Editar Marca' },
+  measurementUnit: { title: 'Editar Unidad de Medida' },
+}
+
+export default function CreateEntityModal({ type, onClose, onCreated, entityId, initialValues }: CreateEntityModalProps) {
+  const [name, setName] = useState(initialValues?.name ?? '')
+  const [extra, setExtra] = useState(initialValues?.description ?? initialValues?.logo_url ?? initialValues?.abbreviation ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const isEditMode = entityId !== undefined
 
   async function handleSave() {
     if (!name.trim()) {
@@ -39,30 +50,48 @@ export default function CreateEntityModal({ type, onClose, onCreated }: CreateEn
     setError(null)
     try {
       let response
-      if (type === 'material') {
-        response = await inventoryApi.createMaterial({ name })
-      } else if (type === 'category') {
-        response = await inventoryApi.createCategory({ name, description: extra || undefined })
-      } else if (type === 'brand') {
-        response = await inventoryApi.createBrand({ name, logo_url: extra || undefined })
+      if (isEditMode) {
+        if (type === 'material') {
+          response = await inventoryApi.updateMaterial(entityId, { name })
+        } else if (type === 'category') {
+          response = await inventoryApi.updateCategory(entityId, { name, description: extra || undefined })
+        } else if (type === 'brand') {
+          response = await inventoryApi.updateBrand(entityId, { name, logo_url: extra || undefined })
+        } else {
+          response = await inventoryApi.updateMeasurementUnit(entityId, { name, abbreviation: extra })
+        }
       } else {
-        response = await inventoryApi.createMeasurementUnit({ name, abbreviation: extra })
+        if (type === 'material') {
+          response = await inventoryApi.createMaterial({ name })
+        } else if (type === 'category') {
+          response = await inventoryApi.createCategory({ name, description: extra || undefined })
+        } else if (type === 'brand') {
+          response = await inventoryApi.createBrand({ name, logo_url: extra || undefined })
+        } else {
+          response = await inventoryApi.createMeasurementUnit({ name, abbreviation: extra })
+        }
       }
       onCreated(response.data)
     } catch (err) {
-      const msgs: Record<EntityType, string> = {
+      const createMsgs: Record<EntityType, string> = {
         material: 'Error al crear material',
         category: 'Error al crear categoría',
         brand: 'Error al crear marca',
         measurementUnit: 'Error al crear unidad de medida',
       }
-      setError(err instanceof Error ? err.message : msgs[type])
+      const editMsgs: Record<EntityType, string> = {
+        material: 'Error al actualizar material',
+        category: 'Error al actualizar categoría',
+        brand: 'Error al actualizar marca',
+        measurementUnit: 'Error al actualizar unidad de medida',
+      }
+      setError(err instanceof Error ? err.message : (isEditMode ? editMsgs : createMsgs)[type])
     } finally {
       setLoading(false)
     }
   }
 
-  const { title } = entityConfig[type]
+  const { title } = isEditMode ? entityEditConfig[type] : entityCreateConfig[type]
 
   return createPortal(
     <div className={styles.modalBackdrop} onClick={onClose}>

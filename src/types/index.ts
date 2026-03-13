@@ -156,6 +156,8 @@ export interface FilterOption {
   id: number
   name: string
   abbreviation?: string
+  description?: string
+  logo_url?: string
 }
 
 // ─── Sale Creation Form ───────────────────────────────────────────────────────

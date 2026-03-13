@@ -1,0 +1,165 @@
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  border-radius: 10px;
+}
+
+.commandBar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+}
+
+.controlsBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 52px;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  height: 52px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 100%;
+  padding: 0 16px 0 36px;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: var(--ink-1);
+  font-family: inherit;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--ink-3);
+}
+
+.searchInput:focus {
+  background: var(--surface-2);
+}
+
+.actionWrapper {
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+.newBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--ink-1);
+  color: var(--surface);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.newBtn:hover {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.tableCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--ink-3);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.emptyState {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--ink-2);
+  transition: all 0.15s;
+}
+
+.iconBtn:hover {
+  background: var(--surface-2);
+  color: var(--ink-1);
+  border-color: var(--border-strong);
+}
+
+.iconBtnDestructive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--ink-3);
+  transition: all 0.15s;
+}
+
+.iconBtnDestructive:hover {
+  background: #fee2e2;
+  color: var(--destructive);
+  border-color: var(--destructive);
+}
