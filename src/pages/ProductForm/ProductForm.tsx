@@ -7,10 +7,37 @@ import { z } from 'zod'
 import { inventoryApi } from '@/lib/api/inventory'
 import { useModalContext } from '@/context/ModalContext'
 import ProductDropdown from '@/components/ProductDropdown/ProductDropdown'
-import CreateEntityModal, { type EntityType } from '@/components/CreateEntityModal/CreateEntityModal'
+import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
 import type { Product, FilterOption, CreateProductInput } from '@/types'
 import styles from './ProductForm.module.css'
+
+type EntityType = 'material' | 'category' | 'brand' | 'measurementUnit'
+
+const ENTITY_TITLES: Record<EntityType, string> = {
+  category: 'Agregar Categoría',
+  brand: 'Agregar Marca',
+  material: 'Agregar Material',
+  measurementUnit: 'Agregar Unidad de Medida',
+}
+
+const ENTITY_FIELDS: Record<EntityType, FieldConfig[]> = {
+  category: [
+    { key: 'name', label: 'Nombre', placeholder: 'Nombre de la categoría', required: true },
+    { key: 'description', label: 'Descripción (opcional)', type: 'textarea', placeholder: 'Descripción de la categoría' },
+  ],
+  brand: [
+    { key: 'name', label: 'Nombre', placeholder: 'Nombre de la marca', required: true },
+    { key: 'logo_url', label: 'Logo URL (opcional)', type: 'url', placeholder: 'https://ejemplo.com/logo.png' },
+  ],
+  material: [
+    { key: 'name', label: 'Nombre', placeholder: 'Nombre del material', required: true },
+  ],
+  measurementUnit: [
+    { key: 'name', label: 'Nombre', placeholder: 'Centímetros', required: true },
+    { key: 'abbreviation', label: 'Abreviatura', placeholder: 'cm', required: true },
+  ],
+}
 
 const productSchema = z.object({
   name: z.string().min(1, 'Nombre es requerido').max(255),
@@ -138,8 +165,18 @@ export default function ProductForm() {
     if (activeModal || showDeleteModal) { contextOpenModal() } else { contextCloseModal() }
   }, [activeModal, showDeleteModal, contextOpenModal, contextCloseModal])
 
-  function handleEntityCreated(type: EntityType, entity: FilterOption) {
-    switch (type) {
+  async function submitCreateEntity(values: Record<string, string>): Promise<FilterOption> {
+    switch (activeModal) {
+      case 'category': return (await inventoryApi.createCategory(values as { name: string; description?: string })).data
+      case 'brand': return (await inventoryApi.createBrand(values as { name: string; logo_url?: string })).data
+      case 'material': return (await inventoryApi.createMaterial(values as { name: string })).data
+      case 'measurementUnit': return (await inventoryApi.createMeasurementUnit(values as { name: string; abbreviation: string })).data
+      default: throw new Error('Unknown entity type')
+    }
+  }
+
+  function handleEntityCreated(entity: FilterOption) {
+    switch (activeModal) {
       case 'category':
         setCategoryInitialOptions(prev => [...prev, entity])
         setValue('category_id', entity.id, { shouldValidate: true })
@@ -593,10 +630,12 @@ export default function ProductForm() {
       </div>
 
       {activeModal && (
-        <CreateEntityModal
-          type={activeModal}
+        <CreateFormModal<FilterOption>
+          title={ENTITY_TITLES[activeModal]}
+          fields={ENTITY_FIELDS[activeModal]}
+          onSubmit={submitCreateEntity}
           onClose={() => setActiveModal(null)}
-          onCreated={(entity) => handleEntityCreated(activeModal, entity)}
+          onCreated={handleEntityCreated}
         />
       )}
 

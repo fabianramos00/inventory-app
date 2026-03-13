@@ -78,29 +78,29 @@
 .tableSection {
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
-  border-radius: 10px;
+  gap: 16px;
 }
 
 .commandBar {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  border-radius: 10px 10px 0 0;
-  padding: 0;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .controlsBar {
   display: flex;
   flex-direction: column;
   width: 100%;
+  gap: 8px;
 }
 
 @media (min-width: 768px) {
   .controlsBar {
     flex-direction: row;
-    height: 48px;
-    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
   }
 }
 
@@ -108,23 +108,6 @@
 .dynamicDropdown {
   position: relative;
   flex: 0 1 auto;
-  min-height: 48px;
-  border-bottom: 1px solid var(--border);
-}
-
-.dynamicDropdown:last-child {
-  border-bottom: none;
-}
-
-@media (min-width: 768px) {
-  .dynamicDropdown {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
-  }
-
-  .dynamicDropdown:last-child {
-    border-right: none;
-  }
 }
 
 .dropdownTrigger {
@@ -132,24 +115,23 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 100%;
-  padding: 0 16px;
+  height: 36px;
+  padding: 0 12px;
   background: transparent;
-  border: none;
-  border-radius: 0;
-  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--ink-2);
   white-space: nowrap;
   cursor: pointer;
   transition: all 150ms ease;
   gap: 8px;
-  min-height: 48px;
 }
 
 @media (min-width: 768px) {
   .dropdownTrigger {
-    justify-content: center;
+    border-color: transparent;
   }
 }
 
@@ -163,16 +145,10 @@
 }
 
 .filterActive {
-  background: var(--surface);
-  color: var(--ink-1);
+  background: rgba(59, 130, 246, 0.08) !important;
+  color: var(--accent) !important;
   font-weight: 600;
-  box-shadow: inset 4px 0 0 var(--accent);
-}
-
-@media (min-width: 768px) {
-  .filterActive {
-    box-shadow: inset 0 -2px 0 var(--accent);
-  }
+  border-color: rgba(59, 130, 246, 0.2) !important;
 }
 
 .dropdownContent {
@@ -246,24 +222,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 14px;
-  min-height: 48px;
-  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
   transition: all 150ms ease;
-}
-
-.dateWrapper:last-child {
-  border-bottom: none;
 }
 
 @media (min-width: 768px) {
   .dateWrapper {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
-  }
-
-  .dateWrapper:last-child {
-    border-right: none;
+    border-color: transparent;
   }
 }
 
@@ -294,10 +263,10 @@
 
 .tableCard {
   background: var(--surface);
-  border-radius: 0 0 10px 10px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-top: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 /* Cell Styles */

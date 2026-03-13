@@ -47,9 +47,19 @@ Complete visual and interaction design specification for GestiónStock.
 
 1. **One accent color only** — yellow `#FACC15`
 2. **Structural borders (1px)** instead of soft shadows, except floating dropdowns
-3. **Border radius:** 4px max for controls, 10px for top-level containers
-4. **Active states:** Sharp `3px` left-border with accent color
+3. **Border radius:** 8px for pill controls/inputs, 12px for floating cards (command bar, table card)
+4. **Active filter state:** Blue tint — `background: rgba(59,130,246,0.08); color: var(--accent); border-color: rgba(59,130,246,0.2)` (not accent left-border)
 5. **Form controls:** Solid focus state with accent border + surface-2 background, no soft shadows
 6. **Spacing:** Uses Tailwind defaults (4px grid)
+
+## Command Bar / Table Layout Pattern
+
+Applied consistently across all list pages (Inventory, Sales, Orders, Users, Providers, Clients):
+
+- **`tableSection`** — `flex-direction: column; gap: 16px` (floating, not merged)
+- **`commandBar`** — `border-radius: 12px; padding: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.04)` — floats above table as separate card
+- **`tableCard`** — `border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.04)` — full radius (not joined to command bar)
+- **Search/filter pills inside command bar:** `height: 36px; border: 1px solid var(--border); border-radius: 8px` — border transparent on desktop (`@media min-width: 768px`), visible on mobile
+- **Active filter pill:** Blue tint (see rule 4 above)
 
 Full spec: `.interface-design/system.md`

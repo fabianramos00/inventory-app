@@ -1,39 +1,48 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Plus, Loader, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Search, Edit2, Trash2, RefreshCw } from 'lucide-react'
 import styles from './AttributeTab.module.css'
-import CreateEntityModal, { type EntityType } from '@/components/CreateEntityModal/CreateEntityModal'
+import CreateFormModal from '@/components/CreateFormModal/CreateFormModal'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
-import { useModalContext } from '@/context/ModalContext'
-import type { FilterOption } from '@/types'
 
-interface ColumnConfig {
-  key: string
-  label: string
-}
+// Update the type to match the expected FieldConfig interface from CreateFormModal
+import type { FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 
-interface AttributeTabProps {
-  entityType: EntityType
-  columns: ColumnConfig[]
-  fetchFn: (params: { search?: string; skip?: number; limit?: number }) => Promise<{ data: { items: FilterOption[] } }>
-  updateFn: (id: number, data: Record<string, string>) => Promise<unknown>
+export interface AttributeTabProps<T> {
+  fetchFn: (params: { search?: string; skip?: number; limit?: number }) => Promise<{ data: { items: T[] } }>
+  fields: FieldConfig[]
+  createTitle: string
+  editTitle: string
+  columns: { key: string, label: string }[]
+  searchKey: string
+  createFn: (data: unknown) => Promise<unknown>
+  updateFn: (id: number, data: unknown) => Promise<unknown>
   deleteFn: (id: number) => Promise<unknown>
+  onSuccess: () => void
 }
 
-const newEntityLabel: Record<EntityType, string> = {
-  category: 'Nueva Categoría',
-  brand: 'Nueva Marca',
-  material: 'Nuevo Material',
-  measurementUnit: 'Nueva Unidad',
-}
-
-export default function AttributeTab({ entityType, columns, fetchFn, deleteFn }: AttributeTabProps) {
-  const { openModal: contextOpenModal, closeModal: contextCloseModal } = useModalContext()
+export default function AttributeTab<T extends { id: number }>({
+  fetchFn,
+  fields,
+  createTitle,
+  editTitle,
+  columns,
+  searchKey,
+  createFn,
+  updateFn,
+  deleteFn,
+  onSuccess
+}: AttributeTabProps<T>) {
   const [search, setSearch] = useState('')
-  const [items, setItems] = useState<FilterOption[]>([])
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  
+  const [editingItem, setEditingItem] = useState<T | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  const [deletingItem, setDeletingItem] = useState<T | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
+  const [items, setItems] = useState<T[]>([])
   const [loading, setLoading] = useState(false)
-  const [editingItem, setEditingItem] = useState<FilterOption | null>(null)
-  const [deletingItem, setDeletingItem] = useState<FilterOption | null>(null)
-  const [showCreateModal, setShowCreateModal] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -53,132 +62,155 @@ export default function AttributeTab({ entityType, columns, fetchFn, deleteFn }:
     return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current) }
   }, [search, fetchFn, refreshKey])
 
-  // Sync modal state with global context for blur effect
-  useEffect(() => {
-    const anyOpen = showCreateModal || editingItem !== null || deletingItem !== null
-    if (anyOpen) { contextOpenModal() } else { contextCloseModal() }
-  }, [showCreateModal, editingItem, deletingItem, contextOpenModal, contextCloseModal])
-
-  function handleCreated() {
-    setShowCreateModal(false)
+  const handleSaved = () => {
+    setIsCreateModalOpen(false)
+    setIsEditModalOpen(false)
     setEditingItem(null)
     setRefreshKey(k => k + 1)
+    onSuccess()
   }
 
-  async function handleDeleteConfirm() {
-    await deleteFn(deletingItem!.id)
-    setDeletingItem(null)
-    setRefreshKey(k => k + 1)
+  const handleDelete = async () => {
+    if (!deletingItem) return
+    try {
+      await deleteFn(deletingItem.id)
+      setIsDeleteModalOpen(false)
+      setDeletingItem(null)
+      setRefreshKey(k => k + 1)
+      onSuccess()
+    } catch (err) {
+      console.error('Error deleting item', err)
+      // Could set a local error state and show it, but parent may handle it
+    }
   }
 
-  function getInitialValues(item: FilterOption): Record<string, string> {
-    const values: Record<string, string> = { name: item.name }
-    if ('description' in item && item.description) values.description = String(item.description)
-    if ('logo_url' in item && item.logo_url) values.logo_url = String(item.logo_url)
-    if ('abbreviation' in item && item.abbreviation) values.abbreviation = String(item.abbreviation)
-    return values
+  const getInitialValues = (item: T | null): Record<string, string> => {
+    if (!item) return {}
+    const vals: Record<string, string> = {}
+    
+    // For every field, grab the value from the item
+    fields.forEach(f => {
+      const val = (item as Record<string, unknown>)[f.key];
+      vals[f.key] = val !== undefined && val !== null ? String(val) : '';
+    })
+
+    return vals
   }
 
   return (
     <div className={styles.tableSection}>
+      {/* Detached Command Bar */}
       <div className={styles.commandBar}>
         <div className={styles.controlsBar}>
           <div className={styles.searchWrapper}>
-            <Search size={14} className={styles.searchIcon} />
+            <Search className={styles.searchIcon} size={14} />
             <input
               type="text"
-              className={styles.searchInput}
-              placeholder="Buscar..."
+              placeholder={`Buscar ${createTitle.toLowerCase()}...`}
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
+              className={styles.searchInput}
             />
           </div>
           <div className={styles.actionWrapper}>
-            <button className={styles.newBtn} onClick={() => setShowCreateModal(true)}>
-              <Plus size={15} strokeWidth={2.5} />
-              <span>{newEntityLabel[entityType]}</span>
+            <button className={styles.newBtn} onClick={() => setIsCreateModalOpen(true)}>
+              <Plus size={16} strokeWidth={2.5} />
+              {createTitle}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Table Card */}
       <div className={styles.tableCard}>
         {loading ? (
           <div className={styles.loadingState}>
-            <Loader size={20} className={styles.spinner} />
-            <p>Cargando...</p>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto w-full">
-              <table className="data-table w-full">
-                <thead>
-                  <tr>
-                    {columns.map(col => (
-                      <th key={col.key}>{col.label}</th>
-                    ))}
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map(item => (
-                    <tr key={item.id}>
-                      {columns.map(col => (
-                        <td key={col.key}>{(item as unknown as Record<string, unknown>)[col.key] as string || '-'}</td>
-                      ))}
-                      <td>
-                        <div className={styles.actionButtons}>
-                          <button
-                            className={styles.iconBtn}
-                            title="Editar"
-                            onClick={() => setEditingItem(item)}
-                          >
-                            <Pencil size={14} />
-                          </button>
-                          <button
-                            className={styles.iconBtnDestructive}
-                            title="Eliminar"
-                            onClick={() => setDeletingItem(item)}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className={styles.loadingSpinner}>
+              <RefreshCw size={24} />
             </div>
-            {items.length === 0 && (
-              <div className={styles.emptyState}>No se encontraron registros.</div>
-            )}
-          </>
+            <span>Cargando datos...</span>
+          </div>
+        ) : items.length === 0 ? (
+          <div className={styles.emptyState}>No se encontraron registros.</div>
+        ) : (
+          <div className="overflow-x-auto w-full">
+            <table className="data-table w-full">
+              <thead>
+                <tr>
+                  {columns.map(col => (
+                    <th key={col.key as string}>{col.label}</th>
+                  ))}
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map(item => (
+                  <tr key={item.id}>
+                    {columns.map(col => (
+                      <td key={col.key}>{(item as unknown as Record<string, unknown>)[col.key] as string || '-'}</td>
+                    ))}
+                    <td>
+                      <div className={styles.actionButtons}>
+                        <button 
+                          className={styles.iconBtn}
+                          onClick={() => {
+                            setEditingItem(item)
+                            setIsEditModalOpen(true)
+                          }}
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          className={styles.iconBtnDestructive}
+                          onClick={() => {
+                            setDeletingItem(item)
+                            setIsDeleteModalOpen(true)
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {showCreateModal && (
-        <CreateEntityModal
-          type={entityType}
-          onClose={() => setShowCreateModal(false)}
-          onCreated={handleCreated}
+      {isCreateModalOpen && (
+        <CreateFormModal
+          title={createTitle}
+          fields={fields}
+          onSubmit={createFn}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreated={handleSaved}
         />
       )}
 
-      {editingItem && (
-        <CreateEntityModal
-          type={entityType}
-          entityId={editingItem.id}
+      {editingItem && isEditModalOpen && (
+        <CreateFormModal
+          title={editTitle}
+          fields={fields}
           initialValues={getInitialValues(editingItem)}
-          onClose={() => setEditingItem(null)}
-          onCreated={handleCreated}
+          onSubmit={(data) => updateFn(editingItem.id, data)}
+          onClose={() => {
+            setIsEditModalOpen(false)
+            setEditingItem(null) 
+          }}
+          onCreated={handleSaved}
         />
       )}
 
-      {deletingItem && (
+      {isDeleteModalOpen && deletingItem && (
         <ConfirmDeleteModal
-          productName={deletingItem.name}
-          onConfirm={handleDeleteConfirm}
-          onClose={() => setDeletingItem(null)}
+          productName={String((deletingItem as Record<string, unknown>)[searchKey as string])}
+          onClose={() => {
+            setIsDeleteModalOpen(false)
+            setDeletingItem(null)
+          }}
+          onConfirm={handleDelete}
         />
       )}
     </div>

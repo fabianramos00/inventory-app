@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Loader, X } from 'lucide-react'
-import styles from '../CreateEntityModal/CreateEntityModal.module.css'
+import styles from './CreateFormModal.module.css'
 import Dropdown, { type DropdownOption } from '@/components/Dropdown/Dropdown'
 
 export interface FieldConfig {

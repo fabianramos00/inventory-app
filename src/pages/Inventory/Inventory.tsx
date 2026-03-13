@@ -8,15 +8,18 @@ import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteMod
 import AttributeTab from '@/components/AttributeTab/AttributeTab'
 import Pagination from '@/components/Pagination'
 import type { Product } from '@/types'
-import type { EntityType } from '@/components/CreateEntityModal/CreateEntityModal'
+import type { FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 
 interface AttributeTabConfig {
   key: string
   label: string
-  entityType: EntityType
   columns: Array<{ key: string; label: string }>
+  fields: FieldConfig[]
+  createTitle: string
+  editTitle: string
   fetchFn: (params: { search?: string; skip?: number; limit?: number }) => Promise<{ data: { items: { id: number; name: string }[] } }>
-  updateFn: (id: number, data: Record<string, string>) => Promise<unknown>
+  createFn: (data: unknown) => Promise<unknown>
+  updateFn: (id: number, data: unknown) => Promise<unknown>
   deleteFn: (id: number) => Promise<unknown>
 }
 
@@ -24,36 +27,59 @@ const ATTRIBUTE_TABS: AttributeTabConfig[] = [
   {
     key: 'categorias',
     label: 'Categorías',
-    entityType: 'category',
     columns: [{ key: 'name', label: 'Nombre' }, { key: 'description', label: 'Descripción' }],
+    fields: [
+      { key: 'name', label: 'Nombre', placeholder: 'Nombre de la categoría', required: true },
+      { key: 'description', label: 'Descripción (opcional)', type: 'textarea', placeholder: 'Descripción de la categoría' },
+    ],
+    createTitle: 'Nueva Categoría',
+    editTitle: 'Editar Categoría',
     fetchFn: inventoryApi.getCategories,
+    createFn: (data) => inventoryApi.createCategory(data as { name: string; description?: string }),
     updateFn: (id, data) => inventoryApi.updateCategory(id, data as { name: string; description?: string }),
     deleteFn: inventoryApi.deleteCategory,
   },
   {
     key: 'marcas',
     label: 'Marcas',
-    entityType: 'brand',
     columns: [{ key: 'name', label: 'Nombre' }, { key: 'logo_url', label: 'Logo URL' }],
+    fields: [
+      { key: 'name', label: 'Nombre', placeholder: 'Nombre de la marca', required: true },
+      { key: 'logo_url', label: 'Logo URL (opcional)', type: 'url', placeholder: 'https://ejemplo.com/logo.png' },
+    ],
+    createTitle: 'Nueva Marca',
+    editTitle: 'Editar Marca',
     fetchFn: inventoryApi.getBrands,
+    createFn: (data) => inventoryApi.createBrand(data as { name: string; logo_url?: string }),
     updateFn: (id, data) => inventoryApi.updateBrand(id, data as { name: string; logo_url?: string }),
     deleteFn: inventoryApi.deleteBrand,
   },
   {
     key: 'materiales',
     label: 'Materiales',
-    entityType: 'material',
     columns: [{ key: 'name', label: 'Nombre' }],
+    fields: [
+      { key: 'name', label: 'Nombre', placeholder: 'Nombre del material', required: true },
+    ],
+    createTitle: 'Nuevo Material',
+    editTitle: 'Editar Material',
     fetchFn: inventoryApi.getMaterials,
+    createFn: (data) => inventoryApi.createMaterial(data as { name: string }),
     updateFn: (id, data) => inventoryApi.updateMaterial(id, data as { name: string }),
     deleteFn: inventoryApi.deleteMaterial,
   },
   {
     key: 'unidades',
     label: 'Unidades de Medida',
-    entityType: 'measurementUnit',
     columns: [{ key: 'name', label: 'Nombre' }, { key: 'abbreviation', label: 'Abreviatura' }],
+    fields: [
+      { key: 'name', label: 'Nombre', placeholder: 'Centímetros', required: true },
+      { key: 'abbreviation', label: 'Abreviatura', placeholder: 'cm', required: true },
+    ],
+    createTitle: 'Nueva Unidad',
+    editTitle: 'Editar Unidad',
     fetchFn: inventoryApi.getMeasurementUnits,
+    createFn: (data) => inventoryApi.createMeasurementUnit(data as { name: string; abbreviation: string }),
     updateFn: (id, data) => inventoryApi.updateMeasurementUnit(id, data as { name: string; abbreviation: string }),
     deleteFn: inventoryApi.deleteMeasurementUnit,
   },
@@ -272,7 +298,7 @@ export default function Inventory() {
       }
     }
     loadStats()
-  }, [])
+  }, [refreshKey])
 
   useEffect(() => {
     if (productToDelete) { contextOpenModal() } else { contextCloseModal() }
@@ -320,6 +346,51 @@ export default function Inventory() {
         </button>
       </div>
 
+      <div className={styles.kpiStrip}>
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <div className={styles.kpiLabel}>Total Productos</div>
+            <div className={styles.kpiIconWrapperAccent}>
+              <Grid size={16} />
+            </div>
+          </div>
+          <div className={styles.kpiValue}>{stats.totalProducts}</div>
+        </div>
+
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <div className={styles.kpiLabel}>Total Stock</div>
+            <div className={styles.kpiIconWrapperWarning}>
+              <Package size={16} />
+            </div>
+          </div>
+          <div className={styles.kpiValue} style={{ color: 'var(--warning)' }}>{stats.totalStock}</div>
+        </div>
+
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <div className={styles.kpiLabel}>Stock Bajo</div>
+            <div className={styles.kpiIconWrapperDestructive}>
+              <AlertCircle size={16} />
+            </div>
+          </div>
+          <div className={styles.kpiValue} style={{ color: 'var(--destructive)' }}>{stats.lowStockCount}</div>
+        </div>
+
+        <div className={styles.kpiItem}>
+          <div className={styles.kpiHeader}>
+            <div className={styles.kpiLabel}>Valor Total</div>
+            <div className={styles.kpiIconWrapperSuccess}>
+              <DollarSign size={16} />
+            </div>
+          </div>
+          <div className={styles.kpiValue} style={{ color: 'var(--success)' }}>
+            <span className={styles.currencySymbol}>$</span>
+            {stats.totalValue.toLocaleString('es-PE', { maximumFractionDigits: 0 })}
+          </div>
+        </div>
+      </div>
+
       <nav className={styles.tabBar}>
         <button
           className={`${styles.tab} ${activeTab === 'productos' ? styles.tabActive : ''}`}
@@ -344,9 +415,14 @@ export default function Inventory() {
         return (
           <AttributeTab
             key={activeTab}
-            entityType={tabConfig.entityType}
-            columns={tabConfig.columns}
             fetchFn={tabConfig.fetchFn}
+            searchKey="name"
+            onSuccess={() => {}}
+            columns={tabConfig.columns}
+            fields={tabConfig.fields}
+            createTitle={tabConfig.createTitle}
+            editTitle={tabConfig.editTitle}
+            createFn={tabConfig.createFn}
             updateFn={tabConfig.updateFn}
             deleteFn={tabConfig.deleteFn}
           />
@@ -354,49 +430,6 @@ export default function Inventory() {
       })()}
 
       {activeTab === 'productos' && <>
-      <div className={styles.kpiStrip}>
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <Grid size={14} className={styles.kpiIconAccent} />
-            <div className={styles.kpiLabel}>Total Productos</div>
-          </div>
-          <div className={styles.kpiValue}>{stats.totalProducts}</div>
-        </div>
-
-        <div className={styles.kpiDivider} />
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <Package size={14} className={styles.kpiIconWarning} />
-            <div className={styles.kpiLabel}>Total Stock</div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--warning)' }}>{stats.totalStock}</div>
-        </div>
-
-        <div className={styles.kpiDivider} />
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <AlertCircle size={14} className={styles.kpiIconDestructive} />
-            <div className={styles.kpiLabel}>Stock Bajo</div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--destructive)' }}>{stats.lowStockCount}</div>
-        </div>
-
-        <div className={styles.kpiDivider} />
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <DollarSign size={14} className={styles.kpiIconSuccess} />
-            <div className={styles.kpiLabel}>Valor Total</div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--success)' }}>
-            <span className={styles.currencySymbol}>$</span>
-            {stats.totalValue.toLocaleString('es-PE', { maximumFractionDigits: 0 })}
-          </div>
-        </div>
-      </div>
-
       <div className={styles.tableSection}>
         <div className={styles.commandBar}>
           <div className={styles.controlsBar}>

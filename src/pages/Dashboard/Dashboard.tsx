@@ -206,8 +206,10 @@ export default function Dashboard() {
       <div className={styles.kpiStrip}>
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <Package size={14} className={styles.kpiIconAccent} />
             <span className={styles.kpiLabel}>Valor Total Inventario</span>
+            <div className={styles.kpiIconWrapperAccent}>
+              <Package size={16} />
+            </div>
           </div>
           <div className={styles.kpiValue}>
             <span className={styles.currencySymbol}>$</span>
@@ -218,12 +220,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className={styles.kpiDivider} />
-
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <DollarSign size={14} className={styles.kpiIconSuccess} />
             <span className={styles.kpiLabel}>Ingresos de Hoy</span>
+            <div className={styles.kpiIconWrapperSuccess}>
+              <DollarSign size={16} />
+            </div>
           </div>
           <div className={styles.kpiValue}>
             <span className={styles.currencySymbol}>$</span>
@@ -234,22 +236,22 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className={styles.kpiDivider} />
-
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <ClipboardList size={14} className={styles.kpiIconWarning} />
             <span className={styles.kpiLabel}>Pedidos Pendientes</span>
+            <div className={styles.kpiIconWrapperWarning}>
+              <ClipboardList size={16} />
+            </div>
           </div>
           <div className={styles.kpiValue}>{summary.pending_orders}</div>
         </div>
 
-        <div className={styles.kpiDivider} />
-
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <ShoppingCart size={14} className={styles.kpiIconDestructive} />
             <span className={styles.kpiLabel}>Ventas Sin Pagar</span>
+            <div className={styles.kpiIconWrapperDestructive}>
+              <ShoppingCart size={16} />
+            </div>
           </div>
           <div className={styles.kpiValue}>
             {summary.pending_payment_sales.toLocaleString('es-PE', {

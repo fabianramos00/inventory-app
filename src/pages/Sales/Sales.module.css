@@ -74,64 +74,64 @@
   transform: translateY(1px);
 }
 
-/* KPI Strip */
+/* KPI Strip — 4-column card grid */
 .kpiStrip {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .kpiStrip {
-    flex-direction: row;
-    align-items: stretch;
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
 .kpiItem {
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 16px 20px;
   gap: 12px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
 }
 
-.kpiDivider {
-  width: 100%;
-  height: 1px;
-  background: var(--border);
-}
-
-@media (min-width: 640px) {
-  .kpiDivider {
-    width: 1px;
-    height: auto;
-  }
+.kpiItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+  border-color: var(--border-strong);
 }
 
 .kpiHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
 }
 
 .kpiLabel {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--ink-3);
+  letter-spacing: 0.02em;
 }
 
-.kpiIconAccent { color: var(--accent); }
-.kpiIconWarning { color: var(--warning); }
-.kpiIconDestructive { color: var(--destructive); }
-.kpiIconSuccess { color: var(--success); }
+.kpiIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.kpiIconWrapperAccent { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
+.kpiIconWrapperWarning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.kpiIconWrapperDestructive { background: rgba(239, 68, 68, 0.1); color: var(--destructive); }
+.kpiIconWrapperSuccess { background: rgba(16, 185, 129, 0.1); color: var(--success); }
 
 .kpiValue {
   font-family: 'DM Mono', monospace;
@@ -154,29 +154,29 @@
 .tableSection {
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
-  border-radius: 10px;
+  gap: 16px;
 }
 
 .commandBar {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  border-radius: 10px 10px 0 0;
-  padding: 0;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .controlsBar {
   display: flex;
   flex-direction: column;
   width: 100%;
+  gap: 8px;
 }
 
 @media (min-width: 768px) {
   .controlsBar {
     flex-direction: row;
-    height: 48px;
-    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
   }
 }
 
@@ -184,23 +184,6 @@
 .dynamicDropdown {
   position: relative;
   flex: 0 1 auto;
-  min-height: 48px;
-  border-bottom: 1px solid var(--border);
-}
-
-.dynamicDropdown:last-child {
-  border-bottom: none;
-}
-
-@media (min-width: 768px) {
-  .dynamicDropdown {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
-  }
-
-  .dynamicDropdown:last-child {
-    border-right: none;
-  }
 }
 
 .dropdownTrigger {
@@ -208,24 +191,23 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 100%;
-  padding: 0 16px;
+  height: 36px;
+  padding: 0 12px;
   background: transparent;
-  border: none;
-  border-radius: 0;
-  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--ink-2);
   white-space: nowrap;
   cursor: pointer;
   transition: all 150ms ease;
   gap: 8px;
-  min-height: 48px;
 }
 
 @media (min-width: 768px) {
   .dropdownTrigger {
-    justify-content: center;
+    border-color: transparent;
   }
 }
 
@@ -239,16 +221,10 @@
 }
 
 .filterActive {
-  background: var(--surface);
-  color: var(--ink-1);
+  background: rgba(59, 130, 246, 0.08) !important;
+  color: var(--accent) !important;
   font-weight: 600;
-  box-shadow: inset 4px 0 0 var(--accent);
-}
-
-@media (min-width: 768px) {
-  .filterActive {
-    box-shadow: inset 0 -2px 0 var(--accent);
-  }
+  border-color: rgba(59, 130, 246, 0.2) !important;
 }
 
 .dropdownContent {
@@ -322,29 +298,23 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 14px;
-  min-height: 48px;
-  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
   transition: all 150ms ease;
-}
-
-.dateWrapper:last-child {
-  border-bottom: none;
 }
 
 @media (min-width: 768px) {
   .dateWrapper {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
-  }
-
-  .dateWrapper:last-child {
-    border-right: none;
+    border-color: transparent;
   }
 }
 
 .dateWrapper:hover {
   background: var(--surface-2);
+  border-color: var(--border-strong);
 }
 
 .dateIcon {
@@ -370,10 +340,10 @@
 
 .tableCard {
   background: var(--surface);
-  border-radius: 0 0 10px 10px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-top: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 /* Cell Styles */

@@ -203,8 +203,8 @@ export default function Sales() {
       <div className={styles.kpiStrip}>
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <DollarSign size={14} className={styles.kpiIconSuccess} />
             <div className={styles.kpiLabel}>Total ventas</div>
+            <div className={styles.kpiIconWrapperSuccess}><DollarSign size={16} /></div>
           </div>
           <div className={styles.kpiValue} style={{ color: 'var(--success)' }}>
             <span className={styles.currencySymbol}>$</span>
@@ -212,12 +212,10 @@ export default function Sales() {
           </div>
         </div>
 
-        <div className={styles.kpiDivider} />
-
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <ShoppingCart size={14} className={styles.kpiIconAccent} />
             <div className={styles.kpiLabel}>Total cobrado</div>
+            <div className={styles.kpiIconWrapperAccent}><ShoppingCart size={16} /></div>
           </div>
           <div className={styles.kpiValue}>
             <span className={styles.currencySymbol}>$</span>
@@ -225,24 +223,20 @@ export default function Sales() {
           </div>
         </div>
 
-        <div className={styles.kpiDivider} />
-
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <Clock size={14} className={styles.kpiIconDestructive} />
             <div className={styles.kpiLabel}>Sin pagar</div>
+            <div className={styles.kpiIconWrapperDestructive}><Clock size={16} /></div>
           </div>
           <div className={styles.kpiValue} style={{ color: 'var(--destructive)' }}>
             {stats.unpaid_count}
           </div>
         </div>
 
-        <div className={styles.kpiDivider} />
-
         <div className={styles.kpiItem}>
           <div className={styles.kpiHeader}>
-            <Truck size={14} className={styles.kpiIconWarning} />
             <div className={styles.kpiLabel}>Sin entregar</div>
+            <div className={styles.kpiIconWrapperWarning}><Truck size={16} /></div>
           </div>
           <div className={styles.kpiValue} style={{ color: 'var(--warning)' }}>
             {stats.undelivered_count}

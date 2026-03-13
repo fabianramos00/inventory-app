@@ -4,25 +4,27 @@
   gap: 32px;
 }
 
-/* Tab navigation */
+/* Tab navigation - Segmented Control Style */
 .tabBar {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: -16px;
+  display: inline-flex;
+  background: var(--surface-2);
+  padding: 4px;
+  border-radius: 8px;
+  gap: 2px;
+  align-self: flex-start;
+  margin-bottom: -8px;
 }
 
 .tab {
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 8px 16px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--ink-2);
-  background: none;
+  background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: all 0.2s ease;
   font-family: inherit;
   white-space: nowrap;
 }
@@ -34,7 +36,8 @@
 .tabActive {
   color: var(--ink-1);
   font-weight: 600;
-  border-bottom-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .pageHeader {
@@ -107,64 +110,64 @@
   transform: translateY(1px);
 }
 
-/* KPI Strip (Data Terminal Style) */
+/* KPI Strip — 4-column card grid */
 .kpiStrip {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .kpiStrip {
-    flex-direction: row;
-    align-items: stretch;
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
 .kpiItem {
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 16px 20px;
   gap: 12px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
 }
 
-.kpiDivider {
-  width: 100%;
-  height: 1px;
-  background: var(--border);
-}
-
-@media (min-width: 640px) {
-  .kpiDivider {
-    width: 1px;
-    height: auto;
-  }
+.kpiItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+  border-color: var(--border-strong);
 }
 
 .kpiHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+}
+
+.kpiIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
 }
 
 .kpiLabel {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--ink-3);
+  letter-spacing: 0.02em;
 }
 
-.kpiIconAccent { color: var(--accent); }
-.kpiIconWarning { color: var(--warning); }
-.kpiIconDestructive { color: var(--destructive); }
-.kpiIconSuccess { color: var(--success); }
+.kpiIconWrapperAccent { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
+.kpiIconWrapperWarning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.kpiIconWrapperDestructive { background: rgba(239, 68, 68, 0.1); color: var(--destructive); }
+.kpiIconWrapperSuccess { background: rgba(16, 185, 129, 0.1); color: var(--success); }
 
 .kpiValue {
   font-family: 'DM Mono', monospace;
@@ -187,17 +190,16 @@
 .tableSection {
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
-  border-radius: 10px;
+  gap: 16px; /* Space between command bar and table */
 }
 
-/* Unified Command Bar */
+/* Detached Command Bar */
 .commandBar {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  border-radius: 10px 10px 0 0;
-  padding: 0;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Controls Bar */
@@ -205,48 +207,50 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  gap: 8px;
 }
 
 @media (min-width: 768px) {
   .controlsBar {
     flex-direction: row;
-    height: 48px;
+    align-items: center;
+    flex-wrap: wrap; /* Prevent squishing on smaller desktops */
   }
 }
 
 .searchWrapper {
   position: relative;
-  flex: 1;
-  min-height: 48px;
-  border-bottom: 1px solid var(--border);
+  flex: 1 1 200px; /* Allow shrinking but keep a min-width */
 }
 
 @media (min-width: 768px) {
   .searchWrapper {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
+    max-width: 320px; /* Don't stretch search too wide on big screens */
   }
 }
 
 .searchIcon {
   position: absolute;
-  left: 16px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--ink-3);
   pointer-events: none;
+  width: 14px;
+  height: 14px;
 }
 
 .searchInput {
   width: 100%;
-  height: 100%;
-  padding: 0 16px 0 40px;
-  background: transparent;
-  border: none;
-  font-size: 14px;
+  height: 36px;
+  padding: 0 12px 0 34px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
   color: var(--ink-1);
   outline: none;
-  transition: background 150ms ease;
+  transition: all 0.2s ease;
 }
 
 .searchInput::placeholder {
@@ -254,29 +258,15 @@
 }
 
 .searchInput:focus {
-  background: var(--surface-2);
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Dynamic Dropdowns */
 .dynamicDropdown {
   position: relative;
   flex: 0 1 auto;
-  min-height: 48px;
-  border-bottom: 1px solid var(--border);
-}
-
-.dynamicDropdown:last-child {
-  border-bottom: none;
-}
-
-@media (min-width: 768px) {
-  .dynamicDropdown {
-    border-bottom: none;
-    border-right: 1px solid var(--border);
-  }
-  .dynamicDropdown:last-child {
-    border-right: none;
-  }
 }
 
 .dropdownTrigger {
@@ -284,47 +274,49 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 100%;
-  padding: 0 16px;
+  height: 36px; /* Match search input height */
+  padding: 0 12px;
   background: transparent;
-  border: none;
-  border-radius: 0;
-  font-size: 14px;
+  border: 1px solid var(--border); /* Visibile border on mobile */
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--ink-2);
   white-space: nowrap;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 0.2s ease;
   gap: 8px;
 }
 
 @media (min-width: 768px) {
   .dropdownTrigger {
     justify-content: center;
+    border-color: transparent; /* Look like an inline floating pill on desktop */
   }
 }
 
 .dropdownTrigger:hover {
   background: var(--surface-2);
+  border-color: var(--border-strong);
   color: var(--ink-1);
 }
 
 .dropdownTrigger:focus {
   outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* Active State using border inside */
+/* Active State using pill background */
 .filterActive {
-  background: var(--surface);
-  color: var(--ink-1);
+  background: rgba(59, 130, 246, 0.08) !important;
+  color: var(--accent);
   font-weight: 600;
-  box-shadow: inset 4px 0 0 var(--accent); /* Mobile visual cue */
+  border-color: rgba(59, 130, 246, 0.2) !important;
 }
 
-@media (min-width: 768px) {
-  .filterActive {
-    box-shadow: inset 0 -2px 0 var(--accent); /* Desktop inline brand indicator */
-  }
+.filterActive:hover {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: var(--accent-strong);
 }
 
 .dropdownContent {
@@ -401,10 +393,10 @@
 /* Table Card */
 .tableCard {
   background: var(--surface);
-  border-radius: 0 0 10px 10px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-top: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .skuCell {
@@ -576,7 +568,7 @@
 }
 
 :global(.data-table thead th) {
-  padding: 12px 16px;
+  padding: 14px 16px;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
