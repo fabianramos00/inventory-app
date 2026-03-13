@@ -196,8 +196,8 @@ export interface CreateProductInput {
   material_id: number
   size_value?: string | null
   measurement_unit_id?: number | null
-  sale_price: number
+  price: number
   cost: number
-  initial_quantity: number
+  stock_quantity: number
   min_stock_quantity: number
 }

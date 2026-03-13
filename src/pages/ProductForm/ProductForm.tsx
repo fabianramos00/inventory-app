@@ -221,8 +221,8 @@ export default function ProductForm() {
         material_id: rest.material_id,
         min_stock_quantity: rest.min_stock_quantity,
         cost: rest.cost,
-        sale_price: price,
-        initial_quantity: rest.stock_quantity,
+        price: price,
+        stock_quantity: rest.stock_quantity,
         size_value: !rest.size_value || rest.size_value.trim() === '' ? null : rest.size_value,
         measurement_unit_id: rest.measurement_unit_id ?? null,
       }
