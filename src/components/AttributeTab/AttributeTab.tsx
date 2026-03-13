@@ -12,6 +12,7 @@ export interface AttributeTabProps<T> {
   fields: FieldConfig[]
   createTitle: string
   editTitle: string
+  searchLabel?: string
   columns: { key: string, label: string }[]
   searchKey: string
   createFn: (data: unknown) => Promise<unknown>
@@ -25,6 +26,7 @@ export default function AttributeTab<T extends { id: number }>({
   fields,
   createTitle,
   editTitle,
+  searchLabel,
   columns,
   searchKey,
   createFn,
@@ -106,7 +108,7 @@ export default function AttributeTab<T extends { id: number }>({
             <Search className={styles.searchIcon} size={14} />
             <input
               type="text"
-              placeholder={`Buscar ${createTitle.toLowerCase()}...`}
+              placeholder={`Buscar ${(searchLabel ?? createTitle).toLowerCase()}...`}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={styles.searchInput}

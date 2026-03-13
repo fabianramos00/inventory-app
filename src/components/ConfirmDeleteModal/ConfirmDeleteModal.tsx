@@ -18,8 +18,8 @@ export default function ConfirmDeleteModal({ productName, onConfirm, onClose }: 
     setError(null)
     try {
       await onConfirm()
-    } catch {
-      setError('Error al eliminar el producto. Intenta nuevamente.')
+    } catch (err: unknown) {
+      setError((err as Error)?.message || 'Error al eliminar. Intenta nuevamente.')
       setIsDeleting(false)
     }
   }

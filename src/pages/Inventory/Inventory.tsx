@@ -422,6 +422,7 @@ export default function Inventory() {
             fields={tabConfig.fields}
             createTitle={tabConfig.createTitle}
             editTitle={tabConfig.editTitle}
+            searchLabel={tabConfig.label}
             createFn={tabConfig.createFn}
             updateFn={tabConfig.updateFn}
             deleteFn={tabConfig.deleteFn}

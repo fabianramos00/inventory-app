@@ -130,7 +130,15 @@ export default function Users() {
 
   async function handleDeleteUser() {
     if (!userToDelete) return
-    await usersApi.deleteUser(userToDelete.id)
+    try {
+      await usersApi.deleteUser(userToDelete.id)
+    } catch (err: unknown) {
+      const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code
+      if (code === 'FOREIGN_KEY_VIOLATION') {
+        throw new Error('No se puede eliminar el usuario porque está asociado a una venta.')
+      }
+      throw err
+    }
     setUserToDelete(null)
     setReloadTrigger(prev => prev + 1)
   }
