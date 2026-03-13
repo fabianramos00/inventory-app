@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Shield, User as UserIcon, Loader, Trash2, Edit2 } from 'lucide-react'
+import DataTable from '@/components/DataTable/DataTable'
 import styles from './Users.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
@@ -37,7 +38,7 @@ export default function Users() {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const [hasNext, setHasNext] = useState(false)
+  const [totalPages, setTotalPages] = useState(1)
   const limit = 10
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -82,7 +83,7 @@ export default function Users() {
       })
       const data = response.data as PaginatedResponse<User>
       setUsers(data.items || [])
-      setHasNext(p < (data.pages || 1))
+      setTotalPages(data.pages || 1)
     } catch {
       setUsers([])
     } finally {
@@ -180,110 +181,88 @@ export default function Users() {
         />
 
         <DataCard>
-        {loading && users.length === 0 ? (
-          <div className={styles.loadingContainer}>
-            <Loader size={20} className={styles.spinner} />
-            <span>Cargando usuarios...</span>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto w-full">
-              <table className="data-table w-full min-w-[900px]">
-                <thead>
-                  <tr>
-                    <th>Usuario</th>
-                    <th>Correo</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user, i) => (
-                    <tr key={user.id}>
-                      <td>
-                        <div className={styles.userCell}>
-                          <div
-                            className={styles.avatar}
-                            style={{ background: colors[i % colors.length] }}
-                          >
-                            {user.full_name.charAt(0).toUpperCase()}
-                          </div>
-                          <span className={styles.userName}>{user.full_name}</span>
-                        </div>
-                      </td>
-                      <td><span className={styles.emailCell}>{user.email}</span></td>
-                      <td>
-                        <div className={styles.roleCell}>
-                          {user.is_superuser
-                            ? <Shield size={12} className={styles.adminIcon} />
-                            : <UserIcon size={12} className={styles.userIcon} />
-                          }
-                          <span className={`badge ${user.is_superuser ? 'badge--warning' : 'badge--neutral'}`}>
-                            {user.is_superuser ? 'Administrador' : 'Usuario'}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          className={styles.stateToggle}
-                          onClick={() => handleToggleActive(user)}
-                          disabled={togglegingUserId === user.id}
-                          title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
-                        >
-                          {togglegingUserId === user.id ? (
-                            <Loader size={16} className={styles.toggleSpinner} />
-                          ) : (
-                            <div className={`${styles.toggleSwitch} ${user.is_active ? styles.toggleActive : ''}`} />
-                          )}
-                        </button>
-                      </td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <button
-                            className="action-btn"
-                            onClick={() => openEditModal(user)}
-                            title="Editar usuario"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            className="action-btn action-btn--destructive"
-                            onClick={() => setUserToDelete({ id: user.id, name: user.full_name })}
-                            title="Eliminar usuario"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {(page > 1 || hasNext) && (
-              <div className={styles.pagination}>
-                <button
-                  className={styles.pageBtn}
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Anterior
-                </button>
-                <span className={styles.pageInfo}>Página {page}</span>
-                <button
-                  className={styles.pageBtn}
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={!hasNext}
-                >
-                  Siguiente
-                </button>
-              </div>
-            )}
-          </>
-        )}
+          <DataTable
+            loading={loading && users.length === 0}
+            empty={users.length === 0}
+            loadingText="Cargando usuarios..."
+            emptyText="No se encontraron usuarios."
+            minWidth="900px"
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            isPaginationLoading={loading}
+          >
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user, i) => (
+                <tr key={user.id}>
+                  <td>
+                    <div className={styles.userCell}>
+                      <div
+                        className={styles.avatar}
+                        style={{ background: colors[i % colors.length] }}
+                      >
+                        {user.full_name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className={styles.userName}>{user.full_name}</span>
+                    </div>
+                  </td>
+                  <td><span className={styles.emailCell}>{user.email}</span></td>
+                  <td>
+                    <div className={styles.roleCell}>
+                      {user.is_superuser
+                        ? <Shield size={12} className={styles.adminIcon} />
+                        : <UserIcon size={12} className={styles.userIcon} />
+                      }
+                      <span className={`badge ${user.is_superuser ? 'badge--warning' : 'badge--neutral'}`}>
+                        {user.is_superuser ? 'Administrador' : 'Usuario'}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <button
+                      className={styles.stateToggle}
+                      onClick={() => handleToggleActive(user)}
+                      disabled={togglegingUserId === user.id}
+                      title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
+                    >
+                      {togglegingUserId === user.id ? (
+                        <Loader size={16} className={styles.toggleSpinner} />
+                      ) : (
+                        <div className={`${styles.toggleSwitch} ${user.is_active ? styles.toggleActive : ''}`} />
+                      )}
+                    </button>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="action-btn"
+                        onClick={() => openEditModal(user)}
+                        title="Editar usuario"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        className="action-btn action-btn--destructive"
+                        onClick={() => setUserToDelete({ id: user.id, name: user.full_name })}
+                        title="Eliminar usuario"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </DataTable>
         </DataCard>
       </div>
 

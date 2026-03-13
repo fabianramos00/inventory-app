@@ -8,6 +8,7 @@ import {
   AreaChart, Area, ResponsiveContainer,
 } from 'recharts'
 import { dashboardApi, type SalesTrendData, type TopProduct, type OrderStatusData } from '@/lib/api/dashboard'
+import DataTable from '@/components/DataTable/DataTable'
 import { inventoryApi } from '@/lib/api/inventory'
 import styles from './Dashboard.module.css'
 
@@ -340,30 +341,32 @@ export default function Dashboard() {
             {errors.topProducts}
           </div>
         ) : (
-          <div className="overflow-x-auto w-full">
-            <table className="data-table w-full">
-              <thead>
-                <tr>
-                  <th>SKU</th>
-                  <th>Nombre</th>
-                  <th>Marca</th>
-                  <th>Unidades Vendidas</th>
-                  <th>Ingresos Totales</th>
+          <DataTable
+            loading={false}
+            empty={topProductsData.length === 0}
+            emptyText="Sin productos vendidos."
+          >
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Unidades Vendidas</th>
+                <th>Ingresos Totales</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topProductsData.map((p) => (
+                <tr key={p.sku}>
+                  <td><span className={styles.productSku}>{p.sku}</span></td>
+                  <td><span className={styles.productName}>{p.name}</span></td>
+                  <td><span className="badge badge--neutral">{p.brand}</span></td>
+                  <td><span className={styles.productUnits}>{p.ventas}</span></td>
+                  <td><span className={styles.productRevenue}>$ {p.revenue.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
                 </tr>
-              </thead>
-              <tbody>
-                {topProductsData.map((p) => (
-                  <tr key={p.sku}>
-                    <td><span className={styles.productSku}>{p.sku}</span></td>
-                    <td><span className={styles.productName}>{p.name}</span></td>
-                    <td><span className="badge badge--neutral">{p.brand}</span></td>
-                    <td><span className={styles.productUnits}>{p.ventas}</span></td>
-                    <td><span className={styles.productRevenue}>$ {p.revenue.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </DataTable>
         )}
       </DataCard>
     </div>

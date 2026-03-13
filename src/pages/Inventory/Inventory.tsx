@@ -9,7 +9,7 @@ import { inventoryApi } from '@/lib/api/inventory'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
 import AttributeTab from '@/components/AttributeTab/AttributeTab'
-import Pagination from '@/components/Pagination'
+import DataTable from '@/components/DataTable/DataTable'
 import type { Product } from '@/types'
 import type { FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 
@@ -685,96 +685,82 @@ export default function Inventory() {
         </CommandBar>
 
         <DataCard>
-          {loading ? (
-            <div className={styles.loadingState}>
-              <Loader size={24} className={styles.loadingSpinner} />
-              <p>Cargando productos...</p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto w-full">
-                <table className="data-table w-full min-w-[800px]">
-                  <thead>
-                    <tr>
-                      <th>SKU</th>
-                      <th>Nombre</th>
-                      <th>Medida</th>
-                      <th>Categoría</th>
-                      <th>Stock</th>
-                      <th>Mín.</th>
-                      <th>Material</th>
-                      <th>Marca</th>
-                      <th>Precio Unit.</th>
-                      <th>Disponibilidad</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map(p => {
-                      const status = getProductStatus(p.stock_quantity || 0, p.low_stock_threshold || 0)
-                      return (
-                        <tr key={p.id}>
-                          <td>
-                            <button
-                              className={styles.skuLink}
-                              onClick={() => navigate(`/inventory/product/${p.id}`)}
-                              title="Ver producto"
-                            >
-                              {p.sku}
-                            </button>
-                          </td>
-                          <td><span className={styles.nameCell}>{p.name || '-'}</span></td>
-                          <td><span className={styles.unitCell}>{p.size_value} {p.measurement_unit?.abbreviation}</span></td>
-                          <td><span className={styles.categoryCell}>{p.category?.name || '-'}</span></td>
-                          <td>
-                            <span className={`${styles.stockCell} ${status === 'low_stock' || status === 'out_of_stock' ? styles.stockCellLow : styles.stockCellOk}`}>
-                              {p.stock_quantity} <span className={styles.stockUnit}>{p.unit}</span>
-                            </span>
-                          </td>
-                          <td><span className={styles.minCell}>{p.low_stock_threshold}</span></td>
-                          <td><span className={styles.materialCell}>{p.material?.name || '-'}</span></td>
-                          <td><span className={styles.brandCell}>{p.brand?.name || '-'}</span></td>
-                          <td><span className={styles.priceCell}>$ {(p.price || 0).toFixed(2)}</span></td>
-                          <td><span className={styles[statusMap[status]]}>{statusLabel[status]}</span></td>
-                          <td>
-                            <div className="flex items-center gap-2">
-                              <button
-                                className="action-btn"
-                                title="Ver producto"
-                                onClick={() => navigate(`/inventory/product/${p.id}`)}
-                              >
-                                <Eye size={15} />
-                              </button>
-                              <button
-                                className="action-btn action-btn--destructive"
-                                title="Eliminar"
-                                onClick={() => setProductToDelete({ id: p.id, name: p.name + ' ' + p.size_value + ' ' + p.measurement_unit?.abbreviation })}
-                              >
-                                <Trash2 size={15} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {products.length === 0 && (
-                <div className={styles.emptyState}>
-                  No se encontraron productos.
-                </div>
-              )}
-
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-                isLoading={loading}
-              />
-            </>
-          )}
+          <DataTable
+            loading={loading}
+            empty={products.length === 0}
+            loadingText="Cargando productos..."
+            emptyText="No se encontraron productos."
+            minWidth="800px"
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            isPaginationLoading={loading}
+          >
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Nombre</th>
+                <th>Medida</th>
+                <th>Categoría</th>
+                <th>Stock</th>
+                <th>Mín.</th>
+                <th>Material</th>
+                <th>Marca</th>
+                <th>Precio Unit.</th>
+                <th>Disponibilidad</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map(p => {
+                const status = getProductStatus(p.stock_quantity || 0, p.low_stock_threshold || 0)
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      <button
+                        className={styles.skuLink}
+                        onClick={() => navigate(`/inventory/product/${p.id}`)}
+                        title="Ver producto"
+                      >
+                        {p.sku}
+                      </button>
+                    </td>
+                    <td><span className={styles.nameCell}>{p.name || '-'}</span></td>
+                    <td><span className={styles.unitCell}>{p.size_value} {p.measurement_unit?.abbreviation}</span></td>
+                    <td><span className={styles.categoryCell}>{p.category?.name || '-'}</span></td>
+                    <td>
+                      <span className={`${styles.stockCell} ${status === 'low_stock' || status === 'out_of_stock' ? styles.stockCellLow : styles.stockCellOk}`}>
+                        {p.stock_quantity} <span className={styles.stockUnit}>{p.unit}</span>
+                      </span>
+                    </td>
+                    <td><span className={styles.minCell}>{p.low_stock_threshold}</span></td>
+                    <td><span className={styles.materialCell}>{p.material?.name || '-'}</span></td>
+                    <td><span className={styles.brandCell}>{p.brand?.name || '-'}</span></td>
+                    <td><span className={styles.priceCell}>$ {(p.price || 0).toFixed(2)}</span></td>
+                    <td><span className={styles[statusMap[status]]}>{statusLabel[status]}</span></td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="action-btn"
+                          title="Ver producto"
+                          onClick={() => navigate(`/inventory/product/${p.id}`)}
+                        >
+                          <Eye size={15} />
+                        </button>
+                        <button
+                          className="action-btn action-btn--destructive"
+                          title="Eliminar"
+                          onClick={() => setProductToDelete({ id: p.id, name: p.name + ' ' + p.size_value + ' ' + p.measurement_unit?.abbreviation })}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </DataTable>
         </DataCard>
       </div>
       </>}

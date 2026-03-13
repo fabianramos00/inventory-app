@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, DollarSign, ShoppingCart, Clock, Truck, Loader, Eye, ChevronDown, Calendar, Trash2 } from 'lucide-react'
+import DataTable from '@/components/DataTable/DataTable'
 import styles from './Sales.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
@@ -453,93 +454,83 @@ export default function Sales() {
         </CommandBar>
 
         <DataCard>
-          {loading ? (
-            <div className={styles.loadingState}>
-              <Loader size={24} className={styles.loadingSpinner} />
-              <p>Cargando ventas...</p>
+          <DataTable
+            loading={loading}
+            empty={sales.length === 0}
+            loadingText="Cargando ventas..."
+            emptyText="No se encontraron ventas."
+            minWidth="760px"
+          >
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Pagado</th>
+                <th>Deuda</th>
+                <th>Pago</th>
+                <th>Entrega</th>
+                <th>Usuario</th>
+                <th>Fecha</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {sales.map(s => (
+                <tr key={s.id}>
+                  <td>
+                    <button className={styles.codeLink} onClick={() => navigate(`/sales/${s.id}`)} title="Ver venta">
+                      #{s.id}
+                    </button>
+                  </td>
+                  <td><span className={styles.customerCell}>{s.client?.name ?? <span className={styles.emptyCell}>Sin cliente</span>}</span></td>
+                  <td><span className={styles.totalCell}>$ {s.total_amount.toFixed(2)}</span></td>
+                  <td><span className={styles.amountCell}>$ {s.amount_paid.toFixed(2)}</span></td>
+                  <td><span className={`${styles.debtCell} ${s.debt_amount > 0 ? styles.debtCellActive : ''}`}>$ {s.debt_amount.toFixed(2)}</span></td>
+                  <td>
+                    <span className={styles[paymentStatusBadge[s.payment_status] ?? 'badge--warning']}>
+                      {paymentStatusLabel[s.payment_status] ?? s.payment_status}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={styles[deliveryStatusBadge[s.delivery_status] ?? 'badge--warning']}>
+                      {deliveryStatusLabel[s.delivery_status] ?? s.delivery_status}
+                    </span>
+                  </td>
+                  <td><span className={styles.userCell}>{s.created_by.full_name}</span></td>
+                  <td><span className={styles.dateCell}>{formatDate(s.created_at)}</span></td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="action-btn"
+                        onClick={() => navigate(`/sales/${s.id}`)}
+                        title="Ver venta"
+                      >
+                        <Eye size={14} />
+                      </button>
+                      <button
+                        className="action-btn action-btn--destructive"
+                        onClick={() => setSaleToDelete({ id: s.id, label: `Venta #${s.id}${s.client ? ` — ${s.client.name}` : ''}` })}
+                        title="Eliminar venta"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </DataTable>
+          {!loading && sales.length > 0 && (page > 1 || hasNext) && (
+            <div className={styles.pagination}>
+              <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 1}>
+                Anterior
+              </button>
+              <span className={styles.pageInfo}>Página {page}</span>
+              <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={!hasNext}>
+                Siguiente
+              </button>
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto w-full">
-                <table className="data-table w-full min-w-[760px]">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Cliente</th>
-                      <th>Total</th>
-                      <th>Pagado</th>
-                      <th>Deuda</th>
-                      <th>Pago</th>
-                      <th>Entrega</th>
-                      <th>Usuario</th>
-                      <th>Fecha</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sales.map(s => (
-                      <tr key={s.id}>
-                        <td>
-                          <button className={styles.codeLink} onClick={() => navigate(`/sales/${s.id}`)} title="Ver venta">
-                            #{s.id}
-                          </button>
-                        </td>
-                        <td><span className={styles.customerCell}>{s.client?.name ?? <span className={styles.emptyCell}>Sin cliente</span>}</span></td>
-                        <td><span className={styles.totalCell}>$ {s.total_amount.toFixed(2)}</span></td>
-                        <td><span className={styles.amountCell}>$ {s.amount_paid.toFixed(2)}</span></td>
-                        <td><span className={`${styles.debtCell} ${s.debt_amount > 0 ? styles.debtCellActive : ''}`}>$ {s.debt_amount.toFixed(2)}</span></td>
-                        <td>
-                          <span className={styles[paymentStatusBadge[s.payment_status] ?? 'badge--warning']}>
-                            {paymentStatusLabel[s.payment_status] ?? s.payment_status}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={styles[deliveryStatusBadge[s.delivery_status] ?? 'badge--warning']}>
-                            {deliveryStatusLabel[s.delivery_status] ?? s.delivery_status}
-                          </span>
-                        </td>
-                        <td><span className={styles.userCell}>{s.created_by.full_name}</span></td>
-                        <td><span className={styles.dateCell}>{formatDate(s.created_at)}</span></td>
-                        <td>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="action-btn"
-                              onClick={() => navigate(`/sales/${s.id}`)}
-                              title="Ver venta"
-                            >
-                              <Eye size={14} />
-                            </button>
-                            <button
-                              className="action-btn action-btn--destructive"
-                              onClick={() => setSaleToDelete({ id: s.id, label: `Venta #${s.id}${s.client ? ` — ${s.client.name}` : ''}` })}
-                              title="Eliminar venta"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {sales.length === 0 && (
-                <div className={styles.emptyState}>No se encontraron ventas.</div>
-              )}
-
-              {(page > 1 || hasNext) && (
-                <div className={styles.pagination}>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 1}>
-                    Anterior
-                  </button>
-                  <span className={styles.pageInfo}>Página {page}</span>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={!hasNext}>
-                    Siguiente
-                  </button>
-                </div>
-              )}
-            </>
           )}
         </DataCard>
       </div>

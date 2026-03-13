@@ -415,16 +415,6 @@
 .cancelBtn:hover { background: var(--surface-2); }
 .cancelBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.loadingState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 16px;
-  gap: 12px;
-  color: var(--ink-3);
-}
-
 .loadingSpinner {
   animation: spin 1s linear infinite;
   color: var(--accent);
@@ -433,12 +423,6 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-.emptyState {
-  padding: 48px 16px;
-  text-align: center;
-  color: var(--ink-3);
 }
 
 .pagination {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Edit2, Trash2, RefreshCw } from 'lucide-react'
+import { Plus, Edit2, Trash2 } from 'lucide-react'
+import DataTable from '@/components/DataTable/DataTable'
 import styles from './AttributeTab.module.css'
 import CommandBar from '@/components/CommandBar/CommandBar'
 import CreateFormModal from '@/components/CreateFormModal/CreateFormModal'
@@ -117,60 +118,50 @@ export default function AttributeTab<T extends { id: number }>({
 
       {/* Table Card */}
       <div className={styles.tableCard}>
-        {loading ? (
-          <div className={styles.loadingState}>
-            <div className={styles.loadingSpinner}>
-              <RefreshCw size={24} />
-            </div>
-            <span>Cargando datos...</span>
-          </div>
-        ) : items.length === 0 ? (
-          <div className={styles.emptyState}>No se encontraron registros.</div>
-        ) : (
-          <div className="overflow-x-auto w-full">
-            <table className="data-table w-full">
-              <thead>
-                <tr>
-                  {columns.map(col => (
-                    <th key={col.key as string}>{col.label}</th>
-                  ))}
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map(item => (
-                  <tr key={item.id}>
-                    {columns.map(col => (
-                      <td key={col.key}>{(item as unknown as Record<string, unknown>)[col.key] as string || '-'}</td>
-                    ))}
-                    <td>
-                      <div className={styles.actionButtons}>
-                        <button 
-                          className={styles.iconBtn}
-                          onClick={() => {
-                            setEditingItem(item)
-                            setIsEditModalOpen(true)
-                          }}
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          className={styles.iconBtnDestructive}
-                          onClick={() => {
-                            setDeletingItem(item)
-                            setIsDeleteModalOpen(true)
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+        <DataTable
+          loading={loading}
+          empty={items.length === 0}
+        >
+          <thead>
+            <tr>
+              {columns.map(col => (
+                <th key={col.key as string}>{col.label}</th>
+              ))}
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(item => (
+              <tr key={item.id}>
+                {columns.map(col => (
+                  <td key={col.key}>{(item as unknown as Record<string, unknown>)[col.key] as string || '-'}</td>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                <td>
+                  <div className={styles.actionButtons}>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() => {
+                        setEditingItem(item)
+                        setIsEditModalOpen(true)
+                      }}
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      className={styles.iconBtnDestructive}
+                      onClick={() => {
+                        setDeletingItem(item)
+                        setIsDeleteModalOpen(true)
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       </div>
 
       {isCreateModalOpen && (

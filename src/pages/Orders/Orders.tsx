@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Loader, Eye, Trash2, ChevronDown, Calendar } from 'lucide-react'
+import DataTable from '@/components/DataTable/DataTable'
 import styles from './Orders.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
@@ -283,87 +284,77 @@ export default function Orders() {
         </CommandBar>
 
         <DataCard>
-          {loading ? (
-            <div className={styles.loadingState}>
-              <Loader size={24} className={styles.loadingSpinner} />
-              <p>Cargando pedidos...</p>
+          <DataTable
+            loading={loading}
+            empty={orders.length === 0}
+            loadingText="Cargando pedidos..."
+            emptyText="No se encontraron pedidos."
+            minWidth="640px"
+          >
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Proveedor</th>
+                <th>Total</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Pago</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map(o => (
+                <tr key={o.id}>
+                  <td>
+                    <button className={styles.codeLink} onClick={() => navigate(`/orders/${o.id}`)} title="Ver pedido">
+                      #{o.id}
+                    </button>
+                  </td>
+                  <td><span className={styles.customerCell}>{o.provider.name}</span></td>
+                  <td><span className={styles.totalCell}>$ {o.total_amount.toFixed(2)}</span></td>
+                  <td><span className={styles.dateCell}>{formatDate(o.order_date)}</span></td>
+                  <td>
+                    <span className={styles[statusBadge[o.status] ?? 'badge--warning']}>
+                      {statusLabel[o.status] ?? o.status}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={styles[paymentStatusBadge[o.payment_status] ?? 'badge--warning']}>
+                      {paymentStatusLabel[o.payment_status] ?? o.payment_status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="action-btn"
+                        onClick={() => navigate(`/orders/${o.id}`)}
+                        title="Ver pedido"
+                      >
+                        <Eye size={14} />
+                      </button>
+                      <button
+                        className="action-btn action-btn--destructive"
+                        onClick={() => setOrderToDelete({ id: o.id, label: `Pedido #${o.id} — ${o.provider.name}` })}
+                        title="Eliminar pedido"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </DataTable>
+          {!loading && orders.length > 0 && (page > 1 || hasNext) && (
+            <div className={styles.pagination}>
+              <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 1}>
+                Anterior
+              </button>
+              <span className={styles.pageInfo}>Página {page}</span>
+              <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={!hasNext}>
+                Siguiente
+              </button>
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto w-full">
-                <table className="data-table w-full min-w-[640px]">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Proveedor</th>
-                      <th>Total</th>
-                      <th>Fecha</th>
-                      <th>Estado</th>
-                      <th>Pago</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map(o => (
-                      <tr key={o.id}>
-                        <td>
-                          <button className={styles.codeLink} onClick={() => navigate(`/orders/${o.id}`)} title="Ver pedido">
-                            #{o.id}
-                          </button>
-                        </td>
-                        <td><span className={styles.customerCell}>{o.provider.name}</span></td>
-                        <td><span className={styles.totalCell}>$ {o.total_amount.toFixed(2)}</span></td>
-                        <td><span className={styles.dateCell}>{formatDate(o.order_date)}</span></td>
-                        <td>
-                          <span className={styles[statusBadge[o.status] ?? 'badge--warning']}>
-                            {statusLabel[o.status] ?? o.status}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={styles[paymentStatusBadge[o.payment_status] ?? 'badge--warning']}>
-                            {paymentStatusLabel[o.payment_status] ?? o.payment_status}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="action-btn"
-                              onClick={() => navigate(`/orders/${o.id}`)}
-                              title="Ver pedido"
-                            >
-                              <Eye size={14} />
-                            </button>
-                            <button
-                              className="action-btn action-btn--destructive"
-                              onClick={() => setOrderToDelete({ id: o.id, label: `Pedido #${o.id} — ${o.provider.name}` })}
-                              title="Eliminar pedido"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {orders.length === 0 && (
-                <div className={styles.emptyState}>No se encontraron pedidos.</div>
-              )}
-
-              {(page > 1 || hasNext) && (
-                <div className={styles.pagination}>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 1}>
-                    Anterior
-                  </button>
-                  <span className={styles.pageInfo}>Página {page}</span>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={!hasNext}>
-                    Siguiente
-                  </button>
-                </div>
-              )}
-            </>
           )}
         </DataCard>
       </div>

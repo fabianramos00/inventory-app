@@ -13,24 +13,6 @@
 }
 
 
-.loadingContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 48px 24px;
-  color: var(--ink-3);
-  font-size: 14px;
-}
-
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 /* Table Cells */
 .userCell {
@@ -136,40 +118,3 @@
   color: var(--ink-3);
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
-}
-
-.pageBtn {
-  padding: 6px 14px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-2);
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-
-.pageBtn:hover:not(:disabled) {
-  background: var(--surface-2);
-  color: var(--ink-1);
-}
-
-.pageBtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pageInfo {
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: var(--ink-3);
-}
