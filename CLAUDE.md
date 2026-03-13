@@ -64,6 +64,9 @@ src/
 ├── components/
 │   ├── PrivateRoute, Dropdown, ProductDropdown
 │   ├── CreateEntityModal, ConfirmDeleteModal, CreateFormModal
+│   ├── DataTable/ → loading/empty/overflow/pagination wrapper for all list tables
+│   ├── PageHeader, CommandBar, DataCard, Pagination
+│   ├── AttributeTab/ → generic catalog attribute CRUD tab
 │   └── layout/ → AppLayout, Sidebar
 ├── lib/
 │   ├── axios.ts (Bearer token interceptor)
