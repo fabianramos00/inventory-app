@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Plus, Phone, Mail, Edit, Trash2, Loader } from 'lucide-react'
+import { Plus, Phone, Mail, Edit, Trash2, Loader } from 'lucide-react'
 import styles from './Clients.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
+import CommandBar from '@/components/CommandBar/CommandBar'
 import { clientsApi } from '@/lib/api/clients'
 import { useModalContext } from '@/context/ModalContext'
 import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
@@ -138,37 +140,23 @@ export default function Clients() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.pageHeader}>
-        <div>
-          <div className={styles.breadcrumb}>
-            <span>CLI</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Lista</span>
-          </div>
-          <h1 className={styles.pageTitle}>Clientes</h1>
-        </div>
-        <button className={styles.newClientBtn} onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={16} strokeWidth={2.5} />
-          <span>Nuevo Cliente</span>
-        </button>
-      </div>
+      <PageHeader
+        prefix="CLI"
+        activeLabel="Gestión"
+        title="Clientes"
+        action={
+          <button className={styles.newClientBtn} onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={16} strokeWidth={2.5} />
+            <span>Nuevo Cliente</span>
+          </button>
+        }
+      />
 
-      {/* Command Bar (replacing searchCard) */}
-      <div className={styles.commandBar}>
-        <div className={styles.controlsBar}>
-          <div className={styles.searchWrapper}>
-            <Search size={14} className={styles.searchIcon} />
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="Buscar cliente por nombre, cédula o contacto..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
+      <CommandBar
+        search={search}
+        onSearchChange={setSearch}
+        placeholder="Buscar cliente por nombre, cédula o contacto..."
+      />
 
       {/* Loading state */}
       {loading ? (

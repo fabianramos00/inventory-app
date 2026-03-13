@@ -4,48 +4,6 @@
   gap: 32px;
 }
 
-.pageHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  margin-bottom: 8px;
-}
-
-@media (min-width: 640px) {
-  .pageHeader {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-.pageTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--ink-1);
-  letter-spacing: -0.02em;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--ink-3);
-  text-transform: uppercase;
-}
-
-.breadcrumbDivider {
-  color: var(--border-strong);
-}
-
-.breadcrumbActive {
-  color: var(--ink-2);
-}
 
 .newProviderBtn {
   display: flex;
@@ -74,70 +32,6 @@
   transform: translateY(1px);
 }
 
-/* Command Bar (Search area) */
-.commandBar {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.controlsBar {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-@media (min-width: 768px) {
-  .controlsBar {
-    flex-direction: row;
-    align-items: center;
-  }
-}
-
-.searchWrapper {
-  position: relative;
-  flex: 1;
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-@media (min-width: 768px) {
-  .searchWrapper {
-    border-color: transparent;
-  }
-}
-
-.searchIcon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--ink-3);
-  pointer-events: none;
-}
-
-.searchInput {
-  width: 100%;
-  height: 36px;
-  padding: 0 16px 0 36px;
-  background: transparent;
-  border: none;
-  font-size: 14px;
-  color: var(--ink-1);
-  outline: none;
-  transition: background 150ms ease;
-}
-
-.searchInput::placeholder {
-  color: var(--ink-3);
-}
-
-.searchInput:focus {
-  background: var(--surface-2);
-}
 
 .loadingContainer {
   display: flex;

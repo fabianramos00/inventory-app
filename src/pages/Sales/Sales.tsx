@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, DollarSign, ShoppingCart, Clock, Truck, Loader, Eye, ChevronDown, Calendar, Trash2 } from 'lucide-react'
 import styles from './Sales.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
+import CommandBar from '@/components/CommandBar/CommandBar'
 import { salesApi } from '@/lib/api/sales'
 import { usersApi } from '@/lib/api/users'
 import { useModalContext } from '@/context/ModalContext'
@@ -185,20 +187,17 @@ export default function Sales() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <div>
-          <div className={styles.breadcrumb}>
-            <span>VNT</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Registro</span>
-          </div>
-          <h1 className={styles.pageTitle}>Ventas</h1>
-        </div>
-        <button className={styles.newSaleBtn} onClick={() => navigate('/sales/create')}>
-          <Plus size={16} strokeWidth={2.5} />
-          <span>Nueva Venta</span>
-        </button>
-      </div>
+      <PageHeader
+        prefix="VNT"
+        activeLabel="Gestión"
+        title="Ventas"
+        action={
+          <button className={styles.newSaleBtn} onClick={() => navigate('/sales/create')}>
+            <Plus size={16} strokeWidth={2.5} />
+            <span>Nueva Venta</span>
+          </button>
+        }
+      />
 
       <div className={styles.kpiStrip}>
         <div className={styles.kpiItem}>
@@ -245,8 +244,7 @@ export default function Sales() {
       </div>
 
       <div className={styles.tableSection}>
-        <div className={styles.commandBar}>
-          <div className={styles.controlsBar}>
+        <CommandBar search="" onSearchChange={() => {}}>
 
             {/* Usuario */}
             <div className={styles.dynamicDropdown} ref={userRef}>
@@ -451,8 +449,7 @@ export default function Sales() {
               />
             </div>
 
-          </div>
-        </div>
+        </CommandBar>
 
         <div className={styles.tableCard}>
           {loading ? (

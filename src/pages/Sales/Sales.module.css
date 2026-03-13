@@ -4,48 +4,6 @@
   gap: 32px;
 }
 
-.pageHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  margin-bottom: 8px;
-}
-
-@media (min-width: 640px) {
-  .pageHeader {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-.pageTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--ink-1);
-  letter-spacing: -0.02em;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--ink-3);
-  text-transform: uppercase;
-}
-
-.breadcrumbDivider {
-  color: var(--border-strong);
-}
-
-.breadcrumbActive {
-  color: var(--ink-2);
-}
 
 .newSaleBtn {
   display: flex;
@@ -157,28 +115,6 @@
   gap: 16px;
 }
 
-.commandBar {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.controlsBar {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: 8px;
-}
-
-@media (min-width: 768px) {
-  .controlsBar {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-}
 
 /* Dynamic Dropdowns */
 .dynamicDropdown {

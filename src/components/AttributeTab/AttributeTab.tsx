@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Search, Edit2, Trash2, RefreshCw } from 'lucide-react'
+import { Plus, Edit2, Trash2, RefreshCw } from 'lucide-react'
 import styles from './AttributeTab.module.css'
+import CommandBar from '@/components/CommandBar/CommandBar'
 import CreateFormModal from '@/components/CreateFormModal/CreateFormModal'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
 
@@ -101,27 +102,18 @@ export default function AttributeTab<T extends { id: number }>({
 
   return (
     <div className={styles.tableSection}>
-      {/* Detached Command Bar */}
-      <div className={styles.commandBar}>
-        <div className={styles.controlsBar}>
-          <div className={styles.searchWrapper}>
-            <Search className={styles.searchIcon} size={14} />
-            <input
-              type="text"
-              placeholder={`Buscar ${(searchLabel ?? createTitle).toLowerCase()}...`}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={styles.searchInput}
-            />
-          </div>
-          <div className={styles.actionWrapper}>
-            <button className={styles.newBtn} onClick={() => setIsCreateModalOpen(true)}>
-              <Plus size={16} strokeWidth={2.5} />
-              {createTitle}
-            </button>
-          </div>
+      <CommandBar
+        search={search}
+        onSearchChange={setSearch}
+        placeholder={`Buscar ${(searchLabel ?? createTitle).toLowerCase()}...`}
+      >
+        <div className={styles.actionWrapper}>
+          <button className={styles.newBtn} onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={16} strokeWidth={2.5} />
+            {createTitle}
+          </button>
         </div>
-      </div>
+      </CommandBar>
 
       {/* Table Card */}
       <div className={styles.tableCard}>

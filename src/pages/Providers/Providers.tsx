@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Plus, Phone, Mail, Edit, Trash2, Loader } from 'lucide-react'
+import { Plus, Phone, Mail, Edit, Trash2, Loader } from 'lucide-react'
 import styles from './Providers.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
+import CommandBar from '@/components/CommandBar/CommandBar'
 import { providersApi } from '@/lib/api/providers'
 import { useModalContext } from '@/context/ModalContext'
 import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
@@ -130,37 +132,23 @@ export default function Providers() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.pageHeader}>
-        <div>
-          <div className={styles.breadcrumb}>
-            <span>PROV</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Lista</span>
-          </div>
-          <h1 className={styles.pageTitle}>Proveedores</h1>
-        </div>
-        <button className={styles.newProviderBtn} onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={16} strokeWidth={2.5} />
-          <span>Nuevo Proveedor</span>
-        </button>
-      </div>
+      <PageHeader
+        prefix="PROV"
+        activeLabel="Gestión"
+        title="Proveedores"
+        action={
+          <button className={styles.newProviderBtn} onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={16} strokeWidth={2.5} />
+            <span>Nuevo Proveedor</span>
+          </button>
+        }
+      />
 
-      {/* Command Bar (replacing searchCard) */}
-      <div className={styles.commandBar}>
-        <div className={styles.controlsBar}>
-          <div className={styles.searchWrapper}>
-            <Search size={14} className={styles.searchIcon} />
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="Buscar proveedor por nombre o contacto..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
+      <CommandBar
+        search={search}
+        onSearchChange={setSearch}
+        placeholder="Buscar proveedor por nombre o contacto..."
+      />
 
       {/* Loading state */}
       {loading ? (

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, Search, X, Loader, ChevronDown, Package, Pencil, Check, Trash2, Plus } from 'lucide-react'
 import styles from './OrderForm.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
 import { ordersApi } from '@/lib/api/orders'
 import { inventoryApi } from '@/lib/api/inventory'
 import { providersApi } from '@/lib/api/providers'
@@ -521,14 +522,11 @@ export default function OrderForm() {
           <button type="button" onClick={() => navigate('/orders')} className={styles.backButton} title="Volver a pedidos">
             <ChevronLeft size={20} />
           </button>
-          <div className={styles.headerContent}>
-            <div className={styles.breadcrumb}>
-              <span>PED</span>
-              <span className={styles.breadcrumbDivider}>/</span>
-              <span className={styles.breadcrumbActive}>Pedido #{order.id}</span>
-            </div>
-            <h1 className={styles.pageTitle}>{order.provider.name}</h1>
-          </div>
+          <PageHeader
+            prefix="PED"
+            activeLabel={`Pedido #${order.id}`}
+            title={order.provider.name}
+          />
           <div className={styles.headerActions}>
             <button type="button" onClick={() => setShowDeleteModal(true)} className={styles.deleteButton}>
               <Trash2 size={15} />
@@ -982,14 +980,11 @@ export default function OrderForm() {
         <button type="button" onClick={() => navigate('/orders')} className={styles.backButton} title="Volver a pedidos">
           <ChevronLeft size={20} />
         </button>
-        <div className={styles.headerContent}>
-          <div className={styles.breadcrumb}>
-            <span>PED</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Nuevo Pedido</span>
-          </div>
-          <h1 className={styles.pageTitle}>Crear Pedido</h1>
-        </div>
+        <PageHeader
+          prefix="PED"
+          activeLabel="Nuevo Pedido"
+          title="Crear Pedido"
+        />
         <div className={styles.headerActions}>
           <button type="button" onClick={() => navigate('/orders')} className={styles.cancelButton}>
             Cancelar

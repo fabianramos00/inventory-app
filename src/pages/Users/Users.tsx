@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Search, Shield, User as UserIcon, Loader, Trash2, Edit2 } from 'lucide-react'
+import { Plus, Shield, User as UserIcon, Loader, Trash2, Edit2 } from 'lucide-react'
 import styles from './Users.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
+import CommandBar from '@/components/CommandBar/CommandBar'
 import { usersApi, type CreateUserInput, type UpdateUserInput } from '@/lib/api/users'
 import { useModalContext } from '@/context/ModalContext'
 import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
@@ -157,37 +159,24 @@ export default function Users() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.pageHeader}>
-        <div>
-          <div className={styles.breadcrumb}>
-            <span>USR</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Gestión</span>
-          </div>
-          <h1 className={styles.pageTitle}>Usuarios</h1>
-        </div>
-        <button className={styles.newUserBtn} onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={16} /> Nuevo Usuario
-        </button>
-      </div>
+      <PageHeader
+        prefix="USR"
+        activeLabel="Gestión"
+        title="Usuarios"
+        action={
+          <button className={styles.newUserBtn} onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={16} /> Nuevo Usuario
+          </button>
+        }
+      />
 
       {/* Table Section */}
       <div className={styles.tableSection}>
-        <div className={styles.commandBar}>
-          <div className={styles.controlsBar}>
-            <div className={styles.searchWrapper}>
-              <Search size={14} className={styles.searchIcon} />
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Buscar usuario..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
+        <CommandBar
+          search={search}
+          onSearchChange={setSearch}
+          placeholder="Buscar usuario..."
+        />
 
         <div className={styles.tableCard}>
         {loading && users.length === 0 ? (

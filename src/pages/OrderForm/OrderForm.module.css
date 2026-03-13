@@ -37,34 +37,6 @@
   border-color: var(--border-strong);
 }
 
-.headerContent {
-  flex: 1;
-  min-width: 0;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--ink-3);
-  text-transform: uppercase;
-}
-
-.breadcrumbDivider { color: var(--border-strong); }
-.breadcrumbActive { color: var(--ink-2); }
-
-.pageTitle {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--ink-1);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
 
 .headerActions {
   display: flex;

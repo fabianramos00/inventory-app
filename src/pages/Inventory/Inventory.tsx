@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, Plus, AlertCircle, DollarSign, Package, Grid, ChevronDown, Loader, Eye, Trash2 } from 'lucide-react'
+import { Plus, AlertCircle, DollarSign, Package, Grid, ChevronDown, Loader, Eye, Trash2 } from 'lucide-react'
 import styles from './Inventory.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
+import CommandBar from '@/components/CommandBar/CommandBar'
 import { inventoryApi } from '@/lib/api/inventory'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
@@ -328,23 +330,20 @@ export default function Inventory() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <div>
-          <div className={styles.breadcrumb}>
-            <span>INV</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>{activeLabelMap[activeTab] ?? 'Productos'}</span>
-          </div>
-          <h1 className={styles.pageTitle}>Inventario Principal</h1>
-        </div>
-        <button
-          className={styles.newProductBtn}
-          onClick={() => navigate('/inventory/create')}
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          <span>Nuevo Producto</span>
-        </button>
-      </div>
+      <PageHeader
+        prefix="INV"
+        activeLabel={activeLabelMap[activeTab] ?? 'Productos'}
+        title="Inventario Principal"
+        action={
+          <button
+            className={styles.newProductBtn}
+            onClick={() => navigate('/inventory/create')}
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            <span>Nuevo Producto</span>
+          </button>
+        }
+      />
 
       <div className={styles.kpiStrip}>
         <div className={styles.kpiItem}>
@@ -432,18 +431,11 @@ export default function Inventory() {
 
       {activeTab === 'productos' && <>
       <div className={styles.tableSection}>
-        <div className={styles.commandBar}>
-          <div className={styles.controlsBar}>
-            <div className={styles.searchWrapper}>
-              <Search size={14} className={styles.searchIcon} />
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Nombre o ID..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
+        <CommandBar
+          search={search}
+          onSearchChange={setSearch}
+          placeholder="Nombre o ID..."
+        >
 
             <div className={styles.dynamicDropdown} ref={categoryRef}>
               <button
@@ -689,8 +681,7 @@ export default function Inventory() {
                 </div>
               )}
             </div>
-          </div>
-        </div>
+        </CommandBar>
 
         <div className={styles.tableCard}>
           {loading ? (

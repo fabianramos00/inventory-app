@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Package, DollarSign, ClipboardList, ShoppingCart, CheckCircle } from 'lucide-react'
+import PageHeader from '@/components/PageHeader/PageHeader'
 import {
   Tooltip, Legend,
   XAxis, YAxis, CartesianGrid,
@@ -141,14 +142,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.pageHeader}>
-          <div className={styles.breadcrumb}>
-            <span>DSH</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Resumen</span>
-          </div>
-          <h1 className={styles.pageTitle}>Dashboard</h1>
-        </div>
+        <PageHeader prefix="DSH" activeLabel="Resumen" title="Dashboard" />
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--ink-3)' }}>
           Cargando datos...
         </div>
@@ -158,14 +152,7 @@ export default function Dashboard() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <div className={styles.breadcrumb}>
-          <span>DSH</span>
-          <span className={styles.breadcrumbDivider}>/</span>
-          <span className={styles.breadcrumbActive}>Resumen</span>
-        </div>
-        <h1 className={styles.pageTitle}>Dashboard</h1>
-      </div>
+      <PageHeader prefix="DSH" activeLabel="Resumen" title="Dashboard" />
 
       {/* KPI Strip — 5 cards */}
       <div className={styles.kpiStrip}>

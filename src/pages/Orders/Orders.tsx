@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Loader, Eye, Trash2, ChevronDown, Calendar } from 'lucide-react'
 import styles from './Orders.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
+import CommandBar from '@/components/CommandBar/CommandBar'
 import { ordersApi } from '@/lib/api/orders'
 import { providersApi } from '@/lib/api/providers'
 import { useModalContext } from '@/context/ModalContext'
@@ -137,24 +139,20 @@ export default function Orders() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <div>
-          <div className={styles.breadcrumb}>
-            <span>PED</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Registro</span>
-          </div>
-          <h1 className={styles.pageTitle}>Pedidos de Compra</h1>
-        </div>
-        <button className={styles.newOrderBtn} onClick={() => navigate('/orders/create')}>
-          <Plus size={16} strokeWidth={2.5} />
-          <span>Nuevo Pedido</span>
-        </button>
-      </div>
+      <PageHeader
+        prefix="PED"
+        activeLabel="Gestión"
+        title="Pedidos de Compra"
+        action={
+          <button className={styles.newOrderBtn} onClick={() => navigate('/orders/create')}>
+            <Plus size={16} strokeWidth={2.5} />
+            <span>Nuevo Pedido</span>
+          </button>
+        }
+      />
 
       <div className={styles.tableSection}>
-        <div className={styles.commandBar}>
-          <div className={styles.controlsBar}>
+        <CommandBar search="" onSearchChange={() => {}}>
 
             {/* Proveedor */}
             <div className={styles.dynamicDropdown} ref={providerRef}>
@@ -281,8 +279,7 @@ export default function Orders() {
               />
             </div>
 
-          </div>
-        </div>
+        </CommandBar>
 
         <div className={styles.tableCard}>
           {loading ? (

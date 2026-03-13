@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, Search, X, Loader, ChevronDown, Package, Plus, Pencil, Check, Trash2 } from 'lucide-react'
 import styles from './SaleForm.module.css'
+import PageHeader from '@/components/PageHeader/PageHeader'
 import { salesApi } from '@/lib/api/sales'
 import { inventoryApi } from '@/lib/api/inventory'
 import { useModalContext } from '@/context/ModalContext'
@@ -623,16 +624,11 @@ export default function SaleForm() {
           <button type="button" onClick={() => navigate('/sales')} className={styles.backButton} title="Volver a ventas">
             <ChevronLeft size={20} />
           </button>
-          <div className={styles.headerContent}>
-            <div className={styles.breadcrumb}>
-              <span>VNT</span>
-              <span className={styles.breadcrumbDivider}>/</span>
-              <span className={styles.breadcrumbActive}>Venta #{sale.id}</span>
-            </div>
-            <h1 className={styles.pageTitle}>
-              {sale.client?.name ?? 'Sin cliente'}
-            </h1>
-          </div>
+          <PageHeader
+            prefix="VNT"
+            activeLabel={`Venta #${sale.id}`}
+            title={sale.client?.name ?? 'Sin cliente'}
+          />
           <div className={styles.headerActions}>
             <button type="button" onClick={() => setShowDeleteModal(true)} className={styles.deleteButton}>
               <Trash2 size={15} />
@@ -1112,14 +1108,11 @@ export default function SaleForm() {
         <button type="button" onClick={() => navigate('/sales')} className={styles.backButton} title="Volver a ventas">
           <ChevronLeft size={20} />
         </button>
-        <div className={styles.headerContent}>
-          <div className={styles.breadcrumb}>
-            <span>VNT</span>
-            <span className={styles.breadcrumbDivider}>/</span>
-            <span className={styles.breadcrumbActive}>Nueva Venta</span>
-          </div>
-          <h1 className={styles.pageTitle}>Crear Venta</h1>
-        </div>
+        <PageHeader
+          prefix="VNT"
+          activeLabel="Nueva Venta"
+          title="Crear Venta"
+        />
         <div className={styles.headerActions}>
           <button type="button" onClick={() => navigate('/sales')} className={styles.cancelButton}>
             Cancelar
