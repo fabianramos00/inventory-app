@@ -84,7 +84,6 @@ export default function AttributeTab<T extends { id: number }>({
       onSuccess()
     } catch (err) {
       console.error('Error deleting item', err)
-      // Could set a local error state and show it, but parent may handle it
     }
   }
 

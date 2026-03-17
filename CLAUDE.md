@@ -67,9 +67,11 @@ src/
 │   ├── DataTable/ → loading/empty/overflow/pagination wrapper for all list tables
 │   ├── PageHeader, CommandBar, DataCard, Pagination
 │   ├── AttributeTab/ → generic catalog attribute CRUD tab
+│   ├── ErrorBoundary → class component, renders fallback + link to / on render error
 │   └── layout/ → AppLayout, Sidebar
 ├── lib/
-│   ├── axios.ts (Bearer token interceptor)
+│   ├── axios.ts (Bearer token interceptor; console.error gated behind import.meta.env.DEV)
+│   ├── constants.ts (PAGE_LIMIT = 10)
 │   ├── utils.ts (cn helper)
 │   └── api/ → auth, dashboard, inventory, providers, clients, sales, orders, users
 └── pages/ → Login, Dashboard, Inventory, ProductForm, Sales, SaleForm, Orders, OrderForm, Providers, Clients, Users

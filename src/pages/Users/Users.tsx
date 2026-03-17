@@ -6,6 +6,7 @@ import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
 import DataCard from '@/components/DataCard/DataCard'
 import { usersApi, type CreateUserInput, type UpdateUserInput } from '@/lib/api/users'
+import { PAGE_LIMIT } from '@/lib/constants'
 import { useModalContext } from '@/context/ModalContext'
 import CreateFormModal, { type FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
@@ -39,7 +40,7 @@ export default function Users() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const limit = 10
+  const limit = PAGE_LIMIT
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)

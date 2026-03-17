@@ -7,6 +7,7 @@ import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
 import DataCard from '@/components/DataCard/DataCard'
 import { salesApi } from '@/lib/api/sales'
+import { PAGE_LIMIT } from '@/lib/constants'
 import { usersApi } from '@/lib/api/users'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
@@ -54,7 +55,7 @@ export default function Sales() {
   const [stats, setStats] = useState({ unpaid_count: 0, undelivered_count: 0, total_amount_sum: 0, amount_paid_sum: 0 })
   const [page, setPage] = useState(1)
   const [hasNext, setHasNext] = useState(false)
-  const limit = 10
+  const limit = PAGE_LIMIT
   const [saleToDelete, setSaleToDelete] = useState<{ id: number; label: string } | null>(null)
   const [reloadTrigger, setReloadTrigger] = useState(0)
   const { openModal: contextOpenModal, closeModal: contextCloseModal } = useModalContext()

@@ -7,6 +7,7 @@ import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
 import DataCard from '@/components/DataCard/DataCard'
 import { ordersApi } from '@/lib/api/orders'
+import { PAGE_LIMIT } from '@/lib/constants'
 import { providersApi } from '@/lib/api/providers'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
@@ -48,7 +49,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [hasNext, setHasNext] = useState(false)
-  const limit = 10
+  const limit = PAGE_LIMIT
   const [orderToDelete, setOrderToDelete] = useState<{ id: number; label: string } | null>(null)
   const [reloadTrigger, setReloadTrigger] = useState(0)
   const { openModal: contextOpenModal, closeModal: contextCloseModal } = useModalContext()

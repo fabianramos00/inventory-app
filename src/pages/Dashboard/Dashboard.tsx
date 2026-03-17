@@ -10,6 +10,7 @@ import {
 import { dashboardApi, type SalesTrendData, type TopProduct, type OrderStatusData } from '@/lib/api/dashboard'
 import DataTable from '@/components/DataTable/DataTable'
 import { inventoryApi } from '@/lib/api/inventory'
+import { PAGE_LIMIT } from '@/lib/constants'
 import styles from './Dashboard.module.css'
 
 // Chart color constants (Recharts cannot read CSS vars)
@@ -52,22 +53,29 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function loadDashboard() {
+      setLoading(true)
       try {
-        setLoading(true)
+        const [summaryResult, trendResult, productsResult, statusResult, lowStockResult] =
+          await Promise.allSettled([
+            dashboardApi.getSummary(),
+            dashboardApi.getSalesTrend(),
+            dashboardApi.getTopProducts(),
+            dashboardApi.getOrderStatusDistribution(),
+            inventoryApi.getProducts({ skip: 0, limit: PAGE_LIMIT, stock_status: 'low_stock' }),
+          ])
 
         const newErrors: Record<string, string> = {}
 
-        try {
-          const summaryRes = await dashboardApi.getSummary()
-          setSummary(summaryRes.data)
-        } catch {
+        if (summaryResult.status === 'fulfilled') {
+          setSummary(summaryResult.value.data)
+        } else {
           newErrors.summary = 'No se pudieron cargar los datos de resumen'
         }
 
-        try {
-          const trendRes = await dashboardApi.getSalesTrend()
-          if (trendRes.data.data && trendRes.data.data.length > 0) {
-            setWeeklyData(trendRes.data.data.map((item: SalesTrendData) => ({
+        if (trendResult.status === 'fulfilled') {
+          const trendData = trendResult.value.data.data
+          if (trendData && trendData.length > 0) {
+            setWeeklyData(trendData.map((item: SalesTrendData) => ({
               dia: getSpanishDayName(item.date),
               ventas: item.sales_amount,
               pedidos: item.orders_cost,
@@ -75,14 +83,14 @@ export default function Dashboard() {
           } else {
             newErrors.salesTrend = 'Sin datos de tendencia de ventas'
           }
-        } catch {
+        } else {
           newErrors.salesTrend = 'Error al cargar tendencia de ventas'
         }
 
-        try {
-          const productsRes = await dashboardApi.getTopProducts()
-          if (productsRes.data.products && productsRes.data.products.length > 0) {
-            setTopProductsData(productsRes.data.products.map((p: TopProduct) => ({
+        if (productsResult.status === 'fulfilled') {
+          const products = productsResult.value.data.products
+          if (products && products.length > 0) {
+            setTopProductsData(products.map((p: TopProduct) => ({
               sku: p.product_sku,
               name: p.product_name,
               brand: p.brand_name,
@@ -92,14 +100,13 @@ export default function Dashboard() {
           } else {
             newErrors.topProducts = 'Sin productos vendidos'
           }
-        } catch {
+        } else {
           newErrors.topProducts = 'Error al cargar productos principales'
         }
 
-        try {
-          const statusRes = await dashboardApi.getOrderStatusDistribution()
+        if (statusResult.status === 'fulfilled') {
           const apiData: Record<string, OrderStatusData> = {}
-          ;(statusRes.data.data || []).forEach((item: OrderStatusData) => {
+          ;(statusResult.value.data.data || []).forEach((item: OrderStatusData) => {
             apiData[item.status] = item
           })
           const total = Object.values(apiData).reduce((sum, item) => sum + item.count, 0)
@@ -111,24 +118,24 @@ export default function Dashboard() {
               return { name, value: count, percentage, color }
             })
           )
-        } catch {
+        } else {
           newErrors.orderStatus = 'Error al cargar estado de pedidos'
         }
 
-        try {
-          const lowStockRes = await inventoryApi.getProducts({ skip: 0, limit: 10, stock_status: 'low_stock' })
-          if (lowStockRes.data.items && lowStockRes.data.items.length > 0) {
-            setLowStock(lowStockRes.data.items.map((item: any) => ({
+        if (lowStockResult.status === 'fulfilled') {
+          const items = lowStockResult.value.data.items
+          if (items && items.length > 0) {
+            setLowStock(items.map((item) => ({
               sku: item.sku,
               name: item.name,
-              stock: item.stock_quantity,
-              min: item.low_stock_threshold,
+              stock: item.stock_quantity ?? 0,
+              min: item.low_stock_threshold || 0,
               unit: item.measurement_unit?.name || 'pzas',
             })))
           } else {
             newErrors.lowStock = 'Todos los productos tienen stock suficiente'
           }
-        } catch {
+        } else {
           newErrors.lowStock = 'Error al cargar productos con stock bajo'
         }
 

@@ -201,3 +201,11 @@ export interface CreateProductInput {
   stock_quantity: number
   min_stock_quantity: number
 }
+
+// ─── InventoryStats ───────────────────────────────────────────────────────────────
+export interface InventoryStatsData {
+  total_products: number
+  total_stock: number
+  low_stock_count: number
+  total_inventory_value: number
+}

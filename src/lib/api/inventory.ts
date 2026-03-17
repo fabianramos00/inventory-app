@@ -1,5 +1,5 @@
 import api from '@/lib/axios'
-import type { PaginatedResponse, Product, CreateProductInput, FilterOption } from '@/types'
+import type { PaginatedResponse, Product, CreateProductInput, FilterOption, InventoryStatsData } from '@/types'
 
 export const inventoryApi = {
   getProducts: (params?: Record<string, unknown>) =>
@@ -58,5 +58,5 @@ export const inventoryApi = {
   deleteMeasurementUnit: (id: number) => api.delete(`/inventory/measurement-units/${id}`),
 
   getStats: () =>
-    api.get<PaginatedResponse<FilterOption>>('/inventory/products/stats/overview'),
+    api.get<InventoryStatsData>('/inventory/products/stats/overview'),
 }

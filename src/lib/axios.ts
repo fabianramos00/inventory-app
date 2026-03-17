@@ -26,11 +26,13 @@ api.interceptors.response.use(
       localStorage.removeItem('user')
       window.location.href = '/login'
     }
-    console.error('API Error:', {
-      status: error.response?.status,
-      message: error.message,
-      data: error.response?.data,
-    })
+    if (import.meta.env.DEV) {
+      console.error('API Error:', {
+        status: error.response?.status,
+        message: error.message,
+        data: error.response?.data,
+      })
+    }
     return Promise.reject(error)
   }
 )

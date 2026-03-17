@@ -6,6 +6,7 @@ import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
 import DataCard from '@/components/DataCard/DataCard'
 import { inventoryApi } from '@/lib/api/inventory'
+import { PAGE_LIMIT } from '@/lib/constants'
 import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
 import AttributeTab from '@/components/AttributeTab/AttributeTab'
@@ -117,7 +118,7 @@ export default function Inventory() {
   const [selectedAvailability, setSelectedAvailability] = useState('all')
 
   const [page, setPage] = useState(1)
-  const [limit] = useState(10)
+  const limit = PAGE_LIMIT
   const [total, setTotal] = useState(0)
 
   const [products, setProducts] = useState<Product[]>([])
@@ -283,7 +284,7 @@ export default function Inventory() {
     const loadStats = async () => {
       try {
         const response = await inventoryApi.getStats()
-        const data = response.data as any
+        const data = response.data
         setStats({
           totalProducts: data.total_products || 0,
           totalStock: data.total_stock || 0,
