@@ -50,3 +50,33 @@
 .searchInput::placeholder {
   color: var(--ink-3);
 }
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.clearFiltersBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.clearFiltersBtn:hover {
+  color: var(--destructive);
+  border-color: var(--destructive);
+}

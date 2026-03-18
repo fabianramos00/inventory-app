@@ -26,6 +26,8 @@
     --control-border: rgba(0, 0, 0, 0.13);
     --focus-ring: #FACC15;
     --sidebar-w: 232px;
+    --blue: #2563EB;
+    --blue-subtle: rgba(37, 99, 235, 0.1);
   }
 
   * {

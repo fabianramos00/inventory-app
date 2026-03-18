@@ -5,82 +5,6 @@
 }
 
 
-/* KPI Strip — 4-column card grid */
-.kpiStrip {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-@media (min-width: 768px) {
-  .kpiStrip {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.kpiItem {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
-}
-
-.kpiItem:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
-  border-color: var(--border-strong);
-}
-
-.kpiHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.kpiLabel {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ink-3);
-  letter-spacing: 0.02em;
-}
-
-.kpiIconWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-}
-
-.kpiIconWrapperAccent { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
-.kpiIconWrapperWarning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-.kpiIconWrapperDestructive { background: rgba(239, 68, 68, 0.1); color: var(--destructive); }
-.kpiIconWrapperSuccess { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-
-.kpiValue {
-  font-family: 'DM Mono', monospace;
-  font-size: 24px;
-  font-weight: 500;
-  color: var(--ink-1);
-  letter-spacing: -0.02em;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.currencySymbol {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-3);
-}
-
 /* Table Section */
 .tableSection {
   display: flex;
@@ -301,20 +225,47 @@
   color: var(--ink-3);
 }
 
-.amountCell {
+.cobroCell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 130px;
+}
+
+.cobroAmounts {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
   font-family: 'DM Mono', monospace;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.cobroPaid {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.cobroSeparator {
+  color: var(--ink-3);
+  font-size: 11px;
+}
+
+.cobroTotal {
   color: var(--ink-2);
 }
 
-.debtCell {
-  font-family: 'DM Mono', monospace;
-  font-size: 14px;
-  color: var(--ink-3);
+.cobroBar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
 }
 
-.debtCellActive {
-  color: var(--destructive);
+.cobroBarFill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
 
 .emptyCell {

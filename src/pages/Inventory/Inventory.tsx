@@ -11,6 +11,7 @@ import { useModalContext } from '@/context/ModalContext'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal/ConfirmDeleteModal'
 import AttributeTab from '@/components/AttributeTab/AttributeTab'
 import DataTable from '@/components/DataTable/DataTable'
+import KpiStrip from '@/components/KpiStrip/KpiStrip'
 import type { Product } from '@/types'
 import type { FieldConfig } from '@/components/CreateFormModal/CreateFormModal'
 
@@ -97,7 +98,7 @@ interface FilterOption {
 const statusMap: Record<string, string> = {
   low_stock: 'badge--destructive',
   in_stock: 'badge--success',
-  out_of_stock: 'badge--danger',
+  out_of_stock: 'badge--destructive',
 }
 
 const statusLabel: Record<string, string> = {
@@ -314,6 +315,17 @@ export default function Inventory() {
   const selectedBrandName = brandOptions.find(b => b.id === selectedBrand)?.name || 'Marca'
   const selectedAvailabilityName = selectedAvailability === 'all' ? 'Disponibilidad' : statusLabel[selectedAvailability]
 
+  const hasActiveFilters = search !== '' || !!selectedCategory || !!selectedMaterial || !!selectedBrand || selectedAvailability !== 'all'
+
+  function clearFilters() {
+    setSearch('')
+    setSelectedCategory('')
+    setSelectedMaterial(undefined)
+    setSelectedBrand(undefined)
+    setSelectedAvailability('all')
+    setPage(1)
+  }
+
   async function handleDeleteConfirm() {
     await inventoryApi.deleteProduct(productToDelete!.id)
     setProductToDelete(null)
@@ -347,50 +359,12 @@ export default function Inventory() {
         }
       />
 
-      <div className={styles.kpiStrip}>
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Total Productos</div>
-            <div className={styles.kpiIconWrapperAccent}>
-              <Grid size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue}>{stats.totalProducts}</div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Total Stock</div>
-            <div className={styles.kpiIconWrapperWarning}>
-              <Package size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--warning)' }}>{stats.totalStock}</div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Stock Bajo</div>
-            <div className={styles.kpiIconWrapperDestructive}>
-              <AlertCircle size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--destructive)' }}>{stats.lowStockCount}</div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Valor Total</div>
-            <div className={styles.kpiIconWrapperSuccess}>
-              <DollarSign size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--success)' }}>
-            <span className={styles.currencySymbol}>$</span>
-            {stats.totalValue.toLocaleString('es-PE', { maximumFractionDigits: 0 })}
-          </div>
-        </div>
-      </div>
+      <KpiStrip cards={[
+        { label: 'Total Productos', value: stats.totalProducts, icon: Grid, variant: 'accent' },
+        { label: 'Total Stock', value: stats.totalStock, icon: Package, variant: 'warning', valueColor: 'var(--warning)' },
+        { label: 'Stock Bajo', value: stats.lowStockCount, icon: AlertCircle, variant: 'destructive', valueColor: 'var(--destructive)' },
+        { label: 'Valor Total', value: stats.totalValue.toLocaleString('es-PE', { maximumFractionDigits: 0 }), icon: DollarSign, variant: 'success', prefix: '$', valueColor: 'var(--success)' },
+      ]} />
 
       <nav className={styles.tabBar}>
         <button
@@ -437,6 +411,8 @@ export default function Inventory() {
           search={search}
           onSearchChange={setSearch}
           placeholder="Nombre o ID..."
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
         >
 
             <div className={styles.dynamicDropdown} ref={categoryRef}>

@@ -140,6 +140,17 @@ export default function Orders() {
 
   const selectedProviderName = providerOptions.find(p => p.id === selectedProvider)?.name || 'Proveedor'
 
+  const hasActiveFilters = !!selectedProvider || !!selectedPaymentStatus || !!selectedStatus || !!minDate || !!maxDate
+
+  function clearFilters() {
+    setSelectedProvider('')
+    setSelectedPaymentStatus('')
+    setSelectedStatus('')
+    setMinDate('')
+    setMaxDate('')
+    setPage(1)
+  }
+
   return (
     <div className={styles.container}>
       <PageHeader
@@ -155,7 +166,7 @@ export default function Orders() {
       />
 
       <div className={styles.tableSection}>
-        <CommandBar search="" onSearchChange={() => {}}>
+        <CommandBar showSearch={false} hasActiveFilters={hasActiveFilters} onClearFilters={clearFilters}>
 
             {/* Proveedor */}
             <div className={styles.dynamicDropdown} ref={providerRef}>

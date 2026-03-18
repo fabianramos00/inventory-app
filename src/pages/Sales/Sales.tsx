@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, DollarSign, ShoppingCart, Clock, Truck, Loader, Eye, ChevronDown, Calendar, Trash2 } from 'lucide-react'
 import DataTable from '@/components/DataTable/DataTable'
+import KpiStrip from '@/components/KpiStrip/KpiStrip'
 import styles from './Sales.module.css'
 import PageHeader from '@/components/PageHeader/PageHeader'
 import CommandBar from '@/components/CommandBar/CommandBar'
@@ -188,6 +189,37 @@ export default function Sales() {
   const selectedClientName = noClient ? 'Sin cliente' : (clientOptions.find(c => c.id === selectedClient)?.name || 'Cliente')
   const clientFilterActive = noClient || !!selectedClient
 
+  const hasActiveFilters = !!selectedUser || clientFilterActive || !!selectedPaymentMethod || !!selectedDeliveryStatus || !!selectedPaymentStatus || !!startDate || !!endDate
+
+  function clearFilters() {
+    setSelectedUser('')
+    setSelectedClient('')
+    setNoClient(false)
+    setSelectedPaymentMethod('')
+    setSelectedDeliveryStatus('')
+    setSelectedPaymentStatus('')
+    setStartDate('')
+    setEndDate('')
+    setPage(1)
+  }
+
+  function renderCobroCell(amountPaid: number, debtAmount: number) {
+    const total = amountPaid + debtAmount
+    const pct = total > 0 ? (amountPaid / total) * 100 : 100
+    return (
+      <div className={styles.cobroCell}>
+        <div className={styles.cobroAmounts}>
+          <span className={styles.cobroPaid}>$ {amountPaid.toFixed(2)}</span>
+          <span className={styles.cobroSeparator}>/</span>
+          <span className={styles.cobroTotal}>$ {total.toFixed(2)}</span>
+        </div>
+        <div className={styles.cobroBar}>
+          <div className={styles.cobroBarFill} style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.container}>
       <PageHeader
@@ -202,52 +234,15 @@ export default function Sales() {
         }
       />
 
-      <div className={styles.kpiStrip}>
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Total ventas</div>
-            <div className={styles.kpiIconWrapperSuccess}><DollarSign size={16} /></div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--success)' }}>
-            <span className={styles.currencySymbol}>$</span>
-            {stats.total_amount_sum.toLocaleString('es-PE', { maximumFractionDigits: 2 })}
-          </div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Total cobrado</div>
-            <div className={styles.kpiIconWrapperAccent}><ShoppingCart size={16} /></div>
-          </div>
-          <div className={styles.kpiValue}>
-            <span className={styles.currencySymbol}>$</span>
-            {stats.amount_paid_sum.toLocaleString('es-PE', { maximumFractionDigits: 2 })}
-          </div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Sin pagar</div>
-            <div className={styles.kpiIconWrapperDestructive}><Clock size={16} /></div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--destructive)' }}>
-            {stats.unpaid_count}
-          </div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <div className={styles.kpiLabel}>Sin entregar</div>
-            <div className={styles.kpiIconWrapperWarning}><Truck size={16} /></div>
-          </div>
-          <div className={styles.kpiValue} style={{ color: 'var(--warning)' }}>
-            {stats.undelivered_count}
-          </div>
-        </div>
-      </div>
+      <KpiStrip cards={[
+        { label: 'Total ventas', value: stats.total_amount_sum.toLocaleString('es-PE', { maximumFractionDigits: 2 }), icon: DollarSign, variant: 'success', prefix: '$', valueColor: 'var(--success)' },
+        { label: 'Total cobrado', value: stats.amount_paid_sum.toLocaleString('es-PE', { maximumFractionDigits: 2 }), icon: ShoppingCart, variant: 'accent', prefix: '$' },
+        { label: 'Sin pagar', value: stats.unpaid_count, icon: Clock, variant: 'destructive', valueColor: 'var(--destructive)' },
+        { label: 'Sin entregar', value: stats.undelivered_count, icon: Truck, variant: 'warning', valueColor: 'var(--warning)' },
+      ]} />
 
       <div className={styles.tableSection}>
-        <CommandBar search="" onSearchChange={() => {}}>
+        <CommandBar showSearch={false} hasActiveFilters={hasActiveFilters} onClearFilters={clearFilters}>
 
             {/* Usuario */}
             <div className={styles.dynamicDropdown} ref={userRef}>
@@ -467,8 +462,7 @@ export default function Sales() {
                 <th>ID</th>
                 <th>Cliente</th>
                 <th>Total</th>
-                <th>Pagado</th>
-                <th>Deuda</th>
+                <th>Cobro</th>
                 <th>Pago</th>
                 <th>Entrega</th>
                 <th>Usuario</th>
@@ -486,8 +480,7 @@ export default function Sales() {
                   </td>
                   <td><span className={styles.customerCell}>{s.client?.name ?? <span className={styles.emptyCell}>Sin cliente</span>}</span></td>
                   <td><span className={styles.totalCell}>$ {s.total_amount.toFixed(2)}</span></td>
-                  <td><span className={styles.amountCell}>$ {s.amount_paid.toFixed(2)}</span></td>
-                  <td><span className={`${styles.debtCell} ${s.debt_amount > 0 ? styles.debtCellActive : ''}`}>$ {s.debt_amount.toFixed(2)}</span></td>
+                  <td>{renderCobroCell(s.amount_paid, s.debt_amount)}</td>
                   <td>
                     <span className={styles[paymentStatusBadge[s.payment_status] ?? 'badge--warning']}>
                       {paymentStatusLabel[s.payment_status] ?? s.payment_status}

@@ -9,6 +9,7 @@ import {
 } from 'recharts'
 import { dashboardApi, type SalesTrendData, type TopProduct, type OrderStatusData } from '@/lib/api/dashboard'
 import DataTable from '@/components/DataTable/DataTable'
+import KpiStrip, { type KpiCardConfig } from '@/components/KpiStrip/KpiStrip'
 import { inventoryApi } from '@/lib/api/inventory'
 import { PAGE_LIMIT } from '@/lib/constants'
 import styles from './Dashboard.module.css'
@@ -152,77 +153,32 @@ export default function Dashboard() {
     return (
       <div className={styles.container}>
         <PageHeader prefix="DSH" activeLabel="Resumen" title="Dashboard" />
-        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--ink-3)' }}>
-          Cargando datos...
+        <div className={styles.skeletonKpiGrid}>
+          {Array.from({ length: 5 }).map((_, i) => <div key={i} className={styles.skeletonKpi} />)}
         </div>
+        <div className={styles.chartsGrid}>
+          <div className={`${styles.skeletonCard} ${styles.skeletonCardTall} ${styles.chartCardLeft}`} />
+          <div className={styles.skeletonCard} />
+          <div className={styles.skeletonCard} />
+        </div>
+        <div className={styles.skeletonCard} />
       </div>
     )
   }
+
+  const kpiCards: KpiCardConfig[] = [
+    { label: 'Valor Total Inventario', value: summary.inventory_value.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: Package, variant: 'accent', prefix: '$' },
+    { label: 'Ingresos de Hoy', value: summary.total_sales_today.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: DollarSign, variant: 'success', prefix: '$' },
+    { label: 'Pedidos Pendientes', value: summary.pending_orders, icon: ClipboardList, variant: 'warning' },
+    { label: 'Pedidos Entregados', value: summary.delivered_orders, icon: CheckCircle, variant: 'blue' },
+    { label: 'Ventas Sin Pagar', value: summary.pending_payment_sales.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: ShoppingCart, variant: 'destructive' },
+  ]
 
   return (
     <div className={styles.container}>
       <PageHeader prefix="DSH" activeLabel="Resumen" title="Dashboard" />
 
-      {/* KPI Strip — 5 cards */}
-      <div className={styles.kpiStrip}>
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <span className={styles.kpiLabel}>Valor Total Inventario</span>
-            <div className={`${styles.kpiIconWrapper} ${styles.kpiIconWrapperAccent}`}>
-              <Package size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue}>
-            <span className={styles.currencySymbol}>$</span>
-            {summary.inventory_value.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <span className={styles.kpiLabel}>Ingresos de Hoy</span>
-            <div className={`${styles.kpiIconWrapper} ${styles.kpiIconWrapperSuccess}`}>
-              <DollarSign size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue}>
-            <span className={styles.currencySymbol}>$</span>
-            {summary.total_sales_today.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <span className={styles.kpiLabel}>Pedidos Pendientes</span>
-            <div className={`${styles.kpiIconWrapper} ${styles.kpiIconWrapperWarning}`}>
-              <ClipboardList size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue}>{summary.pending_orders}</div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <span className={styles.kpiLabel}>Pedidos Entregados</span>
-            <div className={`${styles.kpiIconWrapper} ${styles.kpiIconWrapperBlue}`}>
-              <CheckCircle size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue}>{summary.delivered_orders}</div>
-        </div>
-
-        <div className={styles.kpiItem}>
-          <div className={styles.kpiHeader}>
-            <span className={styles.kpiLabel}>Ventas Sin Pagar</span>
-            <div className={`${styles.kpiIconWrapper} ${styles.kpiIconWrapperDestructive}`}>
-              <ShoppingCart size={16} />
-            </div>
-          </div>
-          <div className={styles.kpiValue}>
-            {summary.pending_payment_sales.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-        </div>
-      </div>
+      <KpiStrip cards={kpiCards} />
 
       {/* Charts Grid — asymmetric: left spans 2 rows */}
       <div className={styles.chartsGrid}>
